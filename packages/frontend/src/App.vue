@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import AppHeader from './components/AppHeader.vue'
+import type { AppView } from './components/AppHeader.vue'
 import TaskBoard from './components/TaskBoard.vue'
+import GanttView from './components/GanttView.vue'
 import TaskModal from './components/TaskModal.vue'
 import ConfirmDialog from './components/ConfirmDialog.vue'
 import { useTasks } from './composables/useTasks'
@@ -22,6 +24,7 @@ import type { Task } from './types/task'
 
 const showModal = ref(false)
 const editingTask = ref<Task | null>(null)
+const view = ref<AppView>('kanban')
 const deletingTaskId = ref<string | null>(null)
 
 const deletingTask = computed(() =>
@@ -84,15 +87,24 @@ async function handleStatusChange(id: string, status: Task['status']) {
   <div class="h-screen flex flex-col overflow-hidden bg-[#F4F5F7]">
     <AppHeader
       :filters="filters"
+      :view="view"
       @update:filters="setFilter"
+      @update:view="view = $event"
       @create="openCreate"
     />
     <TaskBoard
+      v-if="view === 'kanban'"
       :tasks="tasks"
       :loading="loading"
       @edit="openEdit"
       @delete="requestDelete"
       @status-change="handleStatusChange"
+    />
+    <GanttView
+      v-else
+      :tasks="tasks"
+      :loading="loading"
+      @edit="openEdit"
     />
     <TaskModal
       v-if="showModal"

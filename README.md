@@ -4,7 +4,7 @@
 
 ## 技术栈
 
-- **前端**: Vue 3 + Vite + TailwindCSS 4
+- **前端**: Vue 3 + Vite + TailwindCSS 4（看板 + 甘特图视图）
 - **后端**: Express 5 + TypeScript
 - **数据**: 本地 JSON 文件（`data/tasks.json`）
 
@@ -50,6 +50,13 @@ cd data/
 git add . && git commit -m "数据快照"
 git push
 ```
+
+## 甘特图（时间映射）
+
+- 同时有 `startDate` 与 `endDate`：按区间条形展示（含首尾日）。
+- 仅有 `dueDate`：单日条形。
+- 无时间或仅单侧日期：列入「未排期」，不在时间轴上画条。
+- 已排期任务的父任务会显示为行（可无条形），子任务缩进；顶栏可切换「看板 / 甘特」。
 
 ## API 接口
 
