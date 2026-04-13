@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "dev": "npm run dev:server & npm run dev:frontend",
+    "dev:frontend": "npm -w packages/frontend run dev",
+    "dev:server": "npm -w packages/server run dev"
+  }
+}

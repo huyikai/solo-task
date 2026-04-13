@@ -1,0 +1,54 @@
+<script setup lang="ts">
+import { Plus, ListFilter } from 'lucide-vue-next'
+
+defineProps<{
+  filters: Record<string, string>
+}>()
+
+const emit = defineEmits<{
+  'update:filters': [key: string, value: string]
+  create: []
+}>()
+
+const priorities = [
+  { value: '', label: '全部优先级' },
+  { value: 'urgent', label: '紧急' },
+  { value: 'high', label: '高' },
+  { value: 'medium', label: '中' },
+  { value: 'low', label: '低' },
+]
+</script>
+
+<template>
+  <header class="h-14 bg-[#0052CC] flex items-center px-6 shrink-0">
+    <div class="flex items-center gap-2 text-white">
+      <div class="w-7 h-7 bg-white/20 rounded flex items-center justify-center font-bold text-sm">
+        S
+      </div>
+      <span class="text-lg font-semibold tracking-tight">solo-task</span>
+    </div>
+
+    <div class="ml-auto flex items-center gap-3">
+      <div class="relative flex items-center">
+        <ListFilter class="w-4 h-4 text-white/70 absolute left-2.5 pointer-events-none" />
+        <select
+          class="appearance-none bg-white/15 text-white text-sm pl-8 pr-6 py-1.5 rounded cursor-pointer hover:bg-white/25 transition-colors outline-none border-none"
+          :value="filters.priority ?? ''"
+          @change="emit('update:filters', 'priority', ($event.target as HTMLSelectElement).value)"
+        >
+          <option v-for="p in priorities" :key="p.value" :value="p.value" class="text-[#172B4D]">
+            {{ p.label }}
+          </option>
+        </select>
+      </div>
+
+      <button
+        class="flex items-center gap-1.5 bg-white text-[#0052CC] text-sm font-medium px-3.5 py-1.5 rounded hover:bg-blue-50 transition-colors"
+        @click="emit('create')"
+      >
+        <Plus class="w-4 h-4" />
+        创建
+      </button>
+    </div>
+  </header>
+</template>
