@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { Plus, ListFilter } from 'lucide-vue-next'
+import { Plus, ListFilter, LayoutGrid, ChartGantt } from 'lucide-vue-next'
+
+export type AppView = 'kanban' | 'gantt'
 
 defineProps<{
   filters: Record<string, string>
+  view: AppView
 }>()
 
 const emit = defineEmits<{
   'update:filters': [key: string, value: string]
+  'update:view': [view: AppView]
   create: []
 }>()
 
@@ -29,6 +33,29 @@ const priorities = [
     </div>
 
     <div class="ml-auto flex items-center gap-3">
+      <div class="flex items-center rounded overflow-hidden border border-white/30">
+        <button
+          type="button"
+          class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium transition-colors"
+          :class="view === 'kanban' ? 'bg-white text-[#0052CC]' : 'text-white/90 hover:bg-white/10'"
+          title="看板"
+          @click="emit('update:view', 'kanban')"
+        >
+          <LayoutGrid class="w-3.5 h-3.5" />
+          看板
+        </button>
+        <button
+          type="button"
+          class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium transition-colors border-l border-white/30"
+          :class="view === 'gantt' ? 'bg-white text-[#0052CC]' : 'text-white/90 hover:bg-white/10'"
+          title="甘特图"
+          @click="emit('update:view', 'gantt')"
+        >
+          <ChartGantt class="w-3.5 h-3.5" />
+          甘特
+        </button>
+      </div>
+
       <div class="relative flex items-center">
         <ListFilter class="w-4 h-4 text-white/70 absolute left-2.5 pointer-events-none" />
         <select
