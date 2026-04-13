@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { reactive, computed, onMounted, onUnmounted } from 'vue'
 import { X } from 'lucide-vue-next'
+import MarkdownEditor from './MarkdownEditor.vue'
 import type { Task, TaskStatus, TaskPriority } from '../types/task'
 
 const props = defineProps<{
@@ -149,12 +150,7 @@ const priorityOptions: { value: TaskPriority; label: string }[] = [
           <!-- Description -->
           <div>
             <label class="block text-xs font-semibold text-[#6B778C] uppercase mb-1">描述</label>
-            <textarea
-              v-model="form.description"
-              rows="3"
-              class="w-full border border-[#DFE1E6] rounded-sm px-3 py-2 text-sm text-[#172B4D] outline-none focus:border-[#4C9AFF] focus:ring-2 focus:ring-[#4C9AFF]/20 transition resize-y"
-              placeholder="添加详细说明..."
-            />
+            <MarkdownEditor v-model="form.description" :rows="8" />
           </div>
 
           <!-- Status + Priority (side by side) -->
