@@ -21,9 +21,10 @@ const emit = defineEmits<{
 
 const group = { name: 'kanban', pull: true, put: true }
 
-/** 整卡可拖：短按仍可点击；按住超过 delay 再移动为拖动。filter 区域不发起拖动 */
+/** 整卡可拖：鼠标无延迟可快拖；触摸仍用 delay 区分点击与拖动。filter 区域不发起拖动 */
 const sortableOptions = {
   delay: 200,
+  delayOnTouchOnly: true,
   filter: '.kanban-no-drag',
   preventOnFilter: true,
 }
