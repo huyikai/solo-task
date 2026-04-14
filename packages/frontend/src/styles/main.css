@@ -1,6 +1,11 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+html {
+  /* 减轻横向过度滚动时误触浏览器前进/后退（尤其触控板、部分 Chromium） */
+  overscroll-behavior-x: none;
+}
+
 html[data-theme='light'] {
   color-scheme: light;
 }
