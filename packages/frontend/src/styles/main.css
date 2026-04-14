@@ -19,7 +19,7 @@ html[data-theme='dark'] {
   --st-bg-muted-strong: #ebecf0;
   --st-bg-header-row: #fafbfc;
   --st-bg-toolbar: #f4f5f7;
-  --st-bg-hover: #e4f0ff;
+  --st-bg-hover: #e8f1fc;
   --st-bg-hover-neutral: #ebecf0;
   --st-bg-hover-row: #dfe1e6;
   --st-bg-weekend: #f4f5f7;
@@ -38,11 +38,11 @@ html[data-theme='dark'] {
   --st-text-placeholder: #8993a4;
   --st-text-toolbar: #44546f;
 
-  --st-accent: #0052cc;
-  --st-accent-hover: #0065ff;
-  --st-accent-soft: #deebff;
-  --st-accent-soft-border: #b3d4ff;
-  --st-focus: #4c9aff;
+  --st-accent: #1867d2;
+  --st-accent-hover: #3f7dd9;
+  --st-accent-soft: #e8f1fc;
+  --st-accent-soft-border: #b8d4f0;
+  --st-focus: #4c8eef;
 
   --st-danger: #de350b;
   --st-danger-hover: #bf2600;
@@ -52,29 +52,29 @@ html[data-theme='dark'] {
   --st-border-danger-soft: #ffbdad;
   --st-icon-on-danger-soft: #de350b;
 
-  --st-bg-info-soft: #deebff;
-  --st-border-info-soft: #b3d4ff;
-  --st-icon-info: #0052cc;
+  --st-bg-info-soft: #e8f1fc;
+  --st-border-info-soft: #b8d4f0;
+  --st-icon-info: #1867d2;
 
   --st-bg-neutral-soft: #ebecf0;
 
   --st-shadow-kanban: 0 1px 1px rgb(9 30 66 / 0.08);
   --st-shadow-overlay: rgb(0 0 0 / 0.5);
 
-  --st-header-bg: #0052cc;
+  --st-header-bg: #1867d2;
   --st-header-title: #ffffff;
   --st-header-logo-bg: rgb(255 255 255 / 0.2);
   --st-header-filter-bg: rgb(255 255 255 / 0.15);
   --st-header-filter-bg-hover: rgb(255 255 255 / 0.25);
   --st-header-group-border: rgb(255 255 255 / 0.3);
   --st-header-nav-active-bg: #ffffff;
-  --st-header-nav-active-text: #0052cc;
+  --st-header-nav-active-text: #1867d2;
   --st-header-nav-text: rgb(255 255 255 / 0.9);
   --st-header-nav-hover: rgb(255 255 255 / 0.1);
   --st-header-icon-muted: rgb(255 255 255 / 0.7);
-  --st-header-create-bg: #ffffff;
-  --st-header-create-text: #0052cc;
-  --st-header-create-hover: #eff6ff;
+  --st-header-create-bg: #1867d2;
+  --st-header-create-text: #ffffff;
+  --st-header-create-hover: #155ebe;
   /* 顶栏上原生 select 的展示文字：需与蓝底对比（option 展开后仍用各自 class 的深色） */
   --st-header-select-text: rgb(255 255 255 / 0.95);
   --st-header-nav-style: pill;
@@ -86,18 +86,18 @@ html[data-theme='dark'] {
 
   --st-gantt-urgent: #de350b;
   --st-gantt-high: #ff991f;
-  --st-gantt-medium: #0065ff;
+  --st-gantt-medium: #1867d2;
   --st-gantt-low: #6b778c;
   --st-gantt-done: rgb(0 135 90 / 0.7);
 
-  --st-status-todo: #0052cc;
+  --st-status-todo: #1867d2;
   --st-status-progress: #ff991f;
   --st-status-done: #00875a;
   --st-status-archived: #6b778c;
   --st-status-bar-empty: #dfe1e6;
 
-  --st-tag-0-bg: #deebff;
-  --st-tag-0-fg: #0747a6;
+  --st-tag-0-bg: #e8f1fc;
+  --st-tag-0-fg: #1254a8;
   --st-tag-1-bg: #e3fcef;
   --st-tag-1-fg: #006644;
   --st-tag-2-bg: #fff0b3;
