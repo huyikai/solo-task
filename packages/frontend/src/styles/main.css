@@ -44,19 +44,19 @@ html[data-theme='dark'] {
   --st-accent-soft-border: #b8d4f0;
   --st-focus: #4c8eef;
 
-  --st-danger: #de350b;
-  --st-danger-hover: #bf2600;
-  --st-danger-ring: rgb(222 53 11 / 0.4);
+  --st-danger: #c73d2f;
+  --st-danger-hover: #a83226;
+  --st-danger-ring: rgb(199 61 47 / 0.38);
 
-  --st-bg-danger-soft: #ffebe6;
-  --st-border-danger-soft: #ffbdad;
-  --st-icon-on-danger-soft: #de350b;
+  --st-bg-danger-soft: #fdf1ef;
+  --st-border-danger-soft: #efd5cf;
+  --st-icon-on-danger-soft: #c73d2f;
 
   --st-bg-info-soft: #e8f1fc;
   --st-border-info-soft: #b8d4f0;
   --st-icon-info: #1867d2;
 
-  --st-bg-neutral-soft: #ebecf0;
+  --st-bg-neutral-soft: #e9ecf2;
 
   --st-shadow-kanban: 0 1px 1px rgb(9 30 66 / 0.08);
   --st-shadow-overlay: rgb(0 0 0 / 0.5);
@@ -79,35 +79,35 @@ html[data-theme='dark'] {
   --st-header-select-text: rgb(255 255 255 / 0.95);
   --st-header-nav-style: pill;
 
-  --st-priority-urgent: #ddb3ac;
-  --st-priority-high: #e0d0b0;
-  --st-priority-medium: #a3b5ce;
-  --st-priority-low: #b8bfc6;
+  --st-priority-urgent: #cda89f;
+  --st-priority-high: #d4c9a8;
+  --st-priority-medium: #92a6c4;
+  --st-priority-low: #aab3bd;
 
-  --st-gantt-urgent: #de350b;
-  --st-gantt-high: #ff991f;
+  --st-gantt-urgent: #c73d2f;
+  --st-gantt-high: #df9f3d;
   --st-gantt-medium: #1867d2;
-  --st-gantt-low: #6b778c;
-  --st-gantt-done: rgb(0 135 90 / 0.7);
+  --st-gantt-low: #8b98ab;
+  --st-gantt-done: rgb(61 168 132 / 0.78);
 
   --st-status-todo: #1867d2;
-  --st-status-progress: #ff991f;
-  --st-status-done: #00875a;
-  --st-status-archived: #6b778c;
+  --st-status-progress: #df9f3d;
+  --st-status-done: #3da884;
+  --st-status-archived: #8b98ab;
   --st-status-bar-empty: #dfe1e6;
 
   --st-tag-0-bg: #e8f1fc;
   --st-tag-0-fg: #1254a8;
-  --st-tag-1-bg: #e3fcef;
-  --st-tag-1-fg: #006644;
-  --st-tag-2-bg: #fff0b3;
-  --st-tag-2-fg: #172b4d;
-  --st-tag-3-bg: #ffebe6;
-  --st-tag-3-fg: #bf2600;
-  --st-tag-4-bg: #eae6ff;
-  --st-tag-4-fg: #403294;
+  --st-tag-1-bg: #eaf3ef;
+  --st-tag-1-fg: #256352;
+  --st-tag-2-bg: #f2ebe0;
+  --st-tag-2-fg: #5c5340;
+  --st-tag-3-bg: #fdf0ee;
+  --st-tag-3-fg: #a84a3d;
+  --st-tag-4-bg: #e9ecf7;
+  --st-tag-4-fg: #4a5685;
 
-  --st-confirm-icon-bg: #ffebe6;
+  --st-confirm-icon-bg: #fdf1ef;
 }
 
 [data-theme="dark"] {
