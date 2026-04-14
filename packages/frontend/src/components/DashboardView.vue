@@ -4,6 +4,9 @@ import { computed } from 'vue'
 defineOptions({ name: 'DashboardView' })
 import type { Task, TaskStatus } from '../types/task'
 import { useTaskStats, getDeadlineDay } from '../composables/useTaskStats'
+import { useBurndownSeries } from '../composables/useBurndownSeries'
+import StatusPieChart from './StatusPieChart.vue'
+import BurndownChart from './BurndownChart.vue'
 import { CalendarClock, AlertTriangle, History } from 'lucide-vue-next'
 
 const props = defineProps<{
@@ -26,8 +29,9 @@ const {
   dueSoonTasks,
   recentUpdated,
   tagTop,
-  statusPercents,
 } = useTaskStats(tasksRef)
+
+const { series: burndownSeries, weekLabel, hasScopedTasks } = useBurndownSeries(tasksRef)
 
 const statusMeta: { key: TaskStatus; label: string; color: string }[] = [
   { key: 'todo', label: '待办', color: 'var(--st-status-todo)' },
@@ -84,28 +88,18 @@ function deadlineLabel(task: Task) {
         </div>
       </div>
 
-      <div class="rounded border border-[var(--st-border)] bg-[var(--st-bg-surface)] p-4 mb-6">
-        <h2 class="text-sm font-semibold text-[var(--st-text-primary)] mb-3">状态分布</h2>
-        <div class="flex h-8 rounded overflow-hidden border border-[var(--st-border-subtle)]">
-          <div
-            v-for="sp in statusPercents.filter((s) => s.percent > 0)"
-            :key="sp.status"
-            class="h-full min-w-[2px] transition-all"
-            :style="{
-              width: `${sp.percent}%`,
-              backgroundColor: statusMeta.find((m) => m.key === sp.status)?.color ?? 'var(--st-status-bar-empty)',
-            }"
-            :title="`${statusMeta.find((m) => m.key === sp.status)?.label ?? sp.status} ${sp.percent}%`"
-          />
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="rounded border border-[var(--st-border)] bg-[var(--st-bg-surface)] p-4 min-h-0">
+          <h2 class="text-sm font-semibold text-[var(--st-text-primary)] mb-3">状态分布</h2>
+          <StatusPieChart :by-status="byStatus" :status-meta="statusMeta" />
         </div>
-        <div class="flex flex-wrap gap-4 mt-3 text-xs text-[var(--st-text-secondary)]">
-          <span v-for="m in statusMeta" :key="m.key" class="flex items-center gap-1.5">
-            <span
-              class="w-2 h-2 rounded-sm shrink-0"
-              :style="{ backgroundColor: m.color }"
-            />
-            {{ m.label }} {{ byStatus[m.key] }}
-          </span>
+        <div class="rounded border border-[var(--st-border)] bg-[var(--st-bg-surface)] p-4 min-h-0">
+          <h2 class="text-sm font-semibold text-[var(--st-text-primary)] mb-3">本周燃尽</h2>
+          <BurndownChart
+            :series="burndownSeries"
+            :week-label="weekLabel"
+            :has-scoped-tasks="hasScopedTasks"
+          />
         </div>
       </div>
 
