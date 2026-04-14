@@ -240,3 +240,20 @@ html[data-theme='dark'] {
   padding: 0.125rem 0.25rem;
   border-radius: 0.125rem;
 }
+
+/* 输入类控件：去掉浏览器与自定义的蓝色焦点高亮（outline / ring） */
+input,
+textarea,
+select {
+  outline: none;
+}
+
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+select:focus-visible {
+  outline: none;
+  box-shadow: none;
+}

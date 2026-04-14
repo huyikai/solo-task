@@ -193,7 +193,7 @@ const priorityOptions: { value: TaskPriority; label: string }[] = [
             <input
               v-model="form.title"
               type="text"
-              class="w-full border border-[var(--st-border)] rounded-sm px-3 py-2 text-sm text-[var(--st-text-primary)] bg-[var(--st-bg-surface)] outline-none focus:border-[var(--st-focus)] focus:ring-2 focus:ring-[var(--st-focus)]/20 transition"
+              class="w-full border border-[var(--st-border)] rounded-sm px-3 py-2 text-sm text-[var(--st-text-primary)] bg-[var(--st-bg-surface)] outline-none transition"
               placeholder="输入任务标题"
               autofocus
             />
@@ -211,7 +211,7 @@ const priorityOptions: { value: TaskPriority; label: string }[] = [
               <label class="block text-xs font-semibold text-[var(--st-text-muted)] uppercase mb-1">状态</label>
               <select
                 v-model="form.status"
-                class="w-full border border-[var(--st-border)] rounded-sm px-3 py-2 text-sm text-[var(--st-text-primary)] outline-none focus:border-[var(--st-focus)] bg-[var(--st-bg-surface)]"
+                class="w-full border border-[var(--st-border)] rounded-sm px-3 py-2 text-sm text-[var(--st-text-primary)] outline-none bg-[var(--st-bg-surface)]"
               >
                 <option v-for="o in statusOptions" :key="o.value" :value="o.value">
                   {{ o.label }}
@@ -222,7 +222,7 @@ const priorityOptions: { value: TaskPriority; label: string }[] = [
               <label class="block text-xs font-semibold text-[var(--st-text-muted)] uppercase mb-1">优先级</label>
               <select
                 v-model="form.priority"
-                class="w-full border border-[var(--st-border)] rounded-sm px-3 py-2 text-sm text-[var(--st-text-primary)] outline-none focus:border-[var(--st-focus)] bg-[var(--st-bg-surface)]"
+                class="w-full border border-[var(--st-border)] rounded-sm px-3 py-2 text-sm text-[var(--st-text-primary)] outline-none bg-[var(--st-bg-surface)]"
               >
                 <option v-for="o in priorityOptions" :key="o.value" :value="o.value">
                   {{ o.label }}
@@ -254,7 +254,7 @@ const priorityOptions: { value: TaskPriority; label: string }[] = [
               <input
                 v-model="form.newTag"
                 type="text"
-                class="flex-1 border border-[var(--st-border)] rounded-sm px-3 py-1.5 text-sm text-[var(--st-text-primary)] bg-[var(--st-bg-surface)] outline-none focus:border-[var(--st-focus)]"
+                class="flex-1 border border-[var(--st-border)] rounded-sm px-3 py-1.5 text-sm text-[var(--st-text-primary)] bg-[var(--st-bg-surface)] outline-none"
                 placeholder="输入标签名"
                 @keydown.enter.prevent="addTag"
               />
@@ -295,7 +295,7 @@ const priorityOptions: { value: TaskPriority; label: string }[] = [
               <input
                 v-model="form.dueDate"
                 type="datetime-local"
-                class="w-full border border-[var(--st-border)] rounded-sm px-3 py-2 text-sm text-[var(--st-text-primary)] bg-[var(--st-bg-surface)] outline-none focus:border-[var(--st-focus)]"
+                class="w-full border border-[var(--st-border)] rounded-sm px-3 py-2 text-sm text-[var(--st-text-primary)] bg-[var(--st-bg-surface)] outline-none"
               />
             </div>
             <div v-else-if="form.timeType === 'range'" class="grid grid-cols-2 gap-3">
@@ -304,7 +304,7 @@ const priorityOptions: { value: TaskPriority; label: string }[] = [
                 <input
                   v-model="form.startDate"
                   type="datetime-local"
-                  class="w-full border border-[var(--st-border)] rounded-sm px-3 py-2 text-sm text-[var(--st-text-primary)] bg-[var(--st-bg-surface)] outline-none focus:border-[var(--st-focus)]"
+                  class="w-full border border-[var(--st-border)] rounded-sm px-3 py-2 text-sm text-[var(--st-text-primary)] bg-[var(--st-bg-surface)] outline-none"
                 />
               </div>
               <div>
@@ -312,7 +312,7 @@ const priorityOptions: { value: TaskPriority; label: string }[] = [
                 <input
                   v-model="form.endDate"
                   type="datetime-local"
-                  class="w-full border border-[var(--st-border)] rounded-sm px-3 py-2 text-sm text-[var(--st-text-primary)] bg-[var(--st-bg-surface)] outline-none focus:border-[var(--st-focus)]"
+                  class="w-full border border-[var(--st-border)] rounded-sm px-3 py-2 text-sm text-[var(--st-text-primary)] bg-[var(--st-bg-surface)] outline-none"
                 />
               </div>
             </div>
@@ -323,8 +323,8 @@ const priorityOptions: { value: TaskPriority; label: string }[] = [
             <label class="block text-xs font-semibold text-[var(--st-text-muted)] uppercase mb-1">父任务</label>
             <button
               type="button"
-              class="w-full flex items-center gap-2 border border-[var(--st-border)] rounded-sm px-3 py-2 text-sm text-left text-[var(--st-text-primary)] outline-none focus:border-[var(--st-focus)] bg-[var(--st-bg-surface)] hover:bg-[var(--st-bg-muted)]/30 transition-colors"
-              :class="parentComboOpen ? 'border-[var(--st-focus)] ring-2 ring-[var(--st-focus)]/20' : ''"
+              class="w-full flex items-center gap-2 border border-[var(--st-border)] rounded-sm px-3 py-2 text-sm text-left text-[var(--st-text-primary)] outline-none bg-[var(--st-bg-surface)] hover:bg-[var(--st-bg-muted)]/30 transition-colors"
+              :class="parentComboOpen ? 'border-[var(--st-border-muted)]' : ''"
               @click="toggleParentCombo"
             >
               <span class="flex-1 truncate">{{ selectedParentLabel }}</span>
@@ -342,7 +342,7 @@ const priorityOptions: { value: TaskPriority; label: string }[] = [
                 ref="parentSearchInput"
                 v-model="parentSearchQuery"
                 type="text"
-                class="w-full border-b border-[var(--st-border)] px-3 py-2 text-sm text-[var(--st-text-primary)] bg-[var(--st-bg-surface)] outline-none focus:border-[var(--st-focus)] placeholder:text-[var(--st-text-muted)]"
+                class="w-full border-b border-[var(--st-border)] px-3 py-2 text-sm text-[var(--st-text-primary)] bg-[var(--st-bg-surface)] outline-none placeholder:text-[var(--st-text-muted)]"
                 placeholder="输入关键词筛选父任务"
               />
               <ul class="overflow-y-auto py-1">

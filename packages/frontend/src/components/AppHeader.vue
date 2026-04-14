@@ -191,7 +191,7 @@ const secondaryBtnClass =
             <input
               v-model="searchDraft"
               type="search"
-              :class="`w-full min-w-0 border-0 bg-transparent py-0 pl-7 pr-2 text-sm leading-none text-[var(--st-header-select-text)] outline-none ring-0 placeholder:text-[var(--st-header-input-placeholder)] focus-visible:ring-2 focus-visible:ring-[var(--st-focus)] focus-visible:ring-offset-0 h-8 min-h-8`"
+              :class="`w-full min-w-0 border-0 bg-transparent py-0 pl-7 pr-2 text-sm leading-none text-[var(--st-header-select-text)] outline-none ring-0 placeholder:text-[var(--st-header-input-placeholder)] h-8 min-h-8`"
               placeholder="搜索标题、描述、标签…"
               aria-label="搜索任务"
               autocomplete="off"
@@ -209,7 +209,7 @@ const secondaryBtnClass =
               class="pointer-events-none absolute left-2 h-3.5 w-3.5 text-[var(--st-header-icon-muted)]"
             />
             <select
-              :class="`max-w-[10rem] cursor-pointer appearance-none rounded-sm border-0 bg-transparent py-0 pl-7 pr-4 text-sm leading-none text-[var(--st-header-select-text)] outline-none transition-colors hover:bg-[var(--st-header-filter-bg-hover)] focus-visible:ring-2 focus-visible:ring-[var(--st-focus)] focus-visible:ring-offset-0 h-8 min-h-8`"
+              :class="`max-w-[10rem] cursor-pointer appearance-none rounded-sm border-0 bg-transparent py-0 pl-7 pr-4 text-sm leading-none text-[var(--st-header-select-text)] outline-none transition-colors hover:bg-[var(--st-header-filter-bg-hover)] h-8 min-h-8`"
               :value="filters.priority ?? ''"
               aria-label="按优先级筛选"
               @change="emit('update:filters', 'priority', ($event.target as HTMLSelectElement).value)"
@@ -411,7 +411,7 @@ const secondaryBtnClass =
               class="pointer-events-none absolute left-2 h-3.5 w-3.5 text-[var(--st-header-icon-muted)]"
             />
             <select
-              :class="`min-w-0 max-w-[9rem] flex-1 cursor-pointer appearance-none rounded-sm border-0 bg-transparent py-0 pl-7 pr-3 text-sm leading-none text-[var(--st-header-select-text)] outline-none transition-colors hover:bg-[var(--st-header-filter-bg-hover)] focus-visible:ring-2 focus-visible:ring-[var(--st-focus)] focus-visible:ring-offset-0 h-8 min-h-8`"
+              :class="`min-w-0 max-w-[9rem] flex-1 cursor-pointer appearance-none rounded-sm border-0 bg-transparent py-0 pl-7 pr-3 text-sm leading-none text-[var(--st-header-select-text)] outline-none transition-colors hover:bg-[var(--st-header-filter-bg-hover)] h-8 min-h-8`"
               :value="filters.priority ?? ''"
               aria-label="按优先级筛选"
               @change="emit('update:filters', 'priority', ($event.target as HTMLSelectElement).value)"
