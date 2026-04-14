@@ -25,18 +25,19 @@ const emit = defineEmits<{
   'status-change': [id: string, status: Task['status']]
 }>()
 
+/** 低饱和、偏亮的粉彩色，区别于高饱和警示色 */
 const priorityConfig: Record<string, { icon: any; color: string; label: string }> = {
-  urgent: { icon: ArrowUpFromDot, color: 'text-[#DE350B]', label: '紧急' },
-  high: { icon: ArrowUp, color: 'text-[#FF991F]', label: '高' },
-  medium: { icon: Minus, color: 'text-[#0065FF]', label: '中' },
-  low: { icon: ArrowDown, color: 'text-[#6B778C]', label: '低' },
+  urgent: { icon: ArrowUpFromDot, color: 'text-[#DDB3AC]', label: '紧急' },
+  high: { icon: ArrowUp, color: 'text-[#E0D0B0]', label: '高' },
+  medium: { icon: Minus, color: 'text-[#A3B5CE]', label: '中' },
+  low: { icon: ArrowDown, color: 'text-[#B8BFC6]', label: '低' },
 }
 
 const priorityBorder: Record<string, string> = {
-  urgent: 'border-l-[#DE350B]',
-  high: 'border-l-[#FF991F]',
-  medium: 'border-l-[#0065FF]',
-  low: 'border-l-[#6B778C]',
+  urgent: 'border-l-[#DDB3AC]',
+  high: 'border-l-[#E0D0B0]',
+  medium: 'border-l-[#A3B5CE]',
+  low: 'border-l-[#B8BFC6]',
 }
 
 function formatDate(iso: string) {
@@ -51,18 +52,18 @@ function getChildren(): Task[] {
 
 <template>
   <div
-    class="bg-white rounded border border-[#DFE1E6] border-l-[3px] transition-colors group relative"
+    class="bg-white rounded border-l-[3px] transition-colors group relative"
     :class="[
       priorityBorder[task.priority],
       kanban
-        ? 'cursor-grab active:cursor-grabbing hover:bg-[#E4F0FF] select-none'
-        : 'cursor-pointer hover:bg-[#E4F0FF]',
+        ? 'cursor-grab select-none border border-[#E8EAED] shadow-[0_1px_1px_rgba(9,30,66,0.08)] active:cursor-grabbing hover:bg-white'
+        : 'cursor-pointer border border-[#DFE1E6] hover:bg-[#EEF2F7]',
     ]"
     @click="emit('edit', task)"
   >
     <button
       type="button"
-      class="kanban-no-drag absolute top-2 right-2 p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-[#FFEBE6] text-[#6B778C] hover:text-[#DE350B] transition-all z-[1]"
+      class="kanban-no-drag absolute top-2 right-2 p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-[#EDE8E6] text-[#6B778C] hover:text-[#CF9A92] transition-all z-[1]"
       @click.stop="emit('delete', task.id)"
     >
       <Trash2 class="w-3.5 h-3.5" />

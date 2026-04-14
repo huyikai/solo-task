@@ -27,10 +27,10 @@ function getSubChildren(parentId: string): Task[] {
 }
 
 const priorityIcon: Record<string, { icon: any; color: string }> = {
-  urgent: { icon: ArrowUpFromDot, color: 'text-[#DE350B]' },
-  high: { icon: ArrowUp, color: 'text-[#FF991F]' },
-  medium: { icon: Minus, color: 'text-[#0065FF]' },
-  low: { icon: ArrowDown, color: 'text-[#6B778C]' },
+  urgent: { icon: ArrowUpFromDot, color: 'text-[#DDB3AC]' },
+  high: { icon: ArrowUp, color: 'text-[#E0D0B0]' },
+  medium: { icon: Minus, color: 'text-[#A3B5CE]' },
+  low: { icon: ArrowDown, color: 'text-[#B8BFC6]' },
 }
 </script>
 

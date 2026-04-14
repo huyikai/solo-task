@@ -31,8 +31,8 @@ const sortableOptions = {
 </script>
 
 <template>
-  <div class="flex flex-col min-w-0 min-h-0">
-    <div class="bg-[#EBECF0] rounded-t px-3 py-2.5 flex items-center gap-2 shrink-0">
+  <div class="flex h-full min-h-0 min-w-0 flex-col bg-[#F7F8F9]">
+    <div class="flex shrink-0 items-center gap-2 px-3 py-2.5">
       <span
         class="w-2.5 h-2.5 rounded-full shrink-0"
         :style="{ backgroundColor: color }"
@@ -40,11 +40,13 @@ const sortableOptions = {
       <span class="text-xs font-semibold text-[#5E6C84] uppercase tracking-wide">
         {{ title }}
       </span>
-      <span class="text-xs text-[#5E6C84] bg-[#DFE1E6] rounded-full px-1.5 py-0.5 min-w-[20px] text-center">
+      <span
+        class="min-w-[20px] rounded-full bg-[#EBECF0] px-1.5 py-0.5 text-center text-xs text-[#5E6C84]"
+      >
         {{ tasks.length }}
       </span>
     </div>
-    <div class="bg-[#EBECF0]/50 rounded-b p-2 flex-1 overflow-y-auto min-h-0 relative">
+    <div class="relative min-h-0 flex-1 overflow-y-auto p-2 pt-0">
       <div class="relative min-h-[120px]">
         <VueDraggable
           v-model="tasks"

@@ -84,11 +84,11 @@ async function submitKanbanReorder() {
 </script>
 
 <template>
-  <main class="flex-1 p-6 overflow-hidden">
+  <main class="min-h-0 flex-1 overflow-hidden p-6">
     <div v-if="loading" class="flex items-center justify-center h-full">
       <div class="text-[#5E6C84] text-sm">加载中...</div>
     </div>
-    <div v-else class="grid grid-cols-4 gap-4 h-full">
+    <div v-else class="grid h-full grid-cols-4 gap-3">
       <TaskColumn
         v-for="col in columns"
         :key="col.key"
