@@ -77,7 +77,11 @@ html[data-theme='dark'] {
   --st-header-create-hover: #155ebe;
   /* 顶栏上原生 select 的展示文字：需与蓝底对比（option 展开后仍用各自 class 的深色） */
   --st-header-select-text: rgb(255 255 255 / 0.95);
+  /* 顶栏输入框 placeholder：与浅蓝半透明底协调，勿用页面 --st-text-muted */
+  --st-header-input-placeholder: rgb(255 255 255 / 0.72);
   --st-header-nav-style: pill;
+  /* 顶栏功能组之间的间距（与 Tailwind gap 配合时在组件内引用） */
+  --st-header-cluster-gap: 1.5rem;
 
   --st-priority-urgent: #cda89f;
   --st-priority-high: #d4c9a8;
@@ -176,7 +180,9 @@ html[data-theme='dark'] {
   --st-header-create-text: #1d2125;
   --st-header-create-hover: #85b8ff;
   --st-header-select-text: #c7d1db;
+  --st-header-input-placeholder: rgb(159 173 188 / 0.75);
   --st-header-nav-style: underline;
+  --st-header-cluster-gap: 1.5rem;
 
   --st-priority-urgent: #e8a598;
   --st-priority-high: #e8d4a8;
