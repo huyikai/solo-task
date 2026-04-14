@@ -4,7 +4,7 @@ import {
   Plus,
   ListFilter,
   LayoutDashboard,
-  LayoutGrid,
+  SquareKanban,
   ChartGantt,
   Download,
   Search,
@@ -152,7 +152,7 @@ const secondaryBtnClass =
               title="看板"
               @click="navigate"
             >
-              <LayoutGrid class="h-4 w-4 shrink-0" />
+              <SquareKanban class="h-4 w-4 shrink-0" />
               看板
             </button>
           </router-link>
@@ -354,7 +354,7 @@ const secondaryBtnClass =
               title="看板"
               @click="navigate"
             >
-              <LayoutGrid class="h-4 w-4 shrink-0" />
+              <SquareKanban class="h-4 w-4 shrink-0" />
               看板
             </button>
           </router-link>
