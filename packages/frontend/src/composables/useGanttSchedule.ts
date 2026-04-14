@@ -33,6 +33,12 @@ function addDays(d: Date, n: number): Date {
   return new Date(d.getTime() + n * DAY_MS)
 }
 
+/** 本地日历的当天 00:00 */
+function localToday(): Date {
+  const n = new Date()
+  return new Date(n.getFullYear(), n.getMonth(), n.getDate())
+}
+
 function daysBetweenInclusive(start: Date, end: Date): number {
   const a = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate())
   const b = Date.UTC(end.getFullYear(), end.getMonth(), end.getDate())
@@ -153,7 +159,7 @@ export function useGanttSchedule(
     const schedules = scheduledTasks.value
       .map(t => getTaskSchedule(t))
       .filter((s): s is TaskSchedule => s !== null)
-    const today = parseDay(new Date().toISOString())
+    const today = localToday()
 
     if (schedules.length === 0) {
       const start = new Date(today.getFullYear(), today.getMonth(), 1)
@@ -186,6 +192,21 @@ export function useGanttSchedule(
       d = addDays(d, 1)
     }
     return days
+  })
+
+  const todayColumnIndex = computed((): number | null => {
+    const t = localToday()
+    const ty = t.getFullYear()
+    const tm = t.getMonth()
+    const td = t.getDate()
+    const days = timelineDays.value
+    const i = days.findIndex(
+      d =>
+        d.getFullYear() === ty &&
+        d.getMonth() === tm &&
+        d.getDate() === td
+    )
+    return i >= 0 ? i : null
   })
 
   const colWidthPx = computed(() => ZOOM_COL_WIDTH[zoom.value])
@@ -253,6 +274,7 @@ export function useGanttSchedule(
     visibleRange,
     totalDays,
     timelineDays,
+    todayColumnIndex,
     colWidthPx,
     timelineWidthPx,
     rows,

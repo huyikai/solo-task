@@ -22,6 +22,7 @@ const tasksRef = computed(() => props.tasks)
 const {
   unscheduledTasks,
   timelineDays,
+  todayColumnIndex,
   colWidthPx,
   timelineWidthPx,
   rows,
@@ -81,6 +82,10 @@ function formatDayLabel(d: Date) {
 function isWeekend(d: Date) {
   const w = d.getDay()
   return w === 0 || w === 6
+}
+
+function isTodayColumn(di: number) {
+  return todayColumnIndex.value !== null && todayColumnIndex.value === di
 }
 
 const barBg: Record<Task['priority'], string> = {
@@ -162,11 +167,31 @@ function tooltipText(task: Task) {
               <div
                 v-for="(day, i) in timelineDays"
                 :key="i"
-                class="shrink-0 flex items-center justify-center text-xs text-[var(--st-text-secondary)] border-l border-[var(--st-border-subtle)]"
-                :class="isWeekend(day) ? 'bg-[var(--st-bg-weekend)]' : ''"
+                class="shrink-0 flex items-center justify-center gap-0.5 text-xs border-l border-[var(--st-border-subtle)]"
+                :class="
+                  isTodayColumn(i)
+                    ? 'bg-[var(--st-accent-soft)] text-[var(--st-accent)] font-medium border-l-2 border-l-[var(--st-accent)]'
+                    : 'text-[var(--st-text-secondary)] ' +
+                      (isWeekend(day) ? 'bg-[var(--st-bg-weekend)]' : '')
+                "
                 :style="{ width: `${colWidthPx}px` }"
               >
-                {{ formatDayLabel(day) }}
+                <template v-if="isTodayColumn(i)">
+                  <div
+                    v-if="zoom === 'month'"
+                    class="flex flex-col items-center justify-center gap-0 px-0.5 min-w-0 text-center leading-none"
+                  >
+                    <span class="text-[11px] tabular-nums whitespace-nowrap">{{
+                      formatDayLabel(day)
+                    }}</span>
+                    <span class="text-[9px] font-semibold mt-0.5">今</span>
+                  </div>
+                  <div v-else class="flex items-center justify-center gap-0.5 min-w-0">
+                    <span class="tabular-nums whitespace-nowrap">{{ formatDayLabel(day) }}</span>
+                    <span class="text-[10px] font-semibold shrink-0">今</span>
+                  </div>
+                </template>
+                <span v-else>{{ formatDayLabel(day) }}</span>
               </div>
             </div>
           </div>
@@ -212,7 +237,13 @@ function tooltipText(task: Task) {
                     v-for="(day, di) in timelineDays"
                     :key="di"
                     class="shrink-0 border-l border-[var(--st-border-subtle)]"
-                    :class="isWeekend(day) ? 'bg-[var(--st-bg-weekend)]' : ''"
+                    :class="
+                      isTodayColumn(di)
+                        ? 'bg-[var(--st-accent-soft)]/60 border-l-2 border-l-[var(--st-accent)]'
+                        : isWeekend(day)
+                          ? 'bg-[var(--st-bg-weekend)]'
+                          : ''
+                    "
                     :style="{ width: `${colWidthPx}px` }"
                   />
                 </div>
