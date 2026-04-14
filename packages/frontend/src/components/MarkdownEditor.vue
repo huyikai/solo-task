@@ -16,7 +16,9 @@ const mode = ref<'write' | 'preview'>('write')
 const textarea = ref<HTMLTextAreaElement | null>(null)
 
 const rendered = computed(() => {
-  if (!props.modelValue) return '<p class="text-[#6B778C] text-sm italic">暂无内容</p>'
+  if (!props.modelValue) {
+    return '<p class="text-[var(--st-text-muted)] text-sm italic">暂无内容</p>'
+  }
   return marked.parse(props.modelValue) as string
 })
 
@@ -58,11 +60,13 @@ function applyLine({ prefix, placeholder }: LineAction) {
   })
 }
 
-const toolbarGroups: Array<Array<{
-  title: string
-  action: () => void
-  icon: string
-}>> = [
+const toolbarGroups: Array<
+  Array<{
+    title: string
+    action: () => void
+    icon: string
+  }>
+> = [
   [
     {
       title: '标题',
@@ -118,26 +122,30 @@ const toolbarGroups: Array<Array<{
 </script>
 
 <template>
-  <div class="border border-[#DFE1E6] rounded-sm overflow-hidden">
+  <div class="border border-[var(--st-border)] rounded-sm overflow-hidden">
     <!-- Tab bar + toolbar -->
-    <div class="flex items-stretch bg-[#F4F5F7] border-b border-[#DFE1E6]">
+    <div class="flex items-stretch bg-[var(--st-bg-toolbar)] border-b border-[var(--st-border)]">
       <!-- Write / Preview tabs -->
       <button
         type="button"
-        class="px-4 py-2 text-sm font-medium border-r border-[#DFE1E6] transition-colors"
-        :class="mode === 'write'
-          ? 'bg-white text-[#0052CC] border-b-2 border-b-[#0052CC] -mb-px'
-          : 'text-[#6B778C] hover:text-[#172B4D]'"
+        class="px-4 py-2 text-sm font-medium border-r border-[var(--st-border)] transition-colors"
+        :class="
+          mode === 'write'
+            ? 'bg-[var(--st-bg-surface)] text-[var(--st-accent)] border-b-2 border-b-[var(--st-accent)] -mb-px'
+            : 'text-[var(--st-text-muted)] hover:text-[var(--st-text-primary)]'
+        "
         @click="mode = 'write'"
       >
         编辑
       </button>
       <button
         type="button"
-        class="px-4 py-2 text-sm font-medium border-r border-[#DFE1E6] transition-colors"
-        :class="mode === 'preview'
-          ? 'bg-white text-[#0052CC] border-b-2 border-b-[#0052CC] -mb-px'
-          : 'text-[#6B778C] hover:text-[#172B4D]'"
+        class="px-4 py-2 text-sm font-medium border-r border-[var(--st-border)] transition-colors"
+        :class="
+          mode === 'preview'
+            ? 'bg-[var(--st-bg-surface)] text-[var(--st-accent)] border-b-2 border-b-[var(--st-accent)] -mb-px'
+            : 'text-[var(--st-text-muted)] hover:text-[var(--st-text-primary)]'
+        "
         @click="mode = 'preview'"
       >
         预览
@@ -146,13 +154,13 @@ const toolbarGroups: Array<Array<{
       <!-- Toolbar (only visible in write mode) -->
       <div v-if="mode === 'write'" class="flex items-center gap-0.5 px-2">
         <template v-for="(group, gi) in toolbarGroups" :key="gi">
-          <div v-if="gi > 0" class="w-px h-4 bg-[#DFE1E6] mx-1" />
+          <div v-if="gi > 0" class="w-px h-4 bg-[var(--st-border)] mx-1" />
           <button
             v-for="btn in group"
             :key="btn.title"
             type="button"
             :title="btn.title"
-            class="flex items-center justify-center w-7 h-7 rounded text-[#44546F] text-xs font-bold hover:bg-[#DFE1E6] transition-colors select-none"
+            class="flex items-center justify-center w-7 h-7 rounded text-[var(--st-text-toolbar)] text-xs font-bold hover:bg-[var(--st-border)] transition-colors select-none"
             :class="btn.icon === 'I' ? 'italic' : ''"
             @click="btn.action"
           >
@@ -168,7 +176,7 @@ const toolbarGroups: Array<Array<{
       ref="textarea"
       :value="modelValue"
       :rows="rows ?? 8"
-      class="w-full px-3 py-2.5 text-sm text-[#172B4D] font-mono outline-none resize-y bg-white placeholder:text-[#8993A4]"
+      class="w-full px-3 py-2.5 text-sm text-[var(--st-text-primary)] font-mono outline-none resize-y bg-[var(--st-bg-surface)] placeholder:text-[var(--st-text-placeholder)]"
       :placeholder="placeholder ?? '支持 Markdown 格式，如 **粗体**、## 标题、- 列表...'"
       @input="updateValue(($event.target as HTMLTextAreaElement).value)"
     />
@@ -176,7 +184,7 @@ const toolbarGroups: Array<Array<{
     <!-- Preview area -->
     <div
       v-else
-      class="prose prose-sm max-w-none px-3 py-2.5 min-h-[12rem] bg-white text-[#172B4D] overflow-auto"
+      class="st-markdown-preview prose prose-sm max-w-none px-3 py-2.5 min-h-[12rem] bg-[var(--st-bg-surface)] text-[var(--st-text-primary)] overflow-auto"
       v-html="rendered"
     />
   </div>

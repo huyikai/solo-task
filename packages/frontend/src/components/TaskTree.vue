@@ -27,27 +27,27 @@ function getSubChildren(parentId: string): Task[] {
 }
 
 const priorityIcon: Record<string, { icon: any; color: string }> = {
-  urgent: { icon: ArrowUpFromDot, color: 'text-[#DDB3AC]' },
-  high: { icon: ArrowUp, color: 'text-[#E0D0B0]' },
-  medium: { icon: Minus, color: 'text-[#A3B5CE]' },
-  low: { icon: ArrowDown, color: 'text-[#B8BFC6]' },
+  urgent: { icon: ArrowUpFromDot, color: 'text-[var(--st-priority-urgent)]' },
+  high: { icon: ArrowUp, color: 'text-[var(--st-priority-high)]' },
+  medium: { icon: Minus, color: 'text-[var(--st-priority-medium)]' },
+  low: { icon: ArrowDown, color: 'text-[var(--st-priority-low)]' },
 }
 </script>
 
 <template>
   <div v-if="children.length" class="mt-1.5" @click.stop>
     <button
-      class="flex items-center gap-1 text-xs text-[#5E6C84] hover:text-[#172B4D] mb-1"
+      class="flex items-center gap-1 text-xs text-[var(--st-text-secondary)] hover:text-[var(--st-text-primary)] mb-1"
       @click.stop="expanded = !expanded"
     >
       <component :is="expanded ? ChevronDown : ChevronRight" class="w-3.5 h-3.5" />
       {{ children.length }} 个子任务
     </button>
-    <div v-if="expanded" class="border-l-2 border-[#DFE1E6] pl-3 space-y-1">
+    <div v-if="expanded" class="border-l-2 border-[var(--st-border)] pl-3 space-y-1">
       <div
         v-for="child in children"
         :key="child.id"
-        class="flex items-center gap-1.5 text-sm text-[#172B4D] py-0.5 px-1 rounded hover:bg-[#EBECF0] cursor-pointer group"
+        class="flex items-center gap-1.5 text-sm text-[var(--st-text-primary)] py-0.5 px-1 rounded hover:bg-[var(--st-bg-muted-strong)] cursor-pointer group"
         @click.stop="emit('edit', child)"
       >
         <component
@@ -55,7 +55,10 @@ const priorityIcon: Record<string, { icon: any; color: string }> = {
           class="w-3.5 h-3.5 shrink-0"
           :class="priorityIcon[child.priority]?.color"
         />
-        <span class="truncate flex-1" :class="{ 'line-through text-[#5E6C84]': child.status === 'done' }">
+        <span
+          class="truncate flex-1"
+          :class="{ 'line-through text-[var(--st-text-secondary)]': child.status === 'done' }"
+        >
           {{ child.title }}
         </span>
       </div>

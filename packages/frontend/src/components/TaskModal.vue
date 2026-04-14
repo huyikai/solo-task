@@ -19,8 +19,8 @@ const isEdit = computed(() => !!props.task)
 const form = reactive({
   title: props.task?.title ?? '',
   description: props.task?.description ?? '',
-  status: props.task?.status ?? 'todo' as TaskStatus,
-  priority: props.task?.priority ?? 'medium' as TaskPriority,
+  status: props.task?.status ?? ('todo' as TaskStatus),
+  priority: props.task?.priority ?? ('medium' as TaskPriority),
   tags: [...(props.task?.tags ?? [])],
   timeType: props.task?.dueDate ? 'deadline' : props.task?.startDate ? 'range' : 'none',
   dueDate: props.task?.dueDate?.slice(0, 16) ?? '',
@@ -44,9 +44,7 @@ const availableParents = computed(() => {
     }
     collectDescendants(editId)
   }
-  return props.tasks.filter(t =>
-    t.id !== editId && !childIds.has(t.id) && !t.parentId
-  )
+  return props.tasks.filter(t => t.id !== editId && !childIds.has(t.id) && !t.parentId)
 })
 
 function addTag() {
@@ -111,20 +109,20 @@ const priorityOptions: { value: TaskPriority; label: string }[] = [
 <template>
   <Teleport to="body">
     <div
-      class="fixed inset-0 z-50 flex items-start justify-center pt-[10vh] bg-black/50"
+      class="fixed inset-0 z-50 flex items-start justify-center pt-[10vh] bg-[var(--st-shadow-overlay)]"
       @click.self="emit('close')"
     >
       <div
-        class="bg-white rounded-sm shadow-lg w-full max-w-[640px] max-h-[80vh] flex flex-col"
+        class="bg-[var(--st-bg-elevated)] rounded-sm shadow-lg w-full max-w-[640px] max-h-[80vh] flex flex-col border border-[var(--st-border)]"
         @click.stop
       >
         <!-- Header -->
-        <div class="flex items-center justify-between px-5 py-4 border-b border-[#DFE1E6]">
-          <h2 class="text-lg font-semibold text-[#172B4D]">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--st-border)]">
+          <h2 class="text-lg font-semibold text-[var(--st-text-primary)]">
             {{ isEdit ? '编辑任务' : '创建任务' }}
           </h2>
           <button
-            class="p-1 rounded hover:bg-[#EBECF0] text-[#6B778C] transition-colors"
+            class="p-1 rounded hover:bg-[var(--st-bg-muted-strong)] text-[var(--st-text-muted)] transition-colors"
             @click="emit('close')"
           >
             <X class="w-5 h-5" />
@@ -135,13 +133,13 @@ const priorityOptions: { value: TaskPriority; label: string }[] = [
         <form class="flex-1 overflow-y-auto p-5 space-y-5" @submit.prevent="handleSubmit">
           <!-- Title -->
           <div>
-            <label class="block text-xs font-semibold text-[#6B778C] uppercase mb-1">
-              标题 <span class="text-[#DE350B]">*</span>
+            <label class="block text-xs font-semibold text-[var(--st-text-muted)] uppercase mb-1">
+              标题 <span class="text-[var(--st-danger)]">*</span>
             </label>
             <input
               v-model="form.title"
               type="text"
-              class="w-full border border-[#DFE1E6] rounded-sm px-3 py-2 text-sm text-[#172B4D] outline-none focus:border-[#4C9AFF] focus:ring-2 focus:ring-[#4C9AFF]/20 transition"
+              class="w-full border border-[var(--st-border)] rounded-sm px-3 py-2 text-sm text-[var(--st-text-primary)] bg-[var(--st-bg-surface)] outline-none focus:border-[var(--st-focus)] focus:ring-2 focus:ring-[var(--st-focus)]/20 transition"
               placeholder="输入任务标题"
               autofocus
             />
@@ -149,17 +147,17 @@ const priorityOptions: { value: TaskPriority; label: string }[] = [
 
           <!-- Description -->
           <div>
-            <label class="block text-xs font-semibold text-[#6B778C] uppercase mb-1">描述</label>
+            <label class="block text-xs font-semibold text-[var(--st-text-muted)] uppercase mb-1">描述</label>
             <MarkdownEditor v-model="form.description" :rows="8" />
           </div>
 
           <!-- Status + Priority (side by side) -->
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-semibold text-[#6B778C] uppercase mb-1">状态</label>
+              <label class="block text-xs font-semibold text-[var(--st-text-muted)] uppercase mb-1">状态</label>
               <select
                 v-model="form.status"
-                class="w-full border border-[#DFE1E6] rounded-sm px-3 py-2 text-sm text-[#172B4D] outline-none focus:border-[#4C9AFF] bg-white"
+                class="w-full border border-[var(--st-border)] rounded-sm px-3 py-2 text-sm text-[var(--st-text-primary)] outline-none focus:border-[var(--st-focus)] bg-[var(--st-bg-surface)]"
               >
                 <option v-for="o in statusOptions" :key="o.value" :value="o.value">
                   {{ o.label }}
@@ -167,10 +165,10 @@ const priorityOptions: { value: TaskPriority; label: string }[] = [
               </select>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-[#6B778C] uppercase mb-1">优先级</label>
+              <label class="block text-xs font-semibold text-[var(--st-text-muted)] uppercase mb-1">优先级</label>
               <select
                 v-model="form.priority"
-                class="w-full border border-[#DFE1E6] rounded-sm px-3 py-2 text-sm text-[#172B4D] outline-none focus:border-[#4C9AFF] bg-white"
+                class="w-full border border-[var(--st-border)] rounded-sm px-3 py-2 text-sm text-[var(--st-text-primary)] outline-none focus:border-[var(--st-focus)] bg-[var(--st-bg-surface)]"
               >
                 <option v-for="o in priorityOptions" :key="o.value" :value="o.value">
                   {{ o.label }}
@@ -181,17 +179,17 @@ const priorityOptions: { value: TaskPriority; label: string }[] = [
 
           <!-- Tags -->
           <div>
-            <label class="block text-xs font-semibold text-[#6B778C] uppercase mb-1">标签</label>
+            <label class="block text-xs font-semibold text-[var(--st-text-muted)] uppercase mb-1">标签</label>
             <div class="flex flex-wrap items-center gap-1.5 mb-2">
               <span
                 v-for="tag in form.tags"
                 :key="tag"
-                class="inline-flex items-center gap-1 bg-[#DEEBFF] text-[#0747A6] text-xs font-medium px-2 py-0.5 rounded-sm"
+                class="inline-flex items-center gap-1 bg-[var(--st-tag-0-bg)] text-[var(--st-tag-0-fg)] text-xs font-medium px-2 py-0.5 rounded-sm"
               >
                 {{ tag }}
                 <button
                   type="button"
-                  class="hover:text-[#DE350B] transition-colors"
+                  class="hover:text-[var(--st-danger)] transition-colors"
                   @click="removeTag(tag)"
                 >
                   <X class="w-3 h-3" />
@@ -202,13 +200,13 @@ const priorityOptions: { value: TaskPriority; label: string }[] = [
               <input
                 v-model="form.newTag"
                 type="text"
-                class="flex-1 border border-[#DFE1E6] rounded-sm px-3 py-1.5 text-sm text-[#172B4D] outline-none focus:border-[#4C9AFF]"
+                class="flex-1 border border-[var(--st-border)] rounded-sm px-3 py-1.5 text-sm text-[var(--st-text-primary)] bg-[var(--st-bg-surface)] outline-none focus:border-[var(--st-focus)]"
                 placeholder="输入标签名"
                 @keydown.enter.prevent="addTag"
               />
               <button
                 type="button"
-                class="px-3 py-1.5 bg-[#F4F5F7] text-[#172B4D] text-sm rounded-sm hover:bg-[#EBECF0] transition-colors"
+                class="px-3 py-1.5 bg-[var(--st-bg-muted)] text-[var(--st-text-primary)] text-sm rounded-sm hover:bg-[var(--st-bg-muted-strong)] transition-colors"
                 @click="addTag"
               >
                 添加
@@ -218,18 +216,23 @@ const priorityOptions: { value: TaskPriority; label: string }[] = [
 
           <!-- Time Type -->
           <div>
-            <label class="block text-xs font-semibold text-[#6B778C] uppercase mb-2">时间</label>
-            <div class="flex gap-4 mb-3">
-              <label class="flex items-center gap-1.5 text-sm text-[#172B4D] cursor-pointer">
-                <input v-model="form.timeType" type="radio" value="none" class="accent-[#0052CC]" />
+            <label class="block text-xs font-semibold text-[var(--st-text-muted)] uppercase mb-2">时间</label>
+            <div class="flex gap-4 mb-3 flex-wrap">
+              <label class="flex items-center gap-1.5 text-sm text-[var(--st-text-primary)] cursor-pointer">
+                <input v-model="form.timeType" type="radio" value="none" class="accent-[var(--st-accent)]" />
                 无时间
               </label>
-              <label class="flex items-center gap-1.5 text-sm text-[#172B4D] cursor-pointer">
-                <input v-model="form.timeType" type="radio" value="deadline" class="accent-[#0052CC]" />
+              <label class="flex items-center gap-1.5 text-sm text-[var(--st-text-primary)] cursor-pointer">
+                <input
+                  v-model="form.timeType"
+                  type="radio"
+                  value="deadline"
+                  class="accent-[var(--st-accent)]"
+                />
                 截止日期
               </label>
-              <label class="flex items-center gap-1.5 text-sm text-[#172B4D] cursor-pointer">
-                <input v-model="form.timeType" type="radio" value="range" class="accent-[#0052CC]" />
+              <label class="flex items-center gap-1.5 text-sm text-[var(--st-text-primary)] cursor-pointer">
+                <input v-model="form.timeType" type="radio" value="range" class="accent-[var(--st-accent)]" />
                 时间区间
               </label>
             </div>
@@ -238,24 +241,24 @@ const priorityOptions: { value: TaskPriority; label: string }[] = [
               <input
                 v-model="form.dueDate"
                 type="datetime-local"
-                class="w-full border border-[#DFE1E6] rounded-sm px-3 py-2 text-sm text-[#172B4D] outline-none focus:border-[#4C9AFF]"
+                class="w-full border border-[var(--st-border)] rounded-sm px-3 py-2 text-sm text-[var(--st-text-primary)] bg-[var(--st-bg-surface)] outline-none focus:border-[var(--st-focus)]"
               />
             </div>
             <div v-else-if="form.timeType === 'range'" class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-xs text-[#6B778C] mb-1">开始</label>
+                <label class="block text-xs text-[var(--st-text-muted)] mb-1">开始</label>
                 <input
                   v-model="form.startDate"
                   type="datetime-local"
-                  class="w-full border border-[#DFE1E6] rounded-sm px-3 py-2 text-sm text-[#172B4D] outline-none focus:border-[#4C9AFF]"
+                  class="w-full border border-[var(--st-border)] rounded-sm px-3 py-2 text-sm text-[var(--st-text-primary)] bg-[var(--st-bg-surface)] outline-none focus:border-[var(--st-focus)]"
                 />
               </div>
               <div>
-                <label class="block text-xs text-[#6B778C] mb-1">结束</label>
+                <label class="block text-xs text-[var(--st-text-muted)] mb-1">结束</label>
                 <input
                   v-model="form.endDate"
                   type="datetime-local"
-                  class="w-full border border-[#DFE1E6] rounded-sm px-3 py-2 text-sm text-[#172B4D] outline-none focus:border-[#4C9AFF]"
+                  class="w-full border border-[var(--st-border)] rounded-sm px-3 py-2 text-sm text-[var(--st-text-primary)] bg-[var(--st-bg-surface)] outline-none focus:border-[var(--st-focus)]"
                 />
               </div>
             </div>
@@ -263,10 +266,10 @@ const priorityOptions: { value: TaskPriority; label: string }[] = [
 
           <!-- Parent Task -->
           <div>
-            <label class="block text-xs font-semibold text-[#6B778C] uppercase mb-1">父任务</label>
+            <label class="block text-xs font-semibold text-[var(--st-text-muted)] uppercase mb-1">父任务</label>
             <select
               v-model="form.parentId"
-              class="w-full border border-[#DFE1E6] rounded-sm px-3 py-2 text-sm text-[#172B4D] outline-none focus:border-[#4C9AFF] bg-white"
+              class="w-full border border-[var(--st-border)] rounded-sm px-3 py-2 text-sm text-[var(--st-text-primary)] outline-none focus:border-[var(--st-focus)] bg-[var(--st-bg-surface)]"
             >
               <option value="">无</option>
               <option v-for="t in availableParents" :key="t.id" :value="t.id">
@@ -277,17 +280,17 @@ const priorityOptions: { value: TaskPriority; label: string }[] = [
         </form>
 
         <!-- Footer -->
-        <div class="flex items-center justify-end gap-2 px-5 py-3 border-t border-[#DFE1E6]">
+        <div class="flex items-center justify-end gap-2 px-5 py-3 border-t border-[var(--st-border)]">
           <button
             type="button"
-            class="px-4 py-2 text-sm text-[#172B4D] bg-[#F4F5F7] rounded-sm hover:bg-[#EBECF0] transition-colors font-medium"
+            class="px-4 py-2 text-sm text-[var(--st-text-primary)] bg-[var(--st-bg-muted)] rounded-sm hover:bg-[var(--st-bg-muted-strong)] transition-colors font-medium"
             @click="emit('close')"
           >
             取消
           </button>
           <button
             type="button"
-            class="px-4 py-2 text-sm text-white bg-[#0052CC] rounded-sm hover:bg-[#0065FF] transition-colors font-medium disabled:opacity-50"
+            class="px-4 py-2 text-sm text-white bg-[var(--st-accent)] rounded-sm hover:bg-[var(--st-accent-hover)] transition-colors font-medium disabled:opacity-50"
             :disabled="!form.title.trim()"
             @click="handleSubmit"
           >

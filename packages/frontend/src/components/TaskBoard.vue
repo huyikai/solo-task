@@ -17,18 +17,16 @@ const emit = defineEmits<{
 }>()
 
 const columns: { key: Task['status']; title: string; color: string }[] = [
-  { key: 'todo', title: '待办', color: '#0052CC' },
-  { key: 'in-progress', title: '进行中', color: '#FF991F' },
-  { key: 'done', title: '已完成', color: '#00875A' },
-  { key: 'archived', title: '归档', color: '#6B778C' },
+  { key: 'todo', title: '待办', color: 'var(--st-status-todo)' },
+  { key: 'in-progress', title: '进行中', color: 'var(--st-status-progress)' },
+  { key: 'done', title: '已完成', color: 'var(--st-status-done)' },
+  { key: 'archived', title: '归档', color: 'var(--st-status-archived)' },
 ]
 
 const taskIds = computed(() => new Set(props.tasks.map(t => t.id)))
 
 const topLevelTasks = computed(() =>
-  props.tasks.filter(t =>
-    !t.parentId || t.parentId === t.id || !taskIds.value.has(t.parentId)
-  )
+  props.tasks.filter(t => !t.parentId || t.parentId === t.id || !taskIds.value.has(t.parentId))
 )
 
 const columnLists = reactive<Record<Task['status'], Task[]>>({
@@ -86,7 +84,7 @@ async function submitKanbanReorder() {
 <template>
   <main class="min-h-0 flex-1 overflow-hidden p-6">
     <div v-if="loading" class="flex items-center justify-center h-full">
-      <div class="text-[#5E6C84] text-sm">加载中...</div>
+      <div class="text-[var(--st-text-secondary)] text-sm">加载中...</div>
     </div>
     <div v-else class="grid h-full grid-cols-4 gap-3">
       <TaskColumn

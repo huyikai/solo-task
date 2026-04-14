@@ -31,17 +31,17 @@ const sortableOptions = {
 </script>
 
 <template>
-  <div class="flex h-full min-h-0 min-w-0 flex-col bg-[#F7F8F9]">
+  <div class="flex h-full min-h-0 min-w-0 flex-col bg-[var(--st-bg-column)]">
     <div class="flex shrink-0 items-center gap-2 px-3 py-2.5">
       <span
         class="w-2.5 h-2.5 rounded-full shrink-0"
         :style="{ backgroundColor: color }"
       />
-      <span class="text-xs font-semibold text-[#5E6C84] uppercase tracking-wide">
+      <span class="text-xs font-semibold text-[var(--st-text-secondary)] uppercase tracking-wide">
         {{ title }}
       </span>
       <span
-        class="min-w-[20px] rounded-full bg-[#EBECF0] px-1.5 py-0.5 text-center text-xs text-[#5E6C84]"
+        class="min-w-[20px] rounded-full bg-[var(--st-bg-muted-strong)] px-1.5 py-0.5 text-center text-xs text-[var(--st-text-secondary)]"
       >
         {{ tasks.length }}
       </span>
@@ -69,7 +69,7 @@ const sortableOptions = {
         </VueDraggable>
         <div
           v-if="tasks.length === 0"
-          class="pointer-events-none absolute inset-0 flex items-center justify-center text-xs text-[#6B778C]"
+          class="pointer-events-none absolute inset-0 flex items-center justify-center text-xs text-[var(--st-text-muted)]"
         >
           暂无任务
         </div>

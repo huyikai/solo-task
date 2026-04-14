@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Plus, ListFilter, LayoutDashboard, LayoutGrid, ChartGantt } from 'lucide-vue-next'
+import { useTheme, type ThemePreference } from '../composables/useTheme'
 
 defineProps<{
   filters: Record<string, string>
@@ -10,6 +11,12 @@ const emit = defineEmits<{
   create: []
 }>()
 
+const { themePreference, resolvedTheme, setTheme } = useTheme()
+
+function onThemeChange(e: Event) {
+  setTheme((e.target as HTMLSelectElement).value as ThemePreference)
+}
+
 const priorities = [
   { value: '', label: '全部优先级' },
   { value: 'urgent', label: '紧急' },
@@ -17,19 +24,44 @@ const priorities = [
   { value: 'medium', label: '中' },
   { value: 'low', label: '低' },
 ]
+
+function navBtnClass(isActive: boolean, withLeftBorder: boolean) {
+  const base =
+    'flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium transition-colors min-h-[2.25rem]'
+  const border = withLeftBorder ? 'border-l border-[var(--st-header-group-border)]' : ''
+  if (!isActive) {
+    return [base, border, 'text-[var(--st-header-nav-text)] hover:bg-[var(--st-header-nav-hover)]'].join(
+      ' '
+    )
+  }
+  if (resolvedTheme.value === 'dark') {
+    return [
+      base,
+      border,
+      'bg-transparent text-[var(--st-accent)] border-b-2 border-[var(--st-accent)] rounded-none',
+    ].join(' ')
+  }
+  return [base, border, 'bg-[var(--st-header-nav-active-bg)] text-[var(--st-header-nav-active-text)]'].join(
+    ' '
+  )
+}
 </script>
 
 <template>
-  <header class="h-14 bg-[#0052CC] flex items-center px-6 shrink-0">
-    <div class="flex items-center gap-2 text-white">
-      <div class="w-7 h-7 bg-white/20 rounded flex items-center justify-center font-bold text-sm">
+  <header
+    class="h-14 flex items-center px-6 shrink-0 border-b border-[var(--st-border)] bg-[var(--st-header-bg)]"
+  >
+    <div class="flex items-center gap-2">
+      <div
+        class="w-7 h-7 rounded flex items-center justify-center font-bold text-sm bg-[var(--st-header-logo-bg)] text-[var(--st-header-title)]"
+      >
         S
       </div>
-      <span class="text-lg font-semibold tracking-tight">solo-task</span>
+      <span class="text-lg font-semibold tracking-tight text-[var(--st-header-title)]">solo-task</span>
     </div>
 
     <div class="ml-auto flex items-center gap-3">
-      <div class="flex items-center rounded overflow-hidden border border-white/30">
+      <div class="flex items-center rounded border border-[var(--st-header-group-border)]">
         <router-link
           v-slot="{ navigate, isActive }"
           :to="{ name: 'dashboard' }"
@@ -37,8 +69,7 @@ const priorities = [
         >
           <button
             type="button"
-            class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium transition-colors"
-            :class="isActive ? 'bg-white text-[#0052CC]' : 'text-white/90 hover:bg-white/10'"
+            :class="navBtnClass(isActive, false)"
             title="总览"
             @click="navigate"
           >
@@ -53,8 +84,7 @@ const priorities = [
         >
           <button
             type="button"
-            class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium transition-colors border-l border-white/30"
-            :class="isActive ? 'bg-white text-[#0052CC]' : 'text-white/90 hover:bg-white/10'"
+            :class="navBtnClass(isActive, true)"
             title="看板"
             @click="navigate"
           >
@@ -69,8 +99,7 @@ const priorities = [
         >
           <button
             type="button"
-            class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium transition-colors border-l border-white/30"
-            :class="isActive ? 'bg-white text-[#0052CC]' : 'text-white/90 hover:bg-white/10'"
+            :class="navBtnClass(isActive, true)"
             title="甘特图"
             @click="navigate"
           >
@@ -80,21 +109,45 @@ const priorities = [
         </router-link>
       </div>
 
+      <select
+        class="appearance-none bg-[var(--st-header-filter-bg)] text-[var(--st-header-select-text)] text-sm pl-3 pr-8 py-1.5 rounded cursor-pointer hover:bg-[var(--st-header-filter-bg-hover)] transition-colors outline-none border border-[var(--st-header-group-border)] max-w-[7.5rem]"
+        :value="themePreference"
+        aria-label="主题"
+        @change="onThemeChange"
+      >
+        <option value="light" class="bg-[var(--st-bg-elevated)] text-[var(--st-text-primary)]">
+          浅色
+        </option>
+        <option value="dark" class="bg-[var(--st-bg-elevated)] text-[var(--st-text-primary)]">
+          深色
+        </option>
+        <option value="system" class="bg-[var(--st-bg-elevated)] text-[var(--st-text-primary)]">
+          跟随系统
+        </option>
+      </select>
+
       <div class="relative flex items-center">
-        <ListFilter class="w-4 h-4 text-white/70 absolute left-2.5 pointer-events-none" />
+        <ListFilter
+          class="w-4 h-4 text-[var(--st-header-icon-muted)] absolute left-2.5 pointer-events-none"
+        />
         <select
-          class="appearance-none bg-white/15 text-white text-sm pl-8 pr-6 py-1.5 rounded cursor-pointer hover:bg-white/25 transition-colors outline-none border-none"
+          class="appearance-none bg-[var(--st-header-filter-bg)] text-[var(--st-header-select-text)] text-sm pl-8 pr-6 py-1.5 rounded cursor-pointer hover:bg-[var(--st-header-filter-bg-hover)] transition-colors outline-none border-none"
           :value="filters.priority ?? ''"
           @change="emit('update:filters', 'priority', ($event.target as HTMLSelectElement).value)"
         >
-          <option v-for="p in priorities" :key="p.value" :value="p.value" class="text-[#172B4D]">
+          <option
+            v-for="p in priorities"
+            :key="p.value"
+            :value="p.value"
+            class="bg-[var(--st-bg-elevated)] text-[var(--st-text-primary)]"
+          >
             {{ p.label }}
           </option>
         </select>
       </div>
 
       <button
-        class="flex items-center gap-1.5 bg-white text-[#0052CC] text-sm font-medium px-3.5 py-1.5 rounded hover:bg-blue-50 transition-colors"
+        class="flex items-center gap-1.5 text-sm font-medium px-3.5 py-1.5 rounded transition-colors bg-[var(--st-header-create-bg)] text-[var(--st-header-create-text)] hover:bg-[var(--st-header-create-hover)]"
         @click="emit('create')"
       >
         <Plus class="w-4 h-4" />

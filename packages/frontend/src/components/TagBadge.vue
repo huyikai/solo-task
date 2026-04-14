@@ -2,11 +2,11 @@
 defineProps<{ label: string }>()
 
 const colors = [
-  'bg-[#DEEBFF] text-[#0747A6]',
-  'bg-[#E3FCEF] text-[#006644]',
-  'bg-[#FFF0B3] text-[#172B4D]',
-  'bg-[#FFEBE6] text-[#BF2600]',
-  'bg-[#EAE6FF] text-[#403294]',
+  'bg-[var(--st-tag-0-bg)] text-[var(--st-tag-0-fg)]',
+  'bg-[var(--st-tag-1-bg)] text-[var(--st-tag-1-fg)]',
+  'bg-[var(--st-tag-2-bg)] text-[var(--st-tag-2-fg)]',
+  'bg-[var(--st-tag-3-bg)] text-[var(--st-tag-3-fg)]',
+  'bg-[var(--st-tag-4-bg)] text-[var(--st-tag-4-fg)]',
 ]
 
 function getColor(label: string) {
