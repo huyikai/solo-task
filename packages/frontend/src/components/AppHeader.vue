@@ -1,10 +1,23 @@
 <script setup lang="ts">
-import { Plus, ListFilter, LayoutDashboard, LayoutGrid, ChartGantt } from 'lucide-vue-next'
+import { ref } from 'vue'
+import {
+  Plus,
+  ListFilter,
+  LayoutDashboard,
+  LayoutGrid,
+  ChartGantt,
+  Download,
+} from 'lucide-vue-next'
 import { useTheme, type ThemePreference } from '../composables/useTheme'
+import type { Task } from '../types/task'
+import ExportDialog from './ExportDialog.vue'
 
 defineProps<{
   filters: Record<string, string>
+  tasks: Task[]
 }>()
+
+const showExport = ref(false)
 
 const emit = defineEmits<{
   'update:filters': [key: string, value: string]
@@ -147,6 +160,16 @@ function navBtnClass(isActive: boolean, withLeftBorder: boolean) {
       </div>
 
       <button
+        type="button"
+        class="flex items-center gap-1.5 text-sm font-medium px-3.5 py-1.5 rounded transition-colors border border-[var(--st-header-group-border)] text-[var(--st-header-nav-text)] hover:bg-[var(--st-header-nav-hover)]"
+        title="导出"
+        @click="showExport = true"
+      >
+        <Download class="w-4 h-4" />
+        导出
+      </button>
+
+      <button
         class="flex items-center gap-1.5 text-sm font-medium px-3.5 py-1.5 rounded transition-colors bg-[var(--st-header-create-bg)] text-[var(--st-header-create-text)] hover:bg-[var(--st-header-create-hover)]"
         @click="emit('create')"
       >
@@ -154,5 +177,7 @@ function navBtnClass(isActive: boolean, withLeftBorder: boolean) {
         创建
       </button>
     </div>
+
+    <ExportDialog v-if="showExport" :tasks="tasks" @close="showExport = false" />
   </header>
 </template>

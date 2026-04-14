@@ -10,6 +10,7 @@ import type {
   KanbanReorderColumns,
 } from '../types/task.js'
 import { TASK_STATUSES } from '../types/task.js'
+import type { ExportDateField, ExportQueryParams } from '../types/export.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..', '..', '..')
@@ -126,6 +127,57 @@ export async function getAllTasks(filters?: {
   }
   if (filters?.tag) {
     tasks = tasks.filter(t => t.tags.includes(filters.tag!))
+  }
+
+  return tasks
+}
+
+function getTaskDateValue(task: Task, field: ExportDateField): string | null {
+  const v = task[field]
+  if (v === null || v === undefined) return null
+  return typeof v === 'string' ? v : String(v)
+}
+
+/** 导出筛选：多状态/多优先级/标签/可选日期范围（nullable 日期在启用筛选时排除） */
+export async function queryTasksForExport(
+  params: ExportQueryParams
+): Promise<Task[]> {
+  let tasks = await loadTasks()
+  tasks = sortTasksList(tasks)
+
+  if (params.statuses && params.statuses.length > 0) {
+    const set = new Set(params.statuses)
+    tasks = tasks.filter(t => set.has(t.status))
+  }
+  if (params.priorities && params.priorities.length > 0) {
+    const set = new Set(params.priorities)
+    tasks = tasks.filter(t => set.has(t.priority))
+  }
+  if (params.tag && params.tag.trim()) {
+    const tag = params.tag.trim()
+    tasks = tasks.filter(t => t.tags.includes(tag))
+  }
+
+  const dr = params.dateRange
+  const hasDateFilter = Boolean(dr && (dr.from?.trim() || dr.to?.trim()))
+  if (hasDateFilter && dr) {
+    const field = dr.field
+    const fromTime = dr.from?.trim() ? new Date(dr.from).getTime() : null
+    const toTime = dr.to?.trim() ? new Date(dr.to).getTime() : null
+
+    tasks = tasks.filter(t => {
+      const raw = getTaskDateValue(t, field)
+      if (raw === null) return false
+      const tTime = new Date(raw).getTime()
+      if (Number.isNaN(tTime)) return false
+      if (fromTime !== null && !Number.isNaN(fromTime) && tTime < fromTime) {
+        return false
+      }
+      if (toTime !== null && !Number.isNaN(toTime) && tTime > toTime) {
+        return false
+      }
+      return true
+    })
   }
 
   return tasks

@@ -7,13 +7,14 @@
     "dev": "tsx watch src/index.ts"
   },
   "dependencies": {
+    "cors": "^2.8.5",
+    "exceljs": "^4.4.0",
     "express": "^5.1.0",
-    "nanoid": "^5.1.5",
-    "cors": "^2.8.5"
+    "nanoid": "^5.1.5"
   },
   "devDependencies": {
-    "@types/express": "^5.0.2",
     "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.2",
     "@types/node": "^22.15.2",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3"

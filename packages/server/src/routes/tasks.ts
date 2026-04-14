@@ -1,12 +1,29 @@
 import { Router, Request, Response } from 'express'
 import * as taskService from '../services/taskService.js'
 import {
+  buildCsvExport,
+  buildJsonExport,
+  buildMarkdownExport,
+  buildXlsxExport,
+  resolveExportFields,
+} from '../services/exportFormatters.js'
+import {
+  EXPORT_DATE_FIELDS,
+  TASK_PRIORITIES,
+  type ExportDateField,
+  type ExportQueryParams,
+  type ExportFormat,
+} from '../types/export.js'
+import {
   TASK_STATUSES,
+  type TaskPriority,
   type TaskStatus,
   type KanbanReorderColumns,
 } from '../types/task.js'
 
 const router = Router()
+
+const EXPORT_FORMATS: ExportFormat[] = ['json', 'csv', 'xlsx', 'markdown']
 
 function paramId(req: Request): string {
   const id = req.params.id
@@ -74,6 +91,196 @@ router.get('/', async (req: Request, res: Response) => {
     tag: tag as string | undefined,
   })
   res.json({ success: true, data: tasks })
+})
+
+router.post('/export', async (req: Request, res: Response) => {
+  const body = req.body
+  if (!body || typeof body !== 'object') {
+    res.status(400).json({
+      success: false,
+      error: { code: 'VALIDATION_ERROR', message: '请求体无效' },
+    })
+    return
+  }
+
+  const format = body.format as string
+  if (!EXPORT_FORMATS.includes(format as ExportFormat)) {
+    res.status(400).json({
+      success: false,
+      error: {
+        code: 'VALIDATION_ERROR',
+        message: 'format 须为 json、csv、xlsx、markdown 之一',
+      },
+    })
+    return
+  }
+
+  const fields = resolveExportFields(
+    Array.isArray(body.fields) ? (body.fields as string[]) : undefined
+  )
+
+  let statuses: TaskStatus[] | undefined
+  if (body.statuses !== undefined && body.statuses !== null) {
+    if (!Array.isArray(body.statuses)) {
+      res.status(400).json({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: 'statuses 须为数组' },
+      })
+      return
+    }
+    for (const s of body.statuses) {
+      if (typeof s !== 'string' || !TASK_STATUSES.includes(s as TaskStatus)) {
+        res.status(400).json({
+          success: false,
+          error: { code: 'VALIDATION_ERROR', message: 'statuses 含有无效状态' },
+        })
+        return
+      }
+    }
+    statuses = body.statuses as TaskStatus[]
+  }
+
+  let priorities: TaskPriority[] | undefined
+  if (body.priorities !== undefined && body.priorities !== null) {
+    if (!Array.isArray(body.priorities)) {
+      res.status(400).json({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: 'priorities 须为数组' },
+      })
+      return
+    }
+    for (const p of body.priorities) {
+      if (typeof p !== 'string' || !TASK_PRIORITIES.includes(p as TaskPriority)) {
+        res.status(400).json({
+          success: false,
+          error: { code: 'VALIDATION_ERROR', message: 'priorities 含有无效优先级' },
+        })
+        return
+      }
+    }
+    priorities = body.priorities as TaskPriority[]
+  }
+
+  let tag: string | undefined
+  if (body.tag !== undefined && body.tag !== null) {
+    if (typeof body.tag !== 'string') {
+      res.status(400).json({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: 'tag 须为字符串' },
+      })
+      return
+    }
+    tag = body.tag
+  }
+
+  let dateRange: ExportQueryParams['dateRange']
+  if (body.dateRange !== undefined && body.dateRange !== null) {
+    const dr = body.dateRange
+    if (typeof dr !== 'object' || Array.isArray(dr)) {
+      res.status(400).json({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: 'dateRange 无效' },
+      })
+      return
+    }
+    const field = (dr as { field?: string }).field
+    if (!field || typeof field !== 'string' || !EXPORT_DATE_FIELDS.includes(field as (typeof EXPORT_DATE_FIELDS)[number])) {
+      res.status(400).json({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: 'dateRange.field 无效' },
+      })
+      return
+    }
+    const from = (dr as { from?: unknown }).from
+    const to = (dr as { to?: unknown }).to
+    if (from !== undefined && from !== null && typeof from !== 'string') {
+      res.status(400).json({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: 'dateRange.from 须为字符串' },
+      })
+      return
+    }
+    if (to !== undefined && to !== null && typeof to !== 'string') {
+      res.status(400).json({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: 'dateRange.to 须为字符串' },
+      })
+      return
+    }
+    dateRange = {
+      field: field as ExportDateField,
+      from: typeof from === 'string' ? from : undefined,
+      to: typeof to === 'string' ? to : undefined,
+    }
+  }
+
+  const queryParams: ExportQueryParams = {}
+  if (statuses && statuses.length > 0) queryParams.statuses = statuses
+  if (priorities && priorities.length > 0) queryParams.priorities = priorities
+  if (tag && tag.trim()) queryParams.tag = tag.trim()
+  if (dateRange) queryParams.dateRange = dateRange
+
+  try {
+    const tasks = await taskService.queryTasksForExport(queryParams)
+
+    switch (format as ExportFormat) {
+      case 'json': {
+        const buf = buildJsonExport(tasks, fields, queryParams)
+        res.setHeader('Content-Type', 'application/json; charset=utf-8')
+        res.setHeader(
+          'Content-Disposition',
+          'attachment; filename="solo-task-export.json"'
+        )
+        res.send(buf)
+        return
+      }
+      case 'csv': {
+        const buf = buildCsvExport(tasks, fields)
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8')
+        res.setHeader(
+          'Content-Disposition',
+          'attachment; filename="solo-task-export.csv"'
+        )
+        res.send(buf)
+        return
+      }
+      case 'markdown': {
+        const buf = buildMarkdownExport(tasks, fields)
+        res.setHeader('Content-Type', 'text/markdown; charset=utf-8')
+        res.setHeader(
+          'Content-Disposition',
+          'attachment; filename="solo-task-export.md"'
+        )
+        res.send(buf)
+        return
+      }
+      case 'xlsx': {
+        const buf = await buildXlsxExport(tasks, fields)
+        res.setHeader(
+          'Content-Type',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        res.setHeader(
+          'Content-Disposition',
+          'attachment; filename="solo-task-export.xlsx"'
+        )
+        res.send(buf)
+        return
+      }
+      default: {
+        res.status(400).json({
+          success: false,
+          error: { code: 'VALIDATION_ERROR', message: '不支持的 format' },
+        })
+      }
+    }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : '导出失败'
+    res.status(500).json({
+      success: false,
+      error: { code: 'EXPORT_ERROR', message: msg },
+    })
+  }
 })
 
 router.get('/:id', async (req: Request, res: Response) => {

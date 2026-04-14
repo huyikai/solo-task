@@ -83,6 +83,7 @@ async function handleStatusChange(id: string, status: Task['status']) {
   <div class="flex h-screen flex-col overflow-hidden bg-[var(--st-bg-page)]">
     <AppHeader
       :filters="filters"
+      :tasks="tasks"
       @update:filters="setFilter"
       @create="openCreate"
     />
