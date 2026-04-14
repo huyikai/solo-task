@@ -4,7 +4,7 @@
 
 ## 技术栈
 
-- **前端**: Vue 3 + Vite + TailwindCSS 4（看板 + 甘特图视图）
+- **前端**: Vue 3 + Vite + TailwindCSS 4（总览 / 看板 / 甘特图）
 - **后端**: Express 5 + TypeScript
 - **数据**: 本地 JSON 文件（`data/tasks.json`）
 
@@ -38,8 +38,8 @@ git clone git@github.com:huyikai/solo-task-data.git data/
 npm run dev
 ```
 
-- 前端: http://localhost:5173
-- 后端 API: http://localhost:3001
+- 前端: [http://localhost:5173](http://localhost:5173)
+- 后端 API: [http://localhost:3001](http://localhost:3001)
 
 ## 数据管理
 
@@ -56,15 +56,19 @@ git push
 - 同时有 `startDate` 与 `endDate`：按区间条形展示（含首尾日）。
 - 仅有 `dueDate`：单日条形。
 - 无时间或仅单侧日期：列入「未排期」，不在时间轴上画条。
-- 已排期任务的父任务会显示为行（可无条形），子任务缩进；顶栏可切换「看板 / 甘特」。
+- 已排期任务的父任务会显示为行（可无条形），子任务缩进；顶栏可切换「总览 / 看板 / 甘特」。
+- **总览**：任务数量与状态分布、逾期与临期列表、最近更新、热门标签（数据与当前筛选一致）。
 
 ## API 接口
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/api/tasks` | 获取任务列表（支持 ?status / ?priority / ?tag 筛选） |
-| GET | `/api/tasks/:id` | 获取单个任务 |
-| POST | `/api/tasks` | 创建任务 |
-| PUT | `/api/tasks/:id` | 更新任务 |
-| DELETE | `/api/tasks/:id` | 删除任务（?cascade=true 级联删除子任务） |
-| PATCH | `/api/tasks/:id/status` | 快速切换状态 |
+
+| 方法     | 路径                      | 说明                                       |
+| ------ | ----------------------- | ---------------------------------------- |
+| GET    | `/api/tasks`            | 获取任务列表（支持 ?status / ?priority / ?tag 筛选） |
+| GET    | `/api/tasks/:id`        | 获取单个任务                                   |
+| POST   | `/api/tasks`            | 创建任务                                     |
+| PUT    | `/api/tasks/:id`        | 更新任务                                     |
+| DELETE | `/api/tasks/:id`        | 删除任务（?cascade=true 级联删除子任务）              |
+| PATCH  | `/api/tasks/:id/status` | 快速切换状态                                   |
+
+

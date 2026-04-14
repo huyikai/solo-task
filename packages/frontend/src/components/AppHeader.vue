@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Plus, ListFilter, LayoutGrid, ChartGantt } from 'lucide-vue-next'
+import { Plus, ListFilter, LayoutDashboard, LayoutGrid, ChartGantt } from 'lucide-vue-next'
 
-export type AppView = 'kanban' | 'gantt'
+export type AppView = 'dashboard' | 'kanban' | 'gantt'
 
 defineProps<{
   filters: Record<string, string>
@@ -37,6 +37,16 @@ const priorities = [
         <button
           type="button"
           class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium transition-colors"
+          :class="view === 'dashboard' ? 'bg-white text-[#0052CC]' : 'text-white/90 hover:bg-white/10'"
+          title="总览"
+          @click="emit('update:view', 'dashboard')"
+        >
+          <LayoutDashboard class="w-3.5 h-3.5" />
+          总览
+        </button>
+        <button
+          type="button"
+          class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium transition-colors border-l border-white/30"
           :class="view === 'kanban' ? 'bg-white text-[#0052CC]' : 'text-white/90 hover:bg-white/10'"
           title="看板"
           @click="emit('update:view', 'kanban')"
