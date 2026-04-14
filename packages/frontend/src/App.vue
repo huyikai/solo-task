@@ -1,9 +1,5 @@
 <script setup lang="ts">
 import AppHeader from './components/AppHeader.vue'
-import type { AppView } from './components/AppHeader.vue'
-import DashboardView from './components/DashboardView.vue'
-import TaskBoard from './components/TaskBoard.vue'
-import GanttView from './components/GanttView.vue'
 import TaskModal from './components/TaskModal.vue'
 import ConfirmDialog from './components/ConfirmDialog.vue'
 import { useTasks } from './composables/useTasks'
@@ -18,7 +14,6 @@ const {
   deleteTask,
   updateStatus,
   reorderKanban,
-  fetchTasks,
 } = useTasks()
 
 import { ref, computed } from 'vue'
@@ -26,7 +21,6 @@ import type { Task } from './types/task'
 
 const showModal = ref(false)
 const editingTask = ref<Task | null>(null)
-const view = ref<AppView>('dashboard')
 const deletingTaskId = ref<string | null>(null)
 
 const deletingTask = computed(() =>
@@ -89,32 +83,21 @@ async function handleStatusChange(id: string, status: Task['status']) {
   <div class="h-screen flex flex-col overflow-hidden bg-[#F4F5F7]">
     <AppHeader
       :filters="filters"
-      :view="view"
       @update:filters="setFilter"
-      @update:view="view = $event"
       @create="openCreate"
     />
-    <DashboardView
-      v-if="view === 'dashboard'"
-      :tasks="tasks"
-      :loading="loading"
-      @edit="openEdit"
-    />
-    <TaskBoard
-      v-else-if="view === 'kanban'"
-      :tasks="tasks"
-      :loading="loading"
-      :reorder-kanban="reorderKanban"
-      @edit="openEdit"
-      @delete="requestDelete"
-      @status-change="handleStatusChange"
-    />
-    <GanttView
-      v-else
-      :tasks="tasks"
-      :loading="loading"
-      @edit="openEdit"
-    />
+    <router-view v-slot="{ Component }">
+      <component
+        :is="Component"
+        v-if="Component"
+        :tasks="tasks"
+        :loading="loading"
+        :reorder-kanban="reorderKanban"
+        @edit="openEdit"
+        @delete="requestDelete"
+        @status-change="handleStatusChange"
+      />
+    </router-view>
     <TaskModal
       v-if="showModal"
       :task="editingTask"
