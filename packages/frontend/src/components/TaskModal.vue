@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { reactive, computed, onMounted, onUnmounted } from 'vue'
-import { X } from 'lucide-vue-next'
+import { reactive, ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { X, ChevronDown } from 'lucide-vue-next'
 import MarkdownEditor from './MarkdownEditor.vue'
 import type { Task, TaskStatus, TaskPriority } from '../types/task'
 
@@ -47,6 +47,49 @@ const availableParents = computed(() => {
   return props.tasks.filter(t => t.id !== editId && !childIds.has(t.id) && !t.parentId)
 })
 
+const parentComboOpen = ref(false)
+const parentSearchQuery = ref('')
+const parentComboRoot = ref<HTMLElement | null>(null)
+const parentSearchInput = ref<HTMLInputElement | null>(null)
+
+const filteredParents = computed(() => {
+  const q = parentSearchQuery.value.trim().toLowerCase()
+  if (!q) return availableParents.value
+  return availableParents.value.filter(t => t.title.toLowerCase().includes(q))
+})
+
+const selectedParentLabel = computed(() => {
+  if (!form.parentId) return '无'
+  const t = props.tasks.find(x => x.id === form.parentId)
+  return t?.title ?? '无'
+})
+
+function openParentCombo() {
+  parentComboOpen.value = true
+  parentSearchQuery.value = ''
+  nextTick(() => parentSearchInput.value?.focus())
+}
+
+function toggleParentCombo() {
+  if (parentComboOpen.value) closeParentCombo()
+  else openParentCombo()
+}
+
+function closeParentCombo() {
+  parentComboOpen.value = false
+}
+
+function setParentId(id: string) {
+  form.parentId = id
+  closeParentCombo()
+}
+
+function onParentComboDocMouseDown(e: MouseEvent) {
+  if (!parentComboOpen.value) return
+  const el = parentComboRoot.value
+  if (el && !el.contains(e.target as Node)) closeParentCombo()
+}
+
 function addTag() {
   const tag = form.newTag.trim()
   if (tag && !form.tags.includes(tag)) {
@@ -85,11 +128,22 @@ function handleSubmit() {
 }
 
 function onKeydown(e: KeyboardEvent) {
-  if (e.key === 'Escape') emit('close')
+  if (e.key !== 'Escape') return
+  if (parentComboOpen.value) {
+    closeParentCombo()
+    return
+  }
+  emit('close')
 }
 
-onMounted(() => document.addEventListener('keydown', onKeydown))
-onUnmounted(() => document.removeEventListener('keydown', onKeydown))
+onMounted(() => {
+  document.addEventListener('keydown', onKeydown)
+  document.addEventListener('mousedown', onParentComboDocMouseDown)
+})
+onUnmounted(() => {
+  document.removeEventListener('keydown', onKeydown)
+  document.removeEventListener('mousedown', onParentComboDocMouseDown)
+})
 
 const statusOptions: { value: TaskStatus; label: string }[] = [
   { value: 'todo', label: '待办' },
@@ -264,18 +318,63 @@ const priorityOptions: { value: TaskPriority; label: string }[] = [
             </div>
           </div>
 
-          <!-- Parent Task -->
-          <div>
+          <!-- Parent Task (searchable) -->
+          <div ref="parentComboRoot" class="relative">
             <label class="block text-xs font-semibold text-[var(--st-text-muted)] uppercase mb-1">父任务</label>
-            <select
-              v-model="form.parentId"
-              class="w-full border border-[var(--st-border)] rounded-sm px-3 py-2 text-sm text-[var(--st-text-primary)] outline-none focus:border-[var(--st-focus)] bg-[var(--st-bg-surface)]"
+            <button
+              type="button"
+              class="w-full flex items-center gap-2 border border-[var(--st-border)] rounded-sm px-3 py-2 text-sm text-left text-[var(--st-text-primary)] outline-none focus:border-[var(--st-focus)] bg-[var(--st-bg-surface)] hover:bg-[var(--st-bg-muted)]/30 transition-colors"
+              :class="parentComboOpen ? 'border-[var(--st-focus)] ring-2 ring-[var(--st-focus)]/20' : ''"
+              @click="toggleParentCombo"
             >
-              <option value="">无</option>
-              <option v-for="t in availableParents" :key="t.id" :value="t.id">
-                {{ t.title }}
-              </option>
-            </select>
+              <span class="flex-1 truncate">{{ selectedParentLabel }}</span>
+              <ChevronDown
+                class="w-4 h-4 shrink-0 text-[var(--st-text-muted)] transition-transform"
+                :class="parentComboOpen ? 'rotate-180' : ''"
+              />
+            </button>
+            <div
+              v-if="parentComboOpen"
+              class="absolute z-[60] left-0 right-0 mt-1 rounded-sm border border-[var(--st-border)] bg-[var(--st-bg-elevated)] shadow-lg flex flex-col max-h-64 overflow-hidden"
+              @mousedown.prevent
+            >
+              <input
+                ref="parentSearchInput"
+                v-model="parentSearchQuery"
+                type="text"
+                class="w-full border-b border-[var(--st-border)] px-3 py-2 text-sm text-[var(--st-text-primary)] bg-[var(--st-bg-surface)] outline-none focus:border-[var(--st-focus)] placeholder:text-[var(--st-text-muted)]"
+                placeholder="输入关键词筛选父任务"
+              />
+              <ul class="overflow-y-auto py-1">
+                <li>
+                  <button
+                    type="button"
+                    class="w-full text-left px-3 py-2 text-sm text-[var(--st-text-primary)] hover:bg-[var(--st-bg-muted)] transition-colors"
+                    :class="!form.parentId ? 'bg-[var(--st-bg-muted)]/50' : ''"
+                    @click="setParentId('')"
+                  >
+                    无
+                  </button>
+                </li>
+                <li v-for="t in filteredParents" :key="t.id">
+                  <button
+                    type="button"
+                    class="w-full text-left px-3 py-2 text-sm text-[var(--st-text-primary)] hover:bg-[var(--st-bg-muted)] transition-colors truncate"
+                    :class="form.parentId === t.id ? 'bg-[var(--st-bg-muted)]/50' : ''"
+                    :title="t.title"
+                    @click="setParentId(t.id)"
+                  >
+                    {{ t.title }}
+                  </button>
+                </li>
+                <li
+                  v-if="filteredParents.length === 0 && parentSearchQuery.trim()"
+                  class="px-3 py-2 text-sm text-[var(--st-text-muted)]"
+                >
+                  无匹配任务
+                </li>
+              </ul>
+            </div>
           </div>
         </form>
 
