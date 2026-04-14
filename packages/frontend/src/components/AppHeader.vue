@@ -81,22 +81,24 @@ const priorities = [
 function navBtnClass(isActive: boolean, withLeftBorder: boolean) {
   const base =
     'box-border flex h-full min-h-0 h-8 min-h-8 items-center justify-center gap-1.5 px-3 text-sm font-medium transition-colors'
-  const border = withLeftBorder ? 'border-l border-[var(--st-header-group-border)]' : ''
+  const leftDivider = withLeftBorder ? 'border-l border-l-[var(--st-header-group-border)]' : ''
   if (!isActive) {
-    return [base, border, 'text-[var(--st-header-nav-text)] hover:bg-[var(--st-header-nav-hover)]'].join(
+    return [base, leftDivider, 'text-[var(--st-header-nav-text)] hover:bg-[var(--st-header-nav-hover)]'].join(
       ' '
     )
   }
   if (resolvedTheme.value === 'dark') {
     return [
       base,
-      border,
-      'bg-transparent text-[var(--st-accent)] border-b-2 border-[var(--st-accent)] rounded-none pb-0',
+      leftDivider,
+      'bg-transparent text-[var(--st-accent)] border-b-2 border-b-[var(--st-accent)] rounded-none pb-0',
     ].join(' ')
   }
-  return [base, border, 'bg-[var(--st-header-nav-active-bg)] text-[var(--st-header-nav-active-text)]'].join(
-    ' '
-  )
+  return [
+    base,
+    leftDivider,
+    'bg-[var(--st-header-nav-active-bg)] text-[var(--st-header-nav-active-text)]',
+  ].join(' ')
 }
 
 const secondaryBtnClass =
