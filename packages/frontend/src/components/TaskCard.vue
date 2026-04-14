@@ -55,7 +55,7 @@ function getChildren(): Task[] {
     :class="[
       priorityBorder[task.priority],
       kanban
-        ? 'cursor-grab active:cursor-grabbing hover:bg-[#E4F0FF]'
+        ? 'cursor-grab active:cursor-grabbing hover:bg-[#E4F0FF] select-none'
         : 'cursor-pointer hover:bg-[#E4F0FF]',
     ]"
     @click="emit('edit', task)"
