@@ -17,6 +17,7 @@ const {
   updateTask,
   deleteTask,
   updateStatus,
+  reorderKanban,
   fetchTasks,
 } = useTasks()
 
@@ -103,6 +104,7 @@ async function handleStatusChange(id: string, status: Task['status']) {
       v-else-if="view === 'kanban'"
       :tasks="tasks"
       :loading="loading"
+      :reorder-kanban="reorderKanban"
       @edit="openEdit"
       @delete="requestDelete"
       @status-change="handleStatusChange"

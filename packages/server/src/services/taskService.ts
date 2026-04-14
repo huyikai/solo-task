@@ -2,7 +2,14 @@ import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { nanoid } from 'nanoid'
-import type { Task, CreateTaskInput, UpdateTaskInput } from '../types/task.js'
+import type {
+  Task,
+  CreateTaskInput,
+  UpdateTaskInput,
+  TaskStatus,
+  KanbanReorderColumns,
+} from '../types/task.js'
+import { TASK_STATUSES } from '../types/task.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..', '..', '..')
@@ -17,13 +24,70 @@ function withLock<T>(fn: () => Promise<T>): Promise<T> {
   return next
 }
 
-async function readTasks(): Promise<Task[]> {
+function statusRank(s: TaskStatus): number {
+  return TASK_STATUSES.indexOf(s)
+}
+
+function sortTasksList(tasks: Task[]): Task[] {
+  return [...tasks].sort((a, b) => {
+    const ra = statusRank(a.status)
+    const rb = statusRank(b.status)
+    if (ra !== rb) return ra - rb
+    const boA = a.boardOrder ?? 0
+    const boB = b.boardOrder ?? 0
+    if (boA !== boB) return boA - boB
+    return a.createdAt.localeCompare(b.createdAt)
+  })
+}
+
+function isTopLevelTask(t: Task, allIds: Set<string>): boolean {
+  if (!t.parentId || t.parentId === t.id) return true
+  return !allIds.has(t.parentId)
+}
+
+async function readRawTasks(): Promise<Task[]> {
   const raw = await fs.readFile(TASKS_FILE, 'utf-8')
   return JSON.parse(raw) as Task[]
 }
 
+/** 补齐 boardOrder 并写回（仅当存在缺失或非数字时） */
+async function migrateBoardOrdersIfNeeded(tasks: Task[]): Promise<Task[]> {
+  let changed = false
+  for (const t of tasks) {
+    if (!Number.isFinite(t.boardOrder)) {
+      changed = true
+      break
+    }
+  }
+  if (!changed) return tasks
+
+  for (const status of TASK_STATUSES) {
+    const group = tasks.filter(t => t.status === status)
+    group.sort(
+      (a, b) =>
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    )
+    group.forEach((t, i) => {
+      t.boardOrder = i
+    })
+  }
+  await fs.writeFile(TASKS_FILE, JSON.stringify(tasks, null, 2), 'utf-8')
+  return tasks
+}
+
+async function loadTasks(): Promise<Task[]> {
+  const raw = await readRawTasks()
+  return migrateBoardOrdersIfNeeded(raw)
+}
+
 async function writeTasks(tasks: Task[]): Promise<void> {
   await fs.writeFile(TASKS_FILE, JSON.stringify(tasks, null, 2), 'utf-8')
+}
+
+function nextBoardOrderForStatus(tasks: Task[], status: TaskStatus): number {
+  const inS = tasks.filter(t => t.status === status)
+  if (inS.length === 0) return 0
+  return Math.max(...inS.map(t => (Number.isFinite(t.boardOrder) ? t.boardOrder : 0))) + 1
 }
 
 export async function initDataDir(): Promise<void> {
@@ -32,7 +96,7 @@ export async function initDataDir(): Promise<void> {
   } catch {
     console.error(
       `[solo-task] data/ 目录不存在。请先执行：\n` +
-      `  git clone git@github.com:huyikai/solo-task-data.git data/`
+        `  git clone git@github.com:huyikai/solo-task-data.git data/`
     )
     process.exit(1)
   }
@@ -51,7 +115,8 @@ export async function getAllTasks(filters?: {
   priority?: string
   tag?: string
 }): Promise<Task[]> {
-  let tasks = await readTasks()
+  let tasks = await loadTasks()
+  tasks = sortTasksList(tasks)
 
   if (filters?.status) {
     tasks = tasks.filter(t => t.status === filters.status)
@@ -67,20 +132,27 @@ export async function getAllTasks(filters?: {
 }
 
 export async function getTaskById(id: string): Promise<Task | undefined> {
-  const tasks = await readTasks()
+  const tasks = await loadTasks()
   return tasks.find(t => t.id === id)
 }
 
 export async function createTask(input: CreateTaskInput): Promise<Task> {
   return withLock(async () => {
-    const tasks = await readTasks()
+    const tasks = await readRawTasks()
+    await migrateBoardOrdersIfNeeded(tasks)
     const now = new Date().toISOString()
+    const status = input.status ?? 'todo'
+    const boardOrder =
+      input.boardOrder !== undefined
+        ? input.boardOrder
+        : nextBoardOrderForStatus(tasks, status)
 
     const task: Task = {
       id: nanoid(),
       title: input.title,
       description: input.description ?? '',
-      status: input.status ?? 'todo',
+      status,
+      boardOrder,
       priority: input.priority ?? 'medium',
       tags: input.tags ?? [],
       dueDate: input.dueDate ?? null,
@@ -117,7 +189,8 @@ export async function updateTask(
   input: UpdateTaskInput
 ): Promise<Task | null> {
   return withLock(async () => {
-    const tasks = await readTasks()
+    const tasks = await readRawTasks()
+    await migrateBoardOrdersIfNeeded(tasks)
     const index = tasks.findIndex(t => t.id === id)
     if (index === -1) return null
 
@@ -126,9 +199,27 @@ export async function updateTask(
       input.parentId = null
     }
     const now = new Date().toISOString()
+
+    let nextStatus = input.status ?? existing.status
+    let nextBoardOrder = input.boardOrder ?? existing.boardOrder
+
+    if (
+      input.status !== undefined &&
+      input.status !== existing.status &&
+      input.boardOrder === undefined
+    ) {
+      nextStatus = input.status
+      nextBoardOrder = nextBoardOrderForStatus(
+        tasks.filter(t => t.id !== id),
+        input.status
+      )
+    }
+
     const updated: Task = {
       ...existing,
       ...input,
+      status: nextStatus,
+      boardOrder: nextBoardOrder,
       id: existing.id,
       createdAt: existing.createdAt,
       updatedAt: now,
@@ -154,7 +245,8 @@ export async function deleteTask(
   cascade: boolean = true
 ): Promise<string[]> {
   return withLock(async () => {
-    const tasks = await readTasks()
+    const tasks = await readRawTasks()
+    await migrateBoardOrdersIfNeeded(tasks)
     const deletedIds: string[] = []
 
     function collectChildren(parentId: string) {
@@ -190,4 +282,79 @@ export async function updateTaskStatus(
   status: Task['status']
 ): Promise<Task | null> {
   return updateTask(id, { status })
+}
+
+export async function reorderKanban(
+  columns: KanbanReorderColumns
+): Promise<Task[]> {
+  return withLock(async () => {
+    const tasks = await readRawTasks()
+    await migrateBoardOrdersIfNeeded(tasks)
+
+    const idSet = new Set(tasks.map(t => t.id))
+    const allListed = new Set<string>()
+
+    for (const status of TASK_STATUSES) {
+      const list = columns[status]
+      if (!Array.isArray(list)) {
+        throw new Error('INVALID_COLUMNS')
+      }
+      for (const id of list) {
+        if (allListed.has(id)) {
+          throw new Error('DUPLICATE_ID')
+        }
+        allListed.add(id)
+        const t = tasks.find(x => x.id === id)
+        if (!t) {
+          throw new Error('NOT_FOUND')
+        }
+        if (!isTopLevelTask(t, idSet)) {
+          throw new Error('NOT_TOP_LEVEL')
+        }
+      }
+    }
+
+    const topLevelIds = tasks
+      .filter(t => isTopLevelTask(t, idSet))
+      .map(t => t.id)
+
+    if (allListed.size !== topLevelIds.length) {
+      throw new Error('TOP_LEVEL_MISMATCH')
+    }
+    for (const tid of topLevelIds) {
+      if (!allListed.has(tid)) {
+        throw new Error('TOP_LEVEL_MISMATCH')
+      }
+    }
+
+    const now = new Date().toISOString()
+
+    for (const status of TASK_STATUSES) {
+      const ordered = columns[status]
+      ordered.forEach((id, idx) => {
+        const t = tasks.find(x => x.id === id)!
+        t.status = status
+        t.boardOrder = idx
+        t.updatedAt = now
+      })
+
+      const rest = tasks.filter(
+        t => t.status === status && !ordered.includes(t.id)
+      )
+      rest.sort((a, b) => {
+        const boA = a.boardOrder ?? 0
+        const boB = b.boardOrder ?? 0
+        if (boA !== boB) return boA - boB
+        return a.createdAt.localeCompare(b.createdAt)
+      })
+      const base = ordered.length
+      rest.forEach((t, i) => {
+        t.boardOrder = base + i
+        t.updatedAt = now
+      })
+    }
+
+    await writeTasks(tasks)
+    return sortTasksList(tasks)
+  })
 }

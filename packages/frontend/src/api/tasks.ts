@@ -1,4 +1,4 @@
-import type { Task } from '../types/task'
+import type { KanbanReorderColumns, Task } from '../types/task'
 
 const BASE = '/api/tasks'
 
@@ -49,5 +49,14 @@ export function updateTaskStatus(id: string, status: Task['status']): Promise<Ta
   return request<Task>(`${BASE}/${id}/status`, {
     method: 'PATCH',
     body: JSON.stringify({ status }),
+  })
+}
+
+export function reorderKanban(
+  columns: KanbanReorderColumns
+): Promise<Task[]> {
+  return request<Task[]>(`${BASE}/kanban-reorder`, {
+    method: 'PATCH',
+    body: JSON.stringify({ columns }),
   })
 }

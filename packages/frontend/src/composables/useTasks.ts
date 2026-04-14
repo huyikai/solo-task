@@ -1,5 +1,5 @@
 import { ref, onMounted, reactive } from 'vue'
-import type { Task } from '../types/task'
+import type { KanbanReorderColumns, Task } from '../types/task'
 import * as api from '../api/tasks'
 
 export function useTasks() {
@@ -51,6 +51,11 @@ export function useTasks() {
     await fetchTasks()
   }
 
+  async function reorderKanban(columns: KanbanReorderColumns) {
+    await api.reorderKanban(columns)
+    await fetchTasks()
+  }
+
   onMounted(fetchTasks)
 
   return {
@@ -62,6 +67,7 @@ export function useTasks() {
     updateTask,
     deleteTask,
     updateStatus,
+    reorderKanban,
     fetchTasks,
   }
 }
