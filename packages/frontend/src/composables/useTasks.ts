@@ -7,8 +7,16 @@ export function useTasks() {
   const loading = ref(false)
   const filters = reactive<Record<string, string>>({})
 
-  async function fetchTasks() {
-    loading.value = true
+  function hasActiveFilters(): boolean {
+    for (const v of Object.values(filters)) {
+      if (v) return true
+    }
+    return false
+  }
+
+  async function fetchTasks(opts?: { silent?: boolean }) {
+    const silent = opts?.silent ?? false
+    if (!silent) loading.value = true
     try {
       const cleanFilters: Record<string, string> = {}
       for (const [k, v] of Object.entries(filters)) {
@@ -18,7 +26,7 @@ export function useTasks() {
         Object.keys(cleanFilters).length ? cleanFilters : undefined
       )
     } finally {
-      loading.value = false
+      if (!silent) loading.value = false
     }
   }
 
@@ -52,8 +60,12 @@ export function useTasks() {
   }
 
   async function reorderKanban(columns: KanbanReorderColumns) {
-    await api.reorderKanban(columns)
-    await fetchTasks()
+    const updated = await api.reorderKanban(columns)
+    if (!hasActiveFilters()) {
+      tasks.value = updated
+    } else {
+      await fetchTasks({ silent: true })
+    }
   }
 
   onMounted(fetchTasks)
