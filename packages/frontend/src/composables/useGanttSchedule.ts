@@ -22,6 +22,9 @@ export const ZOOM_COL_WIDTH: Record<GanttZoom, number> = {
   month: 28,
 }
 
+/** 时间轴视窗：缩小默认横向滚动范围；「全部」沿用数据 min/max±7；「自定义」见 customVisibleRange */
+export type GanttViewportPreset = 'thisMonth' | 'eightWeeks' | 'all' | 'custom'
+
 const DAY_MS = 86400000
 
 function parseDay(iso: string): Date {
@@ -157,9 +160,52 @@ function buildRowOrder(
   return out
 }
 
+/** 某任务是否因祖先被折叠而隐藏（collapsedIds 为被折叠的父节点 id） */
+function isRowVisibleUnderCollapse(
+  task: Task,
+  byId: Map<string, Task>,
+  collapsedIds: Set<string>
+): boolean {
+  let pid: string | null | undefined = task.parentId
+  while (pid) {
+    if (collapsedIds.has(pid)) return false
+    const p = byId.get(pid)
+    pid = p?.parentId ?? null
+  }
+  return true
+}
+
+function dataExtentFromSchedules(schedules: TaskSchedule[]): {
+  minS: Date
+  maxE: Date
+} | null {
+  if (schedules.length === 0) return null
+  let minS = schedules[0].start
+  let maxE = schedules[0].end
+  for (const s of schedules) {
+    if (s.start.getTime() < minS.getTime()) minS = s.start
+    if (s.end.getTime() > maxE.getTime()) maxE = s.end
+  }
+  return { minS, maxE }
+}
+
+/** 排期区间与视窗 [rangeStart, rangeEnd]（含首尾日）是否有交集 */
+export function scheduleIntersectsRange(
+  sched: TaskSchedule,
+  rangeStart: Date,
+  rangeEnd: Date
+): boolean {
+  const rs = rangeStart.getTime()
+  const re = rangeEnd.getTime()
+  return sched.end.getTime() >= rs && sched.start.getTime() <= re
+}
+
 export function useGanttSchedule(
   tasks: Ref<Task[]>,
-  zoom: Ref<GanttZoom>
+  zoom: Ref<GanttZoom>,
+  viewportPreset: Ref<GanttViewportPreset>,
+  collapsedIds: Ref<Set<string>>,
+  customVisibleRange: Ref<{ start: Date; end: Date } | null>
 ) {
   const scheduledTasks = computed(() =>
     tasks.value.filter(t => getTaskSchedule(t) !== null)
@@ -175,21 +221,48 @@ export function useGanttSchedule(
       .filter((s): s is TaskSchedule => s !== null)
     const today = localToday()
 
-    if (schedules.length === 0) {
-      const start = new Date(today.getFullYear(), today.getMonth(), 1)
-      const end = new Date(today.getFullYear(), today.getMonth() + 1, 0)
+    const emptyMonthFallback = () => ({
+      start: new Date(today.getFullYear(), today.getMonth(), 1),
+      end: new Date(today.getFullYear(), today.getMonth() + 1, 0),
+    })
+
+    const preset = viewportPreset.value
+
+    if (preset === 'custom') {
+      const c = customVisibleRange.value
+      if (c) {
+        const a = new Date(c.start.getFullYear(), c.start.getMonth(), c.start.getDate())
+        const b = new Date(c.end.getFullYear(), c.end.getMonth(), c.end.getDate())
+        if (a.getTime() <= b.getTime()) {
+          return { start: a, end: b }
+        }
+        return { start: b, end: a }
+      }
+      const start = new Date(today)
+      const end = addDays(today, 8 * 7 - 1)
       return { start, end }
     }
 
-    let minS = schedules[0].start
-    let maxE = schedules[0].end
-    for (const s of schedules) {
-      if (s.start.getTime() < minS.getTime()) minS = s.start
-      if (s.end.getTime() > maxE.getTime()) maxE = s.end
+    if (preset === 'thisMonth') {
+      return emptyMonthFallback()
     }
+
+    if (preset === 'eightWeeks') {
+      const start = new Date(today)
+      const end = addDays(today, 8 * 7 - 1)
+      return { start, end }
+    }
+
+    // preset === 'all'
+    if (schedules.length === 0) {
+      return emptyMonthFallback()
+    }
+
+    const ext = dataExtentFromSchedules(schedules)
+    if (!ext) return emptyMonthFallback()
     return {
-      start: addDays(minS, -7),
-      end: addDays(maxE, 7),
+      start: addDays(ext.minS, -7),
+      end: addDays(ext.maxE, 7),
     }
   })
 
@@ -229,7 +302,16 @@ export function useGanttSchedule(
   const rows = computed((): GanttRow[] => {
     const list = tasks.value
     const byId = new Map(list.map(t => [t.id, t]))
-    const scheduledIds = new Set(scheduledTasks.value.map(t => t.id))
+    const rangeStart = visibleRange.value.start
+    const rangeEnd = visibleRange.value.end
+    const scheduledIds = new Set<string>()
+    for (const t of scheduledTasks.value) {
+      const sched = getTaskSchedule(t)
+      if (!sched) continue
+      if (scheduleIntersectsRange(sched, rangeStart, rangeEnd)) {
+        scheduledIds.add(t.id)
+      }
+    }
     const rowIds = new Set<string>(scheduledIds)
     for (const id of scheduledIds) {
       for (const aid of collectAncestorIds(byId, id)) {
@@ -237,9 +319,13 @@ export function useGanttSchedule(
       }
     }
 
-    const ordered = buildRowOrder(list, rowIds, byId)
-    const rangeStart = visibleRange.value.start
-    const rangeEnd = visibleRange.value.end
+    let ordered = buildRowOrder(list, rowIds, byId)
+    const collapsed = collapsedIds.value
+    if (collapsed.size > 0) {
+      ordered = ordered.filter(t =>
+        isRowVisibleUnderCollapse(t, byId, collapsed)
+      )
+    }
     const cw = colWidthPx.value
 
     function barFor(sched: TaskSchedule | null): GanttBar | null {

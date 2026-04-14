@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@tailwindcss/typography": "^0.5.19",
+    "@tanstack/vue-virtual": "^3.13.23",
     "lucide-vue-next": "^0.503.0",
     "marked": "^18.0.0",
     "sortablejs": "^1.15.7",
