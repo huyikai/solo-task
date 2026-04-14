@@ -111,10 +111,17 @@ export async function initDataDir(): Promise<void> {
   }
 }
 
+function taskMatchesQuery(task: Task, qNorm: string): boolean {
+  if (task.title.toLowerCase().includes(qNorm)) return true
+  if (task.description.toLowerCase().includes(qNorm)) return true
+  return task.tags.some(tag => tag.toLowerCase().includes(qNorm))
+}
+
 export async function getAllTasks(filters?: {
   status?: string
   priority?: string
   tag?: string
+  q?: string
 }): Promise<Task[]> {
   let tasks = await loadTasks()
   tasks = sortTasksList(tasks)
@@ -127,6 +134,12 @@ export async function getAllTasks(filters?: {
   }
   if (filters?.tag) {
     tasks = tasks.filter(t => t.tags.includes(filters.tag!))
+  }
+
+  const qRaw = filters?.q?.trim()
+  if (qRaw) {
+    const qNorm = qRaw.toLowerCase()
+    tasks = tasks.filter(t => taskMatchesQuery(t, qNorm))
   }
 
   return tasks

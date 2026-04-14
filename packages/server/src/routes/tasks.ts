@@ -84,11 +84,17 @@ router.patch('/kanban-reorder', async (req: Request, res: Response) => {
 })
 
 router.get('/', async (req: Request, res: Response) => {
-  const { status, priority, tag } = req.query
+  const { status, priority, tag, q } = req.query
   const tasks = await taskService.getAllTasks({
     status: status as string | undefined,
     priority: priority as string | undefined,
     tag: tag as string | undefined,
+    q:
+      typeof q === 'string'
+        ? q
+        : Array.isArray(q) && typeof q[0] === 'string'
+          ? q[0]
+          : undefined,
   })
   res.json({ success: true, data: tasks })
 })

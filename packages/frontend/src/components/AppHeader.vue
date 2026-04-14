@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch, onBeforeUnmount } from 'vue'
 import {
   Plus,
   ListFilter,
@@ -7,12 +7,13 @@ import {
   LayoutGrid,
   ChartGantt,
   Download,
+  Search,
 } from 'lucide-vue-next'
 import { useTheme, type ThemePreference } from '../composables/useTheme'
 import type { Task } from '../types/task'
 import ExportDialog from './ExportDialog.vue'
 
-defineProps<{
+const props = defineProps<{
   filters: Record<string, string>
   tasks: Task[]
 }>()
@@ -23,6 +24,28 @@ const emit = defineEmits<{
   'update:filters': [key: string, value: string]
   create: []
 }>()
+
+const searchDraft = ref(props.filters.q ?? '')
+let searchDebounce: ReturnType<typeof setTimeout> | null = null
+
+watch(
+  () => props.filters.q,
+  v => {
+    searchDraft.value = v ?? ''
+  }
+)
+
+function onSearchInput() {
+  if (searchDebounce) clearTimeout(searchDebounce)
+  searchDebounce = setTimeout(() => {
+    searchDebounce = null
+    emit('update:filters', 'q', searchDraft.value)
+  }, 320)
+}
+
+onBeforeUnmount(() => {
+  if (searchDebounce) clearTimeout(searchDebounce)
+})
 
 const { themePreference, resolvedTheme, setTheme } = useTheme()
 
@@ -138,6 +161,21 @@ function navBtnClass(isActive: boolean, withLeftBorder: boolean) {
           跟随系统
         </option>
       </select>
+
+      <div class="relative flex items-center min-w-[10rem] max-w-[14rem]">
+        <Search
+          class="w-4 h-4 text-[var(--st-header-icon-muted)] absolute left-2.5 pointer-events-none shrink-0"
+        />
+        <input
+          v-model="searchDraft"
+          type="search"
+          class="w-full bg-[var(--st-header-filter-bg)] text-[var(--st-header-select-text)] text-sm pl-8 pr-2 py-1.5 rounded border border-[var(--st-header-group-border)] hover:bg-[var(--st-header-filter-bg-hover)] transition-colors outline-none placeholder:text-[var(--st-header-input-placeholder)]"
+          placeholder="搜索标题、描述、标签…"
+          aria-label="搜索任务"
+          autocomplete="off"
+          @input="onSearchInput"
+        />
+      </div>
 
       <div class="relative flex items-center">
         <ListFilter
