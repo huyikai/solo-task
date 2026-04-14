@@ -5,10 +5,14 @@ import TaskCard from './TaskCard.vue'
 
 const tasks = defineModel<Task[]>('tasks', { required: true })
 
+const NO_SUBTASKS: Task[] = []
+
 defineProps<{
   title: string
   status: Task['status']
   allTasks: Task[]
+  /** 父任务 id → 直接子任务 */
+  subtasksByParent: Map<string, Task[]>
   color: string
 }>()
 
@@ -60,6 +64,7 @@ const sortableOptions = {
             <TaskCard
               :task="task"
               :all-tasks="allTasks"
+              :subtasks="subtasksByParent.get(task.id) ?? NO_SUBTASKS"
               kanban
               @edit="(t) => emit('edit', t)"
               @delete="(id) => emit('delete', id)"

@@ -103,11 +103,29 @@ export function useTaskStats(tasks: Ref<Task[]>) {
 
   const overdueCount = computed(() => overdueTasks.value.length)
 
-  const recentUpdated = computed(() =>
-    [...tasks.value]
-      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
-      .slice(0, 8)
-  )
+  const recentUpdated = computed((): Task[] => {
+    const list = tasks.value
+    const k = 8
+    if (list.length <= k) {
+      return [...list].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+    }
+    const heap: Task[] = []
+    for (const t of list) {
+      if (heap.length < k) {
+        heap.push(t)
+        continue
+      }
+      let minIdx = 0
+      for (let i = 1; i < k; i++) {
+        if (heap[i].updatedAt.localeCompare(heap[minIdx].updatedAt) < 0) minIdx = i
+      }
+      if (t.updatedAt.localeCompare(heap[minIdx].updatedAt) > 0) {
+        heap[minIdx] = t
+      }
+    }
+    heap.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+    return heap
+  })
 
   const tagTop = computed(() => {
     const counts = new Map<string, number>()

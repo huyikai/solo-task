@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { ref, watch, nextTick, computed } from 'vue'
+import { ref, watch, nextTick, computed, type CSSProperties } from 'vue'
+
+defineOptions({ name: 'GanttView' })
 import type { Task } from '../types/task'
 import {
   useGanttSchedule,
@@ -109,6 +111,44 @@ function tooltipText(task: Task) {
   const range = s.kind === 'due' ? `截止 ${b}（单日）` : `${a} – ${b}（含首尾日）`
   return `${task.title}\n${range}\n${task.status} · ${task.priority}`
 }
+
+/** 整块时间轴底图（竖线 + 周末/今日列），避免「行 × 天」级 DOM */
+const ganttBodyTimelineBgStyle = computed((): CSSProperties => {
+  const days = timelineDays.value
+  const n = days.length
+  const cw = colWidthPx.value
+  const tw = timelineWidthPx.value
+  const h = rows.value.length * ROW_H
+  if (n === 0 || tw <= 0) {
+    return {}
+  }
+  const tIdx = todayColumnIndex.value
+  const parts: string[] = []
+  for (let i = 0; i < n; i++) {
+    const p0 = (i / n) * 100
+    const p1 = ((i + 1) / n) * 100
+    let fill = 'transparent'
+    if (tIdx !== null && i === tIdx) {
+      fill = 'color-mix(in srgb, var(--st-accent-soft) 60%, transparent)'
+    } else if (isWeekend(days[i])) {
+      fill = 'var(--st-bg-weekend)'
+    }
+    parts.push(`${fill} ${p0}%`, `${fill} ${p1}%`)
+  }
+  const fillGrad = `linear-gradient(to right, ${parts.join(', ')})`
+  const gridGrad = `repeating-linear-gradient(to right, var(--st-border-subtle) 0, var(--st-border-subtle) 1px, transparent 1px, transparent ${cw}px)`
+  return {
+    position: 'absolute',
+    left: '0',
+    top: '0',
+    width: `${tw}px`,
+    height: `${h}px`,
+    pointerEvents: 'none',
+    zIndex: 0,
+    backgroundImage: `${gridGrad}, ${fillGrad}`,
+    backgroundSize: '100% 100%, 100% 100%',
+  }
+})
 </script>
 
 <template>
@@ -224,29 +264,21 @@ function tooltipText(task: Task) {
             class="flex-1 overflow-auto min-w-0 bg-[var(--st-bg-header-row)]"
             @scroll="onBodyScroll"
           >
-            <div class="relative" :style="{ width: `${timelineWidthPx}px` }">
+            <div
+              class="relative"
+              :style="{
+                width: `${timelineWidthPx}px`,
+                minHeight: `${rows.length * ROW_H}px`,
+              }"
+            >
+              <div aria-hidden="true" :style="ganttBodyTimelineBgStyle" />
               <div
                 v-for="row in rows"
                 :key="row.task.id"
-                class="border-b border-[var(--st-border-subtle)] relative"
+                class="relative z-[1] border-b border-[var(--st-border-subtle)]"
                 :style="{ height: `${ROW_H}px` }"
                 @click="emit('edit', row.task)"
               >
-                <div class="absolute inset-0 flex pointer-events-none">
-                  <div
-                    v-for="(day, di) in timelineDays"
-                    :key="di"
-                    class="shrink-0 border-l border-[var(--st-border-subtle)]"
-                    :class="
-                      isTodayColumn(di)
-                        ? 'bg-[var(--st-accent-soft)]/60 border-l-2 border-l-[var(--st-accent)]'
-                        : isWeekend(day)
-                          ? 'bg-[var(--st-bg-weekend)]'
-                          : ''
-                    "
-                    :style="{ width: `${colWidthPx}px` }"
-                  />
-                </div>
                 <div
                   v-if="row.bar"
                   class="absolute top-2 bottom-2 rounded-sm pointer-events-auto cursor-pointer shadow-sm min-w-[4px]"

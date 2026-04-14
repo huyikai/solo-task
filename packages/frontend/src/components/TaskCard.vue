@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { withDefaults } from 'vue'
 import type { Task } from '../types/task'
 import TagBadge from './TagBadge.vue'
 import TaskTree from './TaskTree.vue'
@@ -12,12 +13,17 @@ import {
   Trash2,
 } from 'lucide-vue-next'
 
-const props = defineProps<{
-  task: Task
-  allTasks: Task[]
-  /** 看板列内：整卡可拖（配合列上 Sortable delay / filter） */
-  kanban?: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    task: Task
+    allTasks: Task[]
+    /** 直接子任务（由看板预聚合） */
+    subtasks?: Task[]
+    /** 看板列内：整卡可拖（配合列上 Sortable delay / filter） */
+    kanban?: boolean
+  }>(),
+  { subtasks: () => [] }
+)
 
 const emit = defineEmits<{
   edit: [task: Task]
@@ -43,10 +49,6 @@ const priorityBorder: Record<string, string> = {
 function formatDate(iso: string) {
   const d = new Date(iso)
   return `${d.getMonth() + 1}/${d.getDate()}`
-}
-
-function getChildren(): Task[] {
-  return props.allTasks.filter(t => t.parentId === props.task.id)
 }
 </script>
 
@@ -98,9 +100,9 @@ function getChildren(): Task[] {
         </template>
       </div>
 
-      <div v-if="getChildren().length" class="kanban-no-drag">
+      <div v-if="subtasks.length" class="kanban-no-drag">
         <TaskTree
-          :children="getChildren()"
+          :children="subtasks"
           :all-tasks="allTasks"
           @edit="(t) => emit('edit', t)"
           @status-change="(id, s) => emit('status-change', id, s)"

@@ -83,8 +83,7 @@ export interface GanttRow {
   bar: GanttBar | null
 }
 
-function collectAncestorIds(tasks: Task[], taskId: string): Set<string> {
-  const byId = new Map(tasks.map(t => [t.id, t]))
+function collectAncestorIds(byId: Map<string, Task>, taskId: string): Set<string> {
   const ids = new Set<string>()
   let cur: Task | undefined = byId.get(taskId)
   while (cur?.parentId) {
@@ -94,6 +93,17 @@ function collectAncestorIds(tasks: Task[], taskId: string): Set<string> {
   return ids
 }
 
+function depthOf(task: Task, byId: Map<string, Task>): number {
+  let d = 0
+  let cur: Task | undefined = task
+  while (cur?.parentId) {
+    d++
+    cur = byId.get(cur.parentId)
+    if (d > 50) break
+  }
+  return d
+}
+
 function topLevelTasks(tasks: Task[]): Task[] {
   const ids = new Set(tasks.map(t => t.id))
   return tasks.filter(
@@ -101,7 +111,11 @@ function topLevelTasks(tasks: Task[]): Task[] {
   )
 }
 
-function buildRowOrder(tasks: Task[], rowIds: Set<string>): Task[] {
+function buildRowOrder(
+  tasks: Task[],
+  rowIds: Set<string>,
+  byId: Map<string, Task>
+): Task[] {
   const byParent = new Map<string | null, Task[]>()
   for (const t of tasks) {
     const p = t.parentId
@@ -134,7 +148,7 @@ function buildRowOrder(tasks: Task[], rowIds: Set<string>): Task[] {
 
   for (const id of rowIds) {
     if (seen.has(id)) continue
-    const t = tasks.find(x => x.id === id)
+    const t = byId.get(id)
     if (t) {
       seen.add(id)
       out.push(t)
@@ -214,31 +228,19 @@ export function useGanttSchedule(
 
   const rows = computed((): GanttRow[] => {
     const list = tasks.value
+    const byId = new Map(list.map(t => [t.id, t]))
     const scheduledIds = new Set(scheduledTasks.value.map(t => t.id))
     const rowIds = new Set<string>(scheduledIds)
     for (const id of scheduledIds) {
-      for (const aid of collectAncestorIds(list, id)) {
+      for (const aid of collectAncestorIds(byId, id)) {
         rowIds.add(aid)
       }
     }
 
-    const ordered = buildRowOrder(list, rowIds)
+    const ordered = buildRowOrder(list, rowIds, byId)
     const rangeStart = visibleRange.value.start
     const rangeEnd = visibleRange.value.end
     const cw = colWidthPx.value
-    const total = totalDays.value
-
-    function depthOf(task: Task): number {
-      let d = 0
-      let cur: Task | undefined = task
-      const byId = new Map(list.map(t => [t.id, t]))
-      while (cur?.parentId) {
-        d++
-        cur = byId.get(cur.parentId)
-        if (d > 50) break
-      }
-      return d
-    }
 
     function barFor(sched: TaskSchedule | null): GanttBar | null {
       if (!sched) return null
@@ -261,7 +263,7 @@ export function useGanttSchedule(
       const sched = getTaskSchedule(task)
       return {
         task,
-        depth: depthOf(task),
+        depth: depthOf(task, byId),
         schedule: sched,
         bar: barFor(sched),
       }

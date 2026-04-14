@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+
+defineOptions({ name: 'DashboardView' })
 import type { Task, TaskStatus } from '../types/task'
 import { useTaskStats, getDeadlineDay } from '../composables/useTaskStats'
 import { CalendarClock, AlertTriangle, History } from 'lucide-vue-next'

@@ -1,9 +1,13 @@
 <script setup lang="ts">
+import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import AppHeader from './components/AppHeader.vue'
 import TaskModal from './components/TaskModal.vue'
 import ConfirmDialog from './components/ConfirmDialog.vue'
 import { useTasks } from './composables/useTasks'
+import type { Task } from './types/task'
 
+const route = useRoute()
 const {
   tasks,
   loading,
@@ -15,9 +19,6 @@ const {
   updateStatus,
   reorderKanban,
 } = useTasks()
-
-import { ref, computed } from 'vue'
-import type { Task } from './types/task'
 
 const showModal = ref(false)
 const editingTask = ref<Task | null>(null)
@@ -88,16 +89,18 @@ async function handleStatusChange(id: string, status: Task['status']) {
       @create="openCreate"
     />
     <router-view v-slot="{ Component }">
-      <component
-        :is="Component"
-        v-if="Component"
-        :tasks="tasks"
-        :loading="loading"
-        :reorder-kanban="reorderKanban"
-        @edit="openEdit"
-        @delete="requestDelete"
-        @status-change="handleStatusChange"
-      />
+      <keep-alive>
+        <component
+          :is="Component"
+          :key="String(route.name ?? route.path)"
+          :tasks="tasks"
+          :loading="loading"
+          :reorder-kanban="reorderKanban"
+          @edit="openEdit"
+          @delete="requestDelete"
+          @status-change="handleStatusChange"
+        />
+      </keep-alive>
     </router-view>
     <TaskModal
       v-if="showModal"
