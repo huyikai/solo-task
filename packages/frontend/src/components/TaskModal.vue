@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { reactive, ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { X, ChevronDown } from 'lucide-vue-next'
 import MarkdownEditor from './MarkdownEditor.vue'
 import type { Task, TaskStatus, TaskPriority } from '../types/task'
@@ -16,6 +16,15 @@ const emit = defineEmits<{
 
 const isEdit = computed(() => !!props.task)
 
+/** 将接口返回的 ISO 时间转为 datetime-local 所需的本地墙钟时间（避免把 UTC 切片误当本地时间） */
+function isoToDatetimeLocalValue(iso: string | null | undefined): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
 const form = reactive({
   title: props.task?.title ?? '',
   description: props.task?.description ?? '',
@@ -23,12 +32,69 @@ const form = reactive({
   priority: props.task?.priority ?? ('medium' as TaskPriority),
   tags: [...(props.task?.tags ?? [])],
   timeType: props.task?.dueDate ? 'deadline' : props.task?.startDate ? 'range' : 'none',
-  dueDate: props.task?.dueDate?.slice(0, 16) ?? '',
-  startDate: props.task?.startDate?.slice(0, 16) ?? '',
-  endDate: props.task?.endDate?.slice(0, 16) ?? '',
+  dueDate: isoToDatetimeLocalValue(props.task?.dueDate),
+  startDate: isoToDatetimeLocalValue(props.task?.startDate),
+  endDate: isoToDatetimeLocalValue(props.task?.endDate),
   parentId: props.task?.parentId ?? '',
   newTag: '',
 })
+
+/** 新建/切换时间类型时的默认时刻：起始、截止日期（时间点）均为 8:00；区间结束为 17:00；已有值不覆盖 */
+const DEFAULT_START_TIME = '08:00'
+const DEFAULT_END_TIME = '17:00'
+
+function localDateYYYYMMDD(d = new Date()) {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+function combineDateAndTime(datePart: string, timeHHmm: string) {
+  return `${datePart}T${timeHHmm}`
+}
+
+watch(
+  () => form.timeType,
+  next => {
+    if (next === 'deadline' && !form.dueDate.trim()) {
+      form.dueDate = combineDateAndTime(localDateYYYYMMDD(), DEFAULT_START_TIME)
+    }
+    if (next === 'range') {
+      if (!form.startDate.trim()) {
+        form.startDate = combineDateAndTime(localDateYYYYMMDD(), DEFAULT_START_TIME)
+      }
+      if (!form.endDate.trim()) {
+        const datePart =
+          form.startDate.trim().length >= 10 ? form.startDate.slice(0, 10) : localDateYYYYMMDD()
+        form.endDate = combineDateAndTime(datePart, DEFAULT_END_TIME)
+      }
+    }
+  }
+)
+
+function ensureDueDateDefault() {
+  if (form.timeType !== 'deadline') return
+  if (!form.dueDate.trim()) {
+    form.dueDate = combineDateAndTime(localDateYYYYMMDD(), DEFAULT_START_TIME)
+  }
+}
+
+function ensureStartDateDefault() {
+  if (form.timeType !== 'range') return
+  if (!form.startDate.trim()) {
+    form.startDate = combineDateAndTime(localDateYYYYMMDD(), DEFAULT_START_TIME)
+  }
+}
+
+function ensureEndDateDefault() {
+  if (form.timeType !== 'range') return
+  if (!form.endDate.trim()) {
+    const datePart =
+      form.startDate.trim().length >= 10 ? form.startDate.slice(0, 10) : localDateYYYYMMDD()
+    form.endDate = combineDateAndTime(datePart, DEFAULT_END_TIME)
+  }
+}
 
 const availableParents = computed(() => {
   const editId = props.task?.id
@@ -296,6 +362,7 @@ const priorityOptions: { value: TaskPriority; label: string }[] = [
                 v-model="form.dueDate"
                 type="datetime-local"
                 class="w-full border border-[var(--st-border)] rounded-sm px-3 py-2 text-sm text-[var(--st-text-primary)] bg-[var(--st-bg-surface)] outline-none"
+                @focus="ensureDueDateDefault"
               />
             </div>
             <div v-else-if="form.timeType === 'range'" class="grid grid-cols-2 gap-3">
@@ -305,6 +372,7 @@ const priorityOptions: { value: TaskPriority; label: string }[] = [
                   v-model="form.startDate"
                   type="datetime-local"
                   class="w-full border border-[var(--st-border)] rounded-sm px-3 py-2 text-sm text-[var(--st-text-primary)] bg-[var(--st-bg-surface)] outline-none"
+                  @focus="ensureStartDateDefault"
                 />
               </div>
               <div>
@@ -313,6 +381,7 @@ const priorityOptions: { value: TaskPriority; label: string }[] = [
                   v-model="form.endDate"
                   type="datetime-local"
                   class="w-full border border-[var(--st-border)] rounded-sm px-3 py-2 text-sm text-[var(--st-text-primary)] bg-[var(--st-bg-surface)] outline-none"
+                  @focus="ensureEndDateDefault"
                 />
               </div>
             </div>
