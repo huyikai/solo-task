@@ -1,0 +1,14 @@
+---
+description: Git 提交不得包含 Co-authored-by，避免 Contributors 出现 cursoragent
+alwaysApply: true
+---
+
+# Git 提交规范
+
+创建 git commit 时：
+
+- **禁止**在提交说明中加入 `Co-authored-by:`、`Signed-off-by:` 等 Cursor / Agent 归因行。
+- **禁止**使用 `git commit --trailer` 添加协作者信息。
+- 只写与本次变更相关的标题和正文；作者身份以执行 `git commit` 时的 `user.name` / `user.email` 为准。
+
+若用户要求提交，使用普通 `git commit -m "..."`，不要附加任何协作者 trailer。

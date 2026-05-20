@@ -1,0 +1,12 @@
+{
+  "provider": "ollama",
+  "ollama": {
+    "baseUrl": "http://127.0.0.1:11434",
+    "model": "llama3.2"
+  },
+  "openaiCompat": {
+    "baseUrl": "https://api.openai.com/v1",
+    "apiKey": "your-api-key-here",
+    "model": "gpt-4o-mini"
+  }
+}

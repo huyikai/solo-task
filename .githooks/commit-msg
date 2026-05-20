@@ -1,0 +1,12 @@
+#!/bin/sh
+# 移除 Co-authored-by 等 trailer，避免 GitHub Contributors 统计到 cursoragent 等 bot。
+# 启用：git config core.hooksPath .githooks
+
+COMMIT_MSG_FILE=$1
+[ -f "$COMMIT_MSG_FILE" ] || exit 0
+
+# 去掉 Co-authored-by / Co-Authored-By 行（含 Cursor、cursoragent 等）
+grep -viE '^[[:space:]]*co-authored-by:' "$COMMIT_MSG_FILE" > "${COMMIT_MSG_FILE}.tmp" \
+  && mv "${COMMIT_MSG_FILE}.tmp" "$COMMIT_MSG_FILE"
+
+exit 0

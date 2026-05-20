@@ -9,6 +9,7 @@ import {
   Download,
   Search,
   Palette,
+  Bot,
 } from 'lucide-vue-next'
 import { useTheme, type ThemePreference } from '../composables/useTheme'
 import type { Task } from '../types/task'
@@ -17,6 +18,8 @@ import ExportDialog from './ExportDialog.vue'
 const props = defineProps<{
   filters: Record<string, string>
   tasks: Task[]
+  agentOpen?: boolean
+  agentStatus?: 'ok' | 'offline' | 'unknown'
 }>()
 
 const showExport = ref(false)
@@ -25,6 +28,7 @@ const mobileSearchOpen = ref(false)
 const emit = defineEmits<{
   'update:filters': [key: string, value: string]
   create: []
+  'toggle-agent': []
 }>()
 
 const searchDraft = ref(props.filters.q ?? '')
@@ -253,6 +257,29 @@ const secondaryBtnClass =
 
         <button
           type="button"
+          :class="[
+            secondaryBtnClass,
+            agentOpen ? 'border-[var(--st-accent)] bg-[var(--st-header-filter-bg-hover)]' : '',
+          ]"
+          title="任务助手"
+          @click="emit('toggle-agent')"
+        >
+          <span class="relative inline-flex">
+            <Bot class="h-4 w-4" />
+            <span
+              class="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full"
+              :class="{
+                'bg-green-500': agentStatus === 'ok',
+                'bg-gray-400': agentStatus === 'unknown' || !agentStatus,
+                'bg-red-500': agentStatus === 'offline',
+              }"
+            />
+          </span>
+          助手
+        </button>
+
+        <button
+          type="button"
           :class="secondaryBtnClass"
           title="导出"
           @click="showExport = true"
@@ -306,6 +333,17 @@ const secondaryBtnClass =
               </option>
             </select>
           </div>
+          <button
+            type="button"
+            :class="[
+              secondaryBtnClass,
+              agentOpen ? 'border-[var(--st-accent)]' : '',
+            ]"
+            title="任务助手"
+            @click="emit('toggle-agent')"
+          >
+            <Bot class="h-4 w-4" />
+          </button>
           <button
             type="button"
             :class="secondaryBtnClass"

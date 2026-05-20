@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import AppHeader from './components/AppHeader.vue'
 import TaskModal from './components/TaskModal.vue'
 import ConfirmDialog from './components/ConfirmDialog.vue'
+import AgentPanel from './components/agent/AgentPanel.vue'
+import AgentSettingsModal from './components/agent/AgentSettingsModal.vue'
 import { useTasks } from './composables/useTasks'
+import { useAgent } from './composables/useAgent'
 import type { Task } from './types/task'
 
 const route = useRoute()
@@ -18,11 +21,28 @@ const {
   deleteTask,
   updateStatus,
   reorderKanban,
+  fetchTasks,
 } = useTasks()
+
+const agent = useAgent()
 
 const showModal = ref(false)
 const editingTask = ref<Task | null>(null)
 const deletingTaskId = ref<string | null>(null)
+
+const isMdUp = ref(true)
+
+onMounted(() => {
+  const mq = window.matchMedia('(min-width: 768px)')
+  isMdUp.value = mq.matches
+  const handler = () => {
+    isMdUp.value = mq.matches
+    if (mq.matches && agent.panelOpen.value) {
+      // keep panel state on desktop
+    }
+  }
+  mq.addEventListener('change', handler)
+})
 
 const deletingTask = computed(() =>
   deletingTaskId.value ? tasks.value.find(t => t.id === deletingTaskId.value) : null
@@ -78,6 +98,16 @@ function cancelDelete() {
 async function handleStatusChange(id: string, status: Task['status']) {
   await updateStatus(id, status)
 }
+
+async function onAgentTasksChanged() {
+  await fetchTasks()
+}
+
+async function onAgentConfigSave(
+  patch: Parameters<typeof agent.saveConfig>[0]
+) {
+  await agent.saveConfig(patch)
+}
 </script>
 
 <template>
@@ -85,28 +115,53 @@ async function handleStatusChange(id: string, status: Task['status']) {
     <AppHeader
       :filters="filters"
       :tasks="tasks"
+      :agent-open="agent.panelOpen.value"
+      :agent-status="agent.connectionStatus.value"
       @update:filters="setFilter"
       @create="openCreate"
+      @toggle-agent="agent.togglePanel()"
     />
-    <router-view v-slot="{ Component }">
-      <keep-alive>
-        <component
-          :is="Component"
-          :key="String(route.name ?? route.path)"
-          :tasks="tasks"
-          :loading="loading"
-          :reorder-kanban="reorderKanban"
-          @edit="openEdit"
-          @delete="requestDelete"
-          @status-change="handleStatusChange"
+    <div class="flex min-h-0 flex-1 overflow-hidden">
+      <main class="min-w-0 flex-1 overflow-hidden">
+        <router-view v-slot="{ Component }">
+          <keep-alive>
+            <component
+              :is="Component"
+              :key="String(route.name ?? route.path)"
+              :tasks="tasks"
+              :loading="loading"
+              :reorder-kanban="reorderKanban"
+              @edit="openEdit"
+              @status-change="handleStatusChange"
+            />
+          </keep-alive>
+        </router-view>
+      </main>
+
+      <AgentPanel
+        v-if="agent.panelOpen.value && isMdUp"
+        :agent="agent"
+        @tasks-changed="onAgentTasksChanged"
+      />
+    </div>
+
+    <Teleport v-if="agent.panelOpen.value && !isMdUp" to="body">
+      <div class="fixed inset-0 z-40 flex flex-col bg-[var(--st-bg-page)] md:hidden">
+        <AgentPanel
+          :agent="agent"
+          mobile
+          @close="agent.setPanelOpen(false)"
+          @tasks-changed="onAgentTasksChanged"
         />
-      </keep-alive>
-    </router-view>
+      </div>
+    </Teleport>
+
     <TaskModal
       v-if="showModal"
       :task="editingTask"
       :tasks="tasks"
       @save="handleSave"
+      @delete="requestDelete"
       @close="showModal = false"
     />
     <ConfirmDialog
@@ -114,6 +169,14 @@ async function handleStatusChange(id: string, status: Task['status']) {
       :message="deleteMessage"
       @confirm="confirmDelete"
       @cancel="cancelDelete"
+    />
+    <AgentSettingsModal
+      v-if="agent.showSettings.value"
+      :config="agent.config.value"
+      :health="agent.health.value"
+      @close="agent.showSettings.value = false"
+      @save="onAgentConfigSave"
+      @refresh="agent.loadConfig()"
     />
   </div>
 </template>

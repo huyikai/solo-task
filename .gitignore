@@ -1,5 +1,6 @@
 node_modules/
 dist/
 data/
+# agent 密钥配置位于 data/agent.config.json（随 data/ 目录忽略）
 *.local
 .env
