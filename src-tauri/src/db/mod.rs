@@ -1,5 +1,6 @@
 pub mod migrations;
-pub mod tests;
+#[cfg(test)]
+mod tests;
 
 use crate::error::{AppError, AppResult};
 use rusqlite::Connection;

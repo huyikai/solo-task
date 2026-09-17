@@ -1,4 +1,6 @@
-use super::{connect_and_init, integrity_check};
+use super::connect_and_init;
+#[allow(unused_imports)]
+use super::integrity_check;
 
 #[test]
 fn test_migration_creates_empty_tables() {
