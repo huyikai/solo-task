@@ -1,14 +1,16 @@
 <!-- Sync Impact Report
-Version: 1.0.0 (initial)
-Bump rationale: Initial ratification — no prior version exists. MINOR/MAJOR/PATCH bumps apply only to amendments.
-Modified principles: none (all principles are net-new)
+Version: 1.0.0 → 1.1.0
+Bump rationale: MINOR — added a new Core Principle (TDD) with materially expanded guidance,
+plus linked quality-gate updates. No principle was removed or redefined.
+Modified principles: none renamed.
 Added sections:
-- Core Principles (5 principles, see below)
-- Technology Stack
-- Development Workflow
-- Governance
+- Core Principle VI. Test-First Development (TDD) (NON-NEGOTIABLE)
+- Quality-gate bullet referencing "tests written before implementation"
 Removed sections: none
-Follow-up TODOs: none (all placeholders filled; ratification date = today, 2026-09-17)
+Follow-up TODOs:
+- Any feature currently in flight without tests must be brought into compliance at its
+  next touch point; this is a forward-only amendment, not a retroactive requirement on
+  the constitution commit itself.
 -->
 
 # Solo Task Constitution
@@ -55,6 +57,43 @@ Cross-cutting state management MUST happen on the Rust side where it can be pers
 tested headlessly. Rationale: keeps the UI thin, the data model testable, and lets us swap
 or rewrite the UI without touching persistence.
 
+### VI. Test-First Development — TDD (NON-NEGOTIABLE)
+Every behavioral change MUST follow the red-green-refactor cycle:
+
+1. **Red** — write a failing test (Rust unit/integration test, React component test, or
+   end-to-end smoke) that names the new behavior or the bug being fixed. The test MUST
+   fail for the right reason before any production code is touched.
+2. **Green** — write the minimum production code that makes the failing test pass. No
+   speculative features, no "while I'm here" refactors.
+3. **Refactor** — with tests green, clean up duplication and naming, keeping the suite
+   green at every step.
+
+Scope rules:
+
+- **Pure logic** (recurrence math, date arithmetic, status transitions, validation rules)
+  — Rust unit tests, written first.
+- **Persistence** (SQL queries, migrations, repository functions) — Rust integration
+  tests against a real (in-memory or temp-file) SQLite database, written first.
+- **UI behavior** (component state, user interactions, view rendering) — React Testing
+  Library tests, written first. Snapshot tests alone are NOT acceptable for behavior.
+- **Cross-cutting flows** (create-task-with-reminder, board-drag-status-change) — at
+  least one end-to-end test per release; the spec MUST call out which flows need it.
+
+Required test outcomes for a `main` push:
+
+- The test added in step 1 of TDD MUST appear in the same commit (or a logically grouped
+  series of commits) as the production code that makes it pass.
+- A PR that adds production code without a corresponding failing-then-passing test MUST
+  be rejected, with the missing test requested as a precondition to merge.
+- Mutation-style spot checks are encouraged for critical paths but are not a gate.
+
+Documentation tests (doc-comments, README examples) and config-only changes are exempt
+from TDD, provided the diff contains no behavioral code.
+
+Rationale: this project has exactly one maintainer; without a discipline that catches
+regressions before they leave the editor, every "small change" carries the risk of
+silently breaking the user's data or reminders. TDD is the cheap insurance.
+
 ## Technology Stack
 
 - **Desktop shell**: Tauri 2.x (Rust 1.78+)
@@ -84,8 +123,11 @@ or rewrite the UI without touching persistence.
   `/speckit-specify` → (optional `/speckit-clarify`) → `/speckit-plan` → `/speckit-tasks`
   → `/speckit-implement`. Constitution is consulted before each `plan` step.
 - **Quality gates** before any `main` push:
+  - The failing test required by Principle VI (TDD) has been written, observed failing,
+    and made to pass in the same change set.
   - `cargo check` + `cargo clippy -- -D warnings` clean on Rust side
   - `tsc --noEmit` clean on TypeScript side
+  - `cargo test` and the React test runner both pass locally
   - App boots and core flow works on the developer's macOS box
   - DB migration runs cleanly on existing DBs (no destructive schema changes)
 - **Performance budgets** (measured on a 2020-era MacBook Air baseline):
@@ -117,4 +159,4 @@ constitution amendment:
 4. Every PR that lands on `main` is implicitly a claim of compliance with the current
    constitution. The implementer MUST verify and explicitly call out any deviation.
 
-**Version**: 1.0.0 | **Ratified**: 2026-09-17 | **Last Amended**: 2026-09-17
+**Version**: 1.1.0 | **Ratified**: 2026-09-17 | **Last Amended**: 2026-09-17
