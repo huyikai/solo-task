@@ -1,9 +1,37 @@
-node_modules/
-dist/
-data/
-# agent 密钥配置位于 data/agent.config.json（随 data/ 目录忽略）
-*.local
-.env
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# Claude / agent 配置（按 spec-kit 安全提示忽略，避免凭据泄露）
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Rust / Tauri
+src-tauri/target/
+src-tauri/Cargo.lock
+
+# Local data (per Constitution — never committed)
+data/
+
+# Dev marker
+.githooks/.installed
+
+# Claude
 .claude/
