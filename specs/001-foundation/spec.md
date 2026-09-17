@@ -8,7 +8,9 @@
 
 **Input**: User description: "项目骨架 (Foundation) — 第一次把项目骨架搭起来,把 constitution v1.4.0 中所有 '应用启动 / 项目启动时' 应具备的基础设施一次性落地"
 
-**Design Reference**: `design.md` (用户故事 6 引用,设计 tokens + anti-pattern 清单 + pre-flight 标准)
+**Design Reference**: 
+- Global: `.specify/memory/design.md` (用户故事 6 引用, 所有 UI spec 共享)
+- Feature local: [design.md](design.md) (foundation-specific 组件视觉骨架 + 评审 checkpoint)
 
 **Constitution Reference**: `.specify/memory/constitution.md` v1.4.0
 (Principles III, V, VI, VII, VIII, IX; Quality Gates; MVP Done Checklist)
@@ -148,9 +150,9 @@
 - **FR-012**: 应用 MUST 包含 TDD pre-push git hook,自动检查即将 push 的 commits,任何 production-only scope MUST 在同 push 内有同 scope 的测试 commit 在前。违反规则 MUST 阻止 push。
 - **FR-013**: 应用 MUST 实现主样式系统(设计 token + 基础组件 Button / Card / Layout),且样式设计 MUST 通过 `design-taste-frontend` skill 评审。评审摘要 MUST 附在落地该样式的 commit body 中。
 - **FR-018**: Settings 页面 MUST 提供主题切换控件(3 选项 segmented control: 跟随系统 / 亮色 / 暗色),允许用户覆盖 FR-017 的默认行为。控件 MUST 使用 `design.md` Section 2.6 中描述的 segmented control 视觉规范。控件状态变化 MUST 立即应用 (无需重启) 并持久化到 DB(`user_preferences` 表)。
-- **FR-014**: 应用 MUST 在 spec/plan 阶段产出设计指引,作为 implement 阶段的视觉输入。该指引作为 `specs/001-foundation/design.md` 落地,包含 design tokens (color/spacing/typography/radius/shadow)、组件视觉骨架描述、anti-pattern 清单(31 条)、pre-flight pass 标准。
+- **FR-014**: 应用 MUST 在 spec/plan 阶段产出**项目级**设计指引(`.specify/memory/design.md`),作为所有后续 spec 的视觉输入(Constitution Principle X)。该全局文件包含 design tokens (color/spacing/typography/radius/shadow)、anti-pattern 清单(33 条)、pre-flight pass 标准。本 feature 在 `specs/001-foundation/design.md` 仅添加 foundation-specific 内容(feature 特定组件视觉骨架 + 评审 checkpoint 列表),不重复全局定义。
 - **FR-015**: 实际渲染 MUST 严格符合 `design.md` Section 1 的 token 值。任何 token 偏离(不同 hex、不同 spacing、不同字号、不同 radius) MUST 在 commit body 中说明。
-- **FR-016**: `design.md` 第 3 节 anti-pattern 清单 31 条 MUST 在 implement 阶段逐条 ✅。0 容忍 ❌。pre-flight fail = 不允许 commit。
+- **FR-016**: `.specify/memory/design.md` 第 2 节 anti-pattern 清单 33 条 MUST 在 implement 阶段逐条 ✅。0 容忍 ❌。pre-flight fail = 不允许 commit。
 - **FR-017**: 应用 MUST 默认跟随系统主题(`prefers-color-scheme`),并通过 Settings 提供手动覆盖(三个选项:跟随系统 / 亮色 / 暗色)。手动选择 MUST 持久化到 DB,跨应用重启保留。dark mode 下视觉层次 MUST 与 light mode 保持一致(无对比度崩塌、accent 调亮)。
 
 ### Key Entities *(include if feature involves data)*

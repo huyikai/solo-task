@@ -1,11 +1,18 @@
 # Tasks: 项目骨架 (Foundation)
 
 **Input**: Design documents from `/specs/001-foundation/`
-- spec.md (5 user stories: S1-P1, S2-P1, S3-P1, S4-P2, S5-P2)
+- spec.md (5 user stories: S1-P1, S2-P1, S3-P1, S4-P2, S5-P2 + S6-P0 visual)
 - plan.md (single Tauri crate + React src/, technical context, UI Design Phasing)
 - data-model.md (6 SQLite tables, AppError, ExportPayload, I18nKey)
 - contracts/ipc.md (3 IPC commands)
 - quickstart.md (8-step local validation)
+- design.md (foundation-local component visual skeletons)
+
+**Global design reference**: `/Users/.../.specify/memory/design.md` (Constitution
+Principle X, v1.5.0 — tokens, anti-patterns, pre-flight). All UI tasks MUST
+inherit from this file. Foundation-local `design.md` adds only the
+component visual skeletons (Button matrix / Card / Layout / ViewTabs /
+CorruptedView / Settings) and the 4 review checkpoints.
 
 **Prerequisites**: plan.md ✅, spec.md ✅, data-model.md ✅, contracts/ ✅, quickstart.md ✅
 

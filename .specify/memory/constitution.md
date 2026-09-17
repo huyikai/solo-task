@@ -1,18 +1,21 @@
 <!-- Sync Impact Report
-Version: 1.3.0 → 1.4.0
-Bump rationale: MINOR — added explicit package manager (pnpm) and tightened TypeScript
-versioning language in Technology Stack. No principle added or redefined; existing
-principles unaffected.
+Version: 1.4.0 → 1.5.0
+Bump rationale: MINOR — added Core Principle X (Design System Continuity), which
+references a new project-level memory file (`.specify/memory/design.md`) as the
+single source of truth for visual design tokens, anti-patterns, and pre-flight
+standards. Per-feature design docs (`specs/<feature>/design.md`) MUST reference
+the global file rather than redefining tokens.
 Modified principles: none renamed.
 Added sections:
-- Technology Stack bullet: Package manager — pnpm (^9.x)
-- Technology Stack bullet: TypeScript — ^5.x (soft range, lockfile guarantees reproducibility)
-- Quality Gate bullet: TS check uses `pnpm exec tsc --noEmit`
-- Dependency Upgrade footnote: lockfile is the source of truth, `pnpm install --frozen-lockfile` is required in CI
+- Core Principle X. Design System Continuity (NON-NEGOTIABLE)
+- Governance amendment: any visual design change goes through the project-level
+  design.md, not per-feature invention
 Removed sections: none
 Follow-up TODOs:
-- plan.md and tasks.md for 001-foundation contain `npm` invocations that should be
-  migrated to `pnpm`; that is a docs follow-up, not a constitution follow-up.
+- specs/001-foundation/design.md shrunk to a feature-local doc that references
+  .specify/memory/design.md for tokens and anti-patterns.
+- Future specs (002-tasks-crud, 003-reminders, ...) MUST inherit the global
+  design.md and only add feature-specific component skeletons.
 -->
 
 # Solo Task Constitution
@@ -215,6 +218,30 @@ day; "AI-default" or "templated" UI is exactly the kind of friction that
 makes a daily-use tool feel disposable. A disciplined design pass keeps
 the product feeling intentional.
 
+### X. Design System Continuity (NON-NEGOTIABLE)
+Visual design tokens (colors, spacing, typography, radius, shadow,
+motion, z-index, font-family), the anti-pattern checklist, and the
+pre-flight pass standard MUST live in a single project-level file:
+`.specify/memory/design.md`. Every UI feature spec (`specs/<feature>/`)
+MUST reference this global file rather than redefining tokens, and
+MUST only add feature-local content for: (a) feature-specific component
+visual skeletons, (b) feature-specific anti-patterns (max 5), (c) the
+list of pre-flight review checkpoints for that feature.
+
+The global design.md is amended via a constitution-level commit
+following the Governance procedure; feature specs MAY NOT edit the
+global file directly. A feature that needs new tokens MUST produce a
+"design-amendment" sub-spec, route it through `/speckit-specify` →
+`/speckit-plan` → `/speckit-tasks` → `/speckit-implement`, and land the
+amendment before the feature that depends on the new tokens.
+
+Rationale: this project has exactly one maintainer. Without a single
+source of truth, every feature spec would invent its own color palette
+or accent system, and the app would visually drift feature by feature
+until it looks like ten different apps stitched together. The cost of
+a global design.md is one extra file; the cost of drift is a tool the
+maintainer no longer wants to open.
+
 ## Technology Stack
 
 - **Desktop shell**: Tauri 2.x (Rust 1.78+)
@@ -343,8 +370,9 @@ failure.
 
 This constitution supersedes all other practices, READMEs, and informal
 conventions. Any change to a Core Principle, the Technology Stack, the
-Architecture rule, the Automation & CI posture, or the Dependency
-Upgrade tiers requires a constitution amendment:
+Architecture rule, the Automation & CI posture, the Dependency
+Upgrade tiers, or the project-level design system
+(`.specify/memory/design.md`) requires a constitution amendment:
 
 1. Propose the change in a `docs: amend constitution to vX.Y.Z` commit on
    `main`.
@@ -360,4 +388,4 @@ Upgrade tiers requires a constitution amendment:
    current constitution. The implementer MUST verify and explicitly call
    out any deviation in the commit body.
 
-**Version**: 1.4.0 | **Ratified**: 2026-09-17 | **Last Amended**: 2026-09-17
+**Version**: 1.5.0 | **Ratified**: 2026-09-17 | **Last Amended**: 2026-09-17
