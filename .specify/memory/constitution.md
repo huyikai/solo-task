@@ -1,35 +1,17 @@
 <!-- Sync Impact Report
-Version: 1.1.0 → 1.2.0
-Bump rationale: MINOR — added Core Principle VII (Failure & Recovery), clarified TDD
-enforcement as hook + CI (no PR rejection), added MVP Done checklist, tightened
-Privacy exception wording, added MVP Done scope items (export JSON), fixed signing
-commitment, defined dependency upgrade tiers, defined CI posture, defined i18n
-posture, defined uninstall behavior. No principle removed or redefined in a
-backward-incompatible way.
-Modified principles:
-- I. Local-First Privacy — removed "fetch static assets" exception, clarified
-  manual check-for-update semantics
-- VI. Test-First Development — enforcement mechanism changed from "PR rejection"
-  to "local git hook (fast feedback) + CI (gate)", same-commit scope relaxed to
-  "same feature scope, with test commits preceding production commits"
+Version: 1.2.0 → 1.3.0
+Bump rationale: MINOR — added Core Principle IX (Design Quality). No principle
+removed or redefined. Existing principles unaffected.
+Modified principles: none renamed.
 Added sections:
-- Core Principle VII. Failure & Recovery (NON-NEGOTIABLE) — DB corruption recovery,
-  notification permission transparency, structured IPC errors, panic-safe writes
-- Section: MVP Done Checklist (table) — must-pass criteria for declaring v1.0
-- Section: Dependency Upgrade Tiers — security / minor / major
-- Section: CI & Automation Posture — GitHub Actions macOS + Windows runners
-- Section: Internationalization — Chinese only, t() key scaffold
-- Section: Uninstall & Data Lifecycle — DB preserved on uninstall, explicit
-  "clear all data" entry
-- Section: Data Escape Hatch — JSON export is MVP P0
-Removed sections:
-- Vacuous "Future amendment may add signing" sentence (replaced with defer-to-v2.0)
+- Core Principle IX. Design Quality (NON-NEGOTIABLE) — mandates use of the
+  /design-taste-frontend skill for any UI work and requires an inline review
+  summary on push.
+Removed sections: none
 Follow-up TODOs:
-- Concrete TDD-enforcement git hook implementation deferred to the project
-  skeleton spec; constitution commits the policy, not the tooling.
-- CI workflow YAML (`.github/workflows/ci.yml`) also deferred to skeleton spec.
-- i18n scaffold (lookup function, key naming convention) deferred to first
-  feature spec that introduces user-visible strings.
+- The exact review-summary format and the skill-invocation pattern will be
+  refined in the project-skeleton spec; this amendment locks the policy,
+  not the tooling.
 -->
 
 # Solo Task Constitution
@@ -206,6 +188,32 @@ from Settings. Import is intentionally deferred to post-MVP. Rationale:
 the user must always be able to leave with their data, even if the app
 breaks or they switch machines.
 
+### IX. Design Quality (NON-NEGOTIABLE)
+Any change that touches user-visible UI (new screen, new component,
+visual restyle, layout rework, copy/typography change) MUST be reviewed
+through the `design-taste-frontend` skill before the change lands on
+`main`. The implementer invokes the skill, applies its feedback, and
+records a short review summary in the push (commit body or PR
+description) of the form:
+
+```
+Design review (design-taste-frontend):
+- Skill version: <version>
+- Findings: <N anti-patterns flagged, M resolved>
+- Pre-flight check: <pass | fail>
+```
+
+Skipping the skill, or landing UI work without the review summary, is
+treated as a Quality Gate failure on par with a missing TDD test.
+Pure logic, DB, IPC, build, or CI changes that have no user-visible
+surface are exempt — but the moment a refactor touches a rendered
+component, the rule re-engages.
+
+Rationale: this is a personal tool the maintainer will look at every
+day; "AI-default" or "templated" UI is exactly the kind of friction that
+makes a daily-use tool feel disposable. A disciplined design pass keeps
+the product feeling intentional.
+
 ## Technology Stack
 
 - **Desktop shell**: Tauri 2.x (Rust 1.78+)
@@ -254,6 +262,8 @@ breaks or they switch machines.
 - **Quality gates** before any `main` push:
   - The failing test required by Principle VI has been written, observed
     failing, and made to pass in the same scope / push.
+  - For any UI-touching change, the `design-taste-frontend` skill has
+    been invoked and its review summary included per Principle IX.
   - `cargo check` + `cargo clippy -- -D warnings` clean on Rust side
   - `tsc --noEmit` clean on TypeScript side
   - `cargo test` and the React test runner both pass locally
@@ -337,4 +347,4 @@ Upgrade tiers requires a constitution amendment:
    current constitution. The implementer MUST verify and explicitly call
    out any deviation in the commit body.
 
-**Version**: 1.2.0 | **Ratified**: 2026-09-17 | **Last Amended**: 2026-09-17
+**Version**: 1.3.0 | **Ratified**: 2026-09-17 | **Last Amended**: 2026-09-17
