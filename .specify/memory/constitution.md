@@ -1,21 +1,23 @@
 <!-- Sync Impact Report
-Version: 1.4.0 → 1.5.0
-Bump rationale: MINOR — added Core Principle X (Design System Continuity), which
-references a new project-level memory file (`.specify/memory/design.md`) as the
-single source of truth for visual design tokens, anti-patterns, and pre-flight
-standards. Per-feature design docs (`specs/<feature>/design.md`) MUST reference
-the global file rather than redefining tokens.
-Modified principles: none renamed.
+Version: 1.5.0 → 1.6.0
+Bump rationale: MINOR — Principle X tightened. Added explicit ban on
+feature-local design.md except for declared, justified deviations.
+Added the rule that "universal / reusable" design artifacts MUST be
+promoted to governance layer (project-level memory, sibling to this
+constitution), not invented per feature.
+Modified principles:
+- X. Design System Continuity — rewrote to forbid feature-local design.md
+  by default and require deviation justification when one is created.
 Added sections:
-- Core Principle X. Design System Continuity (NON-NEGOTIABLE)
-- Governance amendment: any visual design change goes through the project-level
-  design.md, not per-feature invention
+- Principle XI. Governance Layer Promotion — explicit rule that
+  reusable / cross-feature design artifacts MUST be promoted to
+  `.specify/memory/`, not invented per feature.
 Removed sections: none
 Follow-up TODOs:
-- specs/001-foundation/design.md shrunk to a feature-local doc that references
-  .specify/memory/design.md for tokens and anti-patterns.
-- Future specs (002-tasks-crud, 003-reminders, ...) MUST inherit the global
-  design.md and only add feature-specific component skeletons.
+- Existing specs (001-foundation) already align with the new rule (no
+  feature-local design.md after the previous collapse commit).
+- Future feature specs MUST check `.specify/memory/` first and only
+  create `specs/<feature>/design.md` if they have a declared deviation.
 -->
 
 # Solo Task Constitution
@@ -220,20 +222,34 @@ the product feeling intentional.
 
 ### X. Design System Continuity (NON-NEGOTIABLE)
 Visual design tokens (colors, spacing, typography, radius, shadow,
-motion, z-index, font-family), the anti-pattern checklist, and the
-pre-flight pass standard MUST live in a single project-level file:
-`.specify/memory/design.md`. Every UI feature spec (`specs/<feature>/`)
-MUST reference this global file rather than redefining tokens, and
-MUST only add feature-local content for: (a) feature-specific component
-visual skeletons, (b) feature-specific anti-patterns (max 5), (c) the
-list of pre-flight review checkpoints for that feature.
+motion, z-index, font-family), the Established Component Library, the
+anti-pattern checklist, and the pre-flight pass standard MUST live
+in a single project-level file: `.specify/memory/design.md`.
 
-The global design.md is amended via a constitution-level commit
-following the Governance procedure; feature specs MAY NOT edit the
-global file directly. A feature that needs new tokens MUST produce a
-"design-amendment" sub-spec, route it through `/speckit-specify` →
-`/speckit-plan` → `/speckit-tasks` → `/speckit-implement`, and land the
-amendment before the feature that depends on the new tokens.
+**Default rule: NO feature-local `design.md`.** A UI feature spec
+(`specs/<feature>/`) MUST NOT create its own `design.md`. It MUST
+reference `.specify/memory/design.md` directly, inherit its tokens
+and component library, and either:
+
+- **(a) Conform** — use only what the global file provides; declare
+  in `plan.md`: "no design deviation; this spec inherits the global
+  design system verbatim"; OR
+- **(b) Deviate** — create `specs/<feature>/design.md` ONLY if the
+  feature genuinely needs content that does not belong in the
+  global file (e.g. a feature-specific component that will never be
+  reused, or a feature-specific anti-pattern). The deviation MUST
+  be declared in `plan.md` with a justification, AND if the new
+  artifact has cross-feature reuse potential, it MUST first be
+  routed through a "design-amendment" sub-spec and added to the
+  global file.
+
+**The global design.md is amended via a constitution-level commit**
+following the Governance procedure; feature specs MUST NOT edit the
+global file directly. A feature that needs new tokens or a new
+component visual definition MUST produce a "design-amendment"
+sub-spec, route it through `/speckit-specify` → `/speckit-plan` →
+`/speckit-tasks` → `/speckit-implement`, and land the amendment BEFORE
+the dependent feature ships.
 
 Rationale: this project has exactly one maintainer. Without a single
 source of truth, every feature spec would invent its own color palette
@@ -241,6 +257,34 @@ or accent system, and the app would visually drift feature by feature
 until it looks like ten different apps stitched together. The cost of
 a global design.md is one extra file; the cost of drift is a tool the
 maintainer no longer wants to open.
+
+### XI. Governance Layer Promotion (NON-NEGOTIABLE)
+Artifacts that are **universal** (used across multiple features) or
+**reusable** (likely to be referenced by future specs) MUST live in
+the project governance layer (`.specify/memory/`), alongside this
+constitution. They MUST NOT be created inside `specs/<feature>/`,
+even if a single feature happens to need them first.
+
+Examples that belong in `.specify/memory/`:
+- Design system tokens, component library, anti-pattern checklist
+- Architecture diagrams referenced by multiple specs
+- Cross-feature conventions (error format, IPC contract template,
+  i18n key naming scheme, test fixture format)
+
+Examples that legitimately belong in `specs/<feature>/`:
+- The spec itself (what this feature does)
+- Feature-local feature-local fixture data, mock samples
+- A feature-specific component visual skeleton (per Principle X
+  deviation rule)
+
+The test: **"will a future spec need to reference this?"** If yes,
+it belongs in `.specify/memory/`, not in any single `specs/<feature>/`.
+
+Rationale: the same single-maintainer drift problem from Principle X
+applies to any reusable artifact. A design system, an i18n key naming
+convention, or an IPC contract template that lives inside
+`specs/002-foo/` is invisible to `specs/003-bar/` until someone
+remembers to look — and they will not remember.
 
 ## Technology Stack
 
@@ -388,4 +432,4 @@ Upgrade tiers, or the project-level design system
    current constitution. The implementer MUST verify and explicitly call
    out any deviation in the commit body.
 
-**Version**: 1.5.0 | **Ratified**: 2026-09-17 | **Last Amended**: 2026-09-17
+**Version**: 1.6.0 | **Ratified**: 2026-09-17 | **Last Amended**: 2026-09-17
