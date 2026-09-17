@@ -6,9 +6,11 @@
 
 **Status**: Draft
 
-**Input**: User description: "项目骨架 (Foundation) — 第一次把项目骨架搭起来,把 constitution v1.3.0 中所有 '应用启动 / 项目启动时' 应具备的基础设施一次性落地"
+**Input**: User description: "项目骨架 (Foundation) — 第一次把项目骨架搭起来,把 constitution v1.4.0 中所有 '应用启动 / 项目启动时' 应具备的基础设施一次性落地"
 
-**Constitution Reference**: `.specify/memory/constitution.md` v1.3.0
+**Design Reference**: `design.md` (用户故事 6 引用,设计 tokens + anti-pattern 清单 + pre-flight 标准)
+
+**Constitution Reference**: `.specify/memory/constitution.md` v1.4.0
 (Principles III, V, VI, VII, VIII, IX; Quality Gates; MVP Done Checklist)
 
 ---
@@ -99,6 +101,23 @@
 
 ---
 
+### User Story 6 — 启动时呈现经过设计的视觉 (Priority: P0) 🎯 MVP 的一部分
+
+应用骨架的视觉表现必须符合 `design.md` 中定义的设计语言,不能掉进常见 AI 默认风格。
+
+**Why this priority**: Constitution Principle IX (Design Quality) 是 NON-NEGOTIABLE。如果骨架阶段的视觉就掉进 anti-pattern,后续所有功能都会继承这种"AI 默认感",个人工具每天使用会变成负担。设计必须在 spec 阶段产出指引,在 implement 阶段落地,在评审阶段验证。
+
+**Independent Test**: 应用启动后,人工对照 `design.md` 的 anti-pattern 清单(31 条)逐条审查。**任何一条不通过** = 此 spec 不达标。
+
+**Acceptance Scenarios**:
+
+1. **Given** 应用首次启动, **When** 审视主窗口视觉, **Then** 符合 `design.md` Section 2 中所有组件的视觉描述(tokens / Button / Card / Layout / ViewTabs / CorruptedView / Settings)
+2. **Given** `design.md` 第 3 节 anti-pattern 清单存在, **When** 在主窗口逐条对照, **Then** 31 条全部 ✅, 0 条 ❌
+3. **Given** 应用处于 light mode, **When** 切换系统为 dark mode, **Then** 应用自动跟随, 视觉层次保持一致(无对比度崩塌)
+4. **Given** 应用启动完成, **When** 与 `design.md` Section 2.1 Button 矩阵对照实际渲染, **Then** 每个 variant × size 组合都符合视觉描述(primary 蓝填充、secondary 白底边、ghost 透明、danger 红)
+
+---
+
 ### Edge Cases
 
 - **数据库被另一进程锁定**: 启动时若 `PRAGMA integrity_check` 因锁失败,UI 显示 `AppError::DbLocked` 提示,而不是崩溃或重试无限循环
@@ -126,6 +145,10 @@
 - **FR-011**: 应用 MUST 包含 GitHub Actions CI workflow(`.github/workflows/ci.yml`),在 macOS-latest 和 windows-latest runner 上运行 `cargo check`、`cargo test`、`pnpm install --frozen-lockfile` + `pnpm exec tsc --noEmit`、`pnpm test`、以及 `pnpm run check:i18n`。任一 runner 失败 MUST 阻止 merge。
 - **FR-012**: 应用 MUST 包含 TDD pre-push git hook,自动检查即将 push 的 commits,任何 production-only scope MUST 在同 push 内有同 scope 的测试 commit 在前。违反规则 MUST 阻止 push。
 - **FR-013**: 应用 MUST 实现主样式系统(设计 token + 基础组件 Button / Card / Layout),且样式设计 MUST 通过 `design-taste-frontend` skill 评审。评审摘要 MUST 附在落地该样式的 commit body 中。
+- **FR-014**: 应用 MUST 在 spec/plan 阶段产出设计指引,作为 implement 阶段的视觉输入。该指引作为 `specs/001-foundation/design.md` 落地,包含 design tokens (color/spacing/typography/radius/shadow)、组件视觉骨架描述、anti-pattern 清单(31 条)、pre-flight pass 标准。
+- **FR-015**: 实际渲染 MUST 严格符合 `design.md` Section 1 的 token 值。任何 token 偏离(不同 hex、不同 spacing、不同字号、不同 radius) MUST 在 commit body 中说明。
+- **FR-016**: `design.md` 第 3 节 anti-pattern 清单 31 条 MUST 在 implement 阶段逐条 ✅。0 容忍 ❌。pre-flight fail = 不允许 commit。
+- **FR-017**: 应用 MUST 跟随系统主题(`prefers-color-scheme`),不在应用内做主题切换。dark mode 下视觉层次 MUST 与 light mode 保持一致(无对比度崩塌、accent 调亮)。
 
 ### Key Entities *(include if feature involves data)*
 

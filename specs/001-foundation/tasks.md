@@ -41,21 +41,24 @@ Single Tauri crate layout (per plan.md):
 - **Q2**: DB corrupted → navigation tabs disabled (only CorruptedView + Settings reachable)
 - **Q3**: `trigger_test_error` button visible only when `import.meta.env.DEV`
 
-## Design Review Points (constitution Principle IX)
+## Design Reference (constitution Principle IX)
 
-`design-taste-frontend` skill is invoked at FOUR checkpoints, NOT per
-component. Reviewing tokens / each component individually is overkill; the
-skill is most valuable on **representative screens** where layout,
-hierarchy, and visual rhythm combine.
+UI design is **decided in spec/plan phase** (see [`design.md`](design.md)),
+**implemented in this phase**, and **validated at 4 pre-flight
+checkpoints** (D1-D4). Per-component post-hoc review is wasteful;
+`design.md` is the single source of truth for tokens, components, and
+anti-patterns.
 
-| Review ID | Scope | When |
+| Review ID | Scope | When in tasks.md |
 |---|---|---|
-| **D1** | Design tokens (colors, spacing, type, shadow, radius) | End of Phase 1.5 |
+| **D1** | tokens (colors, spacing, type, shadow, radius) | End of Phase 1.5 |
 | **D2** | Layout shell + three view-tab placeholders | End of Phase 3 Visual |
 | **D3** | CorruptedView + its integration in App state machine | End of Phase 5 Visual |
 | **D4** | Settings page + ConfirmDialog + Test Error picker (dev only) | End of Phase 6 Visual |
 
-Each review produces a summary in the relevant commit body:
+Each review invokes `/design-taste-frontend` skill against the running
+UI, runs the 31-item anti-pattern checklist from `design.md` Section 3,
+and produces a summary in the commit body:
 
 ```
 Design review (design-taste-frontend):
@@ -64,8 +67,7 @@ Design review (design-taste-frontend):
 - Pre-flight check: <pass | fail>
 ```
 
-If pre-flight fails, the UI MUST be revised and re-reviewed before
-behavior TDD proceeds.
+`Pre-flight check: fail` blocks the commit until fixed.
 
 ---
 
@@ -86,24 +88,25 @@ behavior TDD proceeds.
 
 ---
 
-## Phase 1.5: Design Foundation (NEW — front-loads UI design)
+## Phase 1.5: Design Implementation (按 design.md 落地)
 
-**Purpose**: Establish design tokens + Layout shell visual skeleton, get design-taste-frontend review on the foundation BEFORE any behavior TDD. **TDD-skip** for visual choices (tokens have no behavior; Layout shell has only props/JSX shape — behavior tests come in Phase 3).
+**Purpose**: 把 `design.md` 中已定的设计语言落地到代码（tokens + 组件视觉骨架），跑 D1 评审。**TDD-skip** for visual choices (tokens 没有行为；组件骨架只是 props + JSX 形状，行为测试在 Phase 3 之上叠加)。
 
-**Why this phase exists**: Constitution Principle IX requires design quality, but a per-component post-hoc review is wasteful (you write 200 lines, then get 10 anti-pattern flags, then rewrite). Front-loading design with a single Layout-level review gives the rest of the project a visually-correct foundation to build behavior on.
+**Why this phase exists**: 设计决策已在 `design.md` 完成，本阶段是机械落地，避免在 implement 时再决定视觉。这样后续每个 UI scope 只需照搬 tokens，不必每次重新讨论视觉。
 
-- [ ] T008a [P] Author `src/styles/tokens.css` with CSS custom properties for color palette (light theme only at MVP), spacing scale (4/8/12/16/24/32/48), type scale (12/14/16/18/24), shadow elevation (sm/md/lg), radius (sm=4, md=8, lg=12). Wire into Tailwind via `theme.extend.colors` etc. in `tailwind.config.ts`. Include dark-mode stubs commented out (post-MVP).
-- [ ] T008b [P] Author `src/components/Button.tsx` **visual skeleton only** — props: `variant: 'primary' | 'secondary' | 'ghost'`, `size: 'sm' | 'md'`, `children: ReactNode`. Apply tokens. NO behavior tests yet; this is a visual-only commit so the design review has something concrete to look at.
-- [ ] T008c [P] Author `src/components/Card.tsx` **visual skeleton only** — wrapper with surface color, padding, radius. Apply tokens.
-- [ ] T008d Author `src/components/Layout.tsx` **visual skeleton only** — top app bar (logo placeholder + Settings entry placeholder) + main content slot. Apply tokens. **🔔 DESIGN REVIEW D1 + D2 candidate**: this is the most representative page at this point.
-- [ ] T008e Author `src/components/ViewTabs.tsx` **visual skeleton only** — three buttons with active state styled by tokens. **🔔 DESIGN REVIEW D2 candidate**.
-- [ ] T008f **🔔 Invoke `/design-taste-frontend` skill** on tokens + Button + Card + Layout + ViewTabs (as a renderable preview: a temporary `src/pages/DesignPreview.tsx` showing all four side-by-side). Capture review summary.
-- [ ] T008g Refactor visual skeletons based on review findings (rename tokens, swap colors, adjust spacing) until review pre-flight passes.
-- [ ] T008h Single commit: `feat(design): tokens + visual skeletons with design-taste-frontend review (D1+D2)`. Commit body MUST include the review summary.
+- [ ] T008a [P] Author `src/styles/tokens.css` **严格按照 `design.md` Section 1 的值**：色板 (light + dark) / spacing scale / typography scale / radius / shadow / font family / z-index。Wire into Tailwind via `theme.extend` in `tailwind.config.ts` (per design.md Section 1.8 mapping)。
+- [ ] T008b [P] Author `src/components/Button.tsx` **严格按照 `design.md` Section 2.1**：4 variants × 2 sizes 矩阵，radius `md`，focus 2px outline。
+- [ ] T008c [P] Author `src/components/Card.tsx` **严格按照 `design.md` Section 2.2**：surface + border + padding + shadow-sm。
+- [ ] T008d Author `src/components/Layout.tsx` **严格按照 `design.md` Section 2.3**：h-14 顶栏 + 主内容区，Settings 入口在右上角。
+- [ ] T008e Author `src/components/ViewTabs.tsx` **严格按照 `design.md` Section 2.4**：role="tablist"，选中状态 2px accent 下边线。
+- [ ] T008f Author `src/pages/DesignPreview.tsx` (dev-only, gated by `import.meta.env.DEV`) — 把上面 5 个组件并排展示，作为 D1 评审的可视化对象。Phase 8 T057 删除。
+- [ ] T008g **🔔 Invoke `/design-taste-frontend` skill** on tokens + Button + Card + Layout + ViewTabs via DesignPreview。Skill runs the 31-item anti-pattern checklist from `design.md` Section 3. Capture review summary.
+- [ ] T008h Refactor if pre-flight fails (rename tokens / swap colors / adjust spacing). Loop until pre-flight passes.
+- [ ] T008i Single commit: `feat(design): implement design.md tokens + visual skeletons (D1)`. Commit body MUST include review summary + reference to `design.md`.
 
-**Checkpoint**: `pnpm tauri dev` shows a temporary `DesignPreview.tsx` page (gated behind `import.meta.env.DEV`) with tokens + Button + Card + Layout + ViewTabs visible. Visual quality passes design-taste-frontend pre-flight. Foundation visual style is **locked** for all subsequent UI work.
+**Checkpoint**: `pnpm tauri dev` shows DesignPreview page (dev-only) with all 5 components visible. Visual quality passes D1 pre-flight (31-item checklist 0 ❌). Foundation visual style is **locked** to `design.md` for all subsequent UI work.
 
-**Transition to Phase 2**: this phase produces visual artifacts, but the components are still "skeleton only" (no behavior). Phase 3 will add behavior tests on top — components from this phase are reused, not rewritten.
+**Transition to Phase 2**: this phase produces visual artifacts; components are "skeleton only" (no behavior). Phase 3+ will add behavior tests on top — components from this phase are reused, not rewritten.
 
 ---
 

@@ -81,12 +81,13 @@ choices above come from Constitution v1.3.0 or are unambiguous defaults.
 
 ```text
 specs/001-foundation/
-├── plan.md              # This file
-├── data-model.md        # Phase 1 output — DB schema, AppError, ExportPayload, I18nKey
+├── design.md           # Spec-phase design output (tokens, components, anti-patterns)
+├── plan.md             # This file
+├── data-model.md       # Phase 1 output — DB schema, AppError, ExportPayload, I18nKey
 ├── contracts/
-│   └── ipc.md           # Phase 1 output — IPC command signatures
-├── quickstart.md        # Phase 1 output — validation scenarios
-└── tasks.md             # Phase 2 output (/speckit-tasks — NOT created here)
+│   └── ipc.md          # Phase 1 output — IPC command signatures
+├── quickstart.md       # Phase 1 output — validation scenarios
+└── tasks.md            # Phase 2 output (/speckit-tasks — NOT created here)
 ```
 
 ### Source Code (repository root)
@@ -237,31 +238,35 @@ UI scopes additionally require:
 4. Run `design-taste-frontend` skill against the rendered component
 5. Include review summary in commit body
 
-### UI Design Phasing
+## UI Design Phasing
 
-`design-taste-frontend` skill is invoked at **four checkpoints only**, not
-per component. The full list is in `tasks.md` "Design Review Points"
-section; the rationale:
+**Design is decided in the spec/plan phase, not implemented in the
+implement phase.** The full design language for this feature lives in
+[`design.md`](design.md) — produced before any code is written,
+referenced by every UI implementation, and validated by 4 pre-flight
+checkpoints during implement.
 
-- **Per-component post-hoc review is wasteful** — you write 200 lines,
-  then get 10 anti-pattern flags, then rewrite. Tokens and visual rhythm
-  are foundational; once wrong, every downstream component inherits the
-  mistake.
-- **Front-loading design with a single Layout-level review** gives the
-  rest of the project a visually-correct foundation to build behavior on.
-- The four checkpoints are:
-  1. **D1** — design tokens (colors, spacing, type, shadow, radius)
-  2. **D2** — Layout shell + three view-tab placeholders
-  3. **D3** — CorruptedView (emergency-state UX deserves its own review)
-  4. **D4** — Settings page + ConfirmDialog + Test Error picker
+The four pre-flight checkpoints (defined in `tasks.md` "Design Review
+Points"):
 
-UI scopes (Phase 3-6) follow **Visual-first-then-Behavior**: visual
-skeleton from Phase 1.5 + new view content → behavior tests → behavior
-implementation → design review only if D2/D3/D4 needs re-running.
+1. **D1** — design tokens (colors, spacing, type, shadow, radius)
+2. **D2** — Layout shell + three view-tab placeholders
+3. **D3** — CorruptedView (emergency-state UX deserves its own review)
+4. **D4** — Settings page + ConfirmDialog + Test Error picker
 
-Phase 1.5 is **explicitly TDD-skip** for visual choices: tokens have no
-behavior; Layout shell has only props/JSX shape — behavior tests come in
-Phase 3 on top of the existing skeletons.
+Each checkpoint invokes `/design-taste-frontend` skill against the
+running UI, runs the 31-item anti-pattern checklist from `design.md`
+Section 3, and produces a summary in the commit body. `Pre-flight
+check: fail` blocks the commit until fixed.
+
+Why this sequencing:
+- Tokens and visual rhythm are foundational; once wrong, every
+  downstream component inherits the mistake.
+- A spec-phase `design.md` lets implementation move fast — the design
+  decisions are already made and stable.
+- Anti-pattern checklist is mechanical (per the skill's Pre-Flight
+  Check, Section 14 of design-taste-frontend): every item is either
+  ✅ or ❌, no judgment calls.
 
 Pre-push hook verifies: any commit whose scope matches a `feat.*` or
 `fix.*` pattern and which modifies non-test source MUST have an earlier
