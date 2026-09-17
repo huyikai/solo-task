@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { t } from "@/i18n/t";
 
 interface LayoutProps {
   onOpenSettings?: () => void;
@@ -18,7 +19,7 @@ export default function Layout({ onOpenSettings, children }: LayoutProps) {
             type="button"
             onClick={onOpenSettings}
             className="rounded-md p-2 text-text-muted transition-colors duration-150 hover:bg-bg hover:text-text-primary"
-            aria-label="设置"
+            aria-label={t("app.settings")}
           >
             <svg
               width="20"

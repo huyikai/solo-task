@@ -75,7 +75,10 @@ export default function Settings({ onBack }: SettingsProps) {
     }, 1000);
   }
 
-  const resolvedMode = theme === "system" ? (systemDark ? "暗色" : "亮色") : theme === "dark" ? "暗色" : "亮色";
+  const resolvedKey = (() => {
+    const actual = theme === "system" ? (systemDark ? "dark" : "light") : theme;
+    return actual === "dark" ? "settings.theme.dark" : "settings.theme.light";
+  })();
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-8 py-8">
@@ -88,7 +91,7 @@ export default function Settings({ onBack }: SettingsProps) {
           <div className="flex flex-col items-end gap-1">
             <ThemeSwitcher value={theme} onChange={(m) => void handleThemeChange(m)} />
             <span className="text-xs text-text-muted">
-              {t("settings.theme.currentHint", { mode: resolvedMode })}
+              {t("settings.theme.currentHint", { mode: t(resolvedKey) })}
             </span>
           </div>
         </Card>
