@@ -27,6 +27,14 @@ The frontend wrapper `src/api/ipc.ts` normalizes this shape into a typed
 
 ## Commands
 
+| Command | Args | Returns | Used by |
+|---|---|---|---|
+| `health_check` | — | `Result<HealthStatus, AppError>` where `HealthStatus = { ok: true }` | `App.tsx` startup |
+| `export_json` | `path: String` | `Result<ExportSummary, AppError>` | `CorruptedView.tsx` S3 |
+| `get_preference` | `key: String` | `Result<PreferenceValue, AppError>` | `Settings.tsx` S6 |
+| `set_preference` | `key: String, value: String` | `Result<(), AppError>` | `Settings.tsx` S6 |
+| `trigger_test_error` | `variant: String` | `Result<(), AppError>` | `Settings.tsx` S4 debug button |
+
 ### `health_check`
 
 Called by `App.tsx` once on mount (after Tauri window is ready).
@@ -101,6 +109,53 @@ intentionally trivial — it exists so the frontend test can drive each
 variant through the same IPC path.
 
 **Errors**: always returns the variant passed in.
+
+---
+
+### `get_preference`
+
+Read a single user preference from the `user_preferences` table by key.
+
+**Args**: `{ key: String }`
+
+**Returns**: `AppResult<PreferenceValue>` where
+
+```typescript
+interface PreferenceValue {
+  key: string;
+  value: string;        // JSON-encoded for structured values
+  updated_at: string;   // ISO8601 UTC
+}
+```
+
+**Behavior**: SELECT WHERE key = ?. If no row, returns
+`Err(AppError::Unknown("preference_not_found: <key>"))`. Used by
+`Settings.tsx` to read `theme.mode` on mount.
+
+**Errors**:
+- `DbLocked` if SQLite read blocks
+- `Unknown(preference_not_found: <key>)` if key missing
+
+---
+
+### `set_preference`
+
+Upsert a single user preference. Creates row if missing, updates if present.
+
+**Args**: `{ key: String, value: String }` — value MUST be JSON-encoded
+even for simple strings (e.g. `'"dark"'` for the string `dark`).
+
+**Returns**: `AppResult<()>`
+
+**Behavior**: INSERT … ON CONFLICT(key) DO UPDATE. Wrapped in a
+transaction (Principle VII.4 panic-safe). Used by `Settings.tsx` Theme
+switcher to persist user choice.
+
+**Errors**:
+- `PermissionDenied` if key is in a reserved/blocked set (none defined
+  at foundation)
+- `IoError` for any filesystem error
+- `DbLocked` if SQLite write blocks
 
 ---
 

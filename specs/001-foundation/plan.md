@@ -46,7 +46,9 @@ GitHub Actions 双 runner CI、TDD pre-push hook、通过 design-taste-frontend 
   follow-up specs)
 - **Constraints**: < 50 MB installer; zero network calls except explicit manual
   check-for-update; panic-safe writes via SQLite transaction; TDD red→green
-  enforced by hook + CI
+  enforced by hook + CI; theme default = `prefers-color-scheme`, overridable
+  via Settings (3 options: system / light / dark), persisted to DB
+  (`user_preferences` table)
 - **Scale/Scope**: foundation slice only — no real CRUD, no reminders, no
   gantt logic. Roughly: ~10 Rust files, ~15 TS/TSX files, 1 CI workflow,
   1 pre-push hook script.
@@ -120,6 +122,8 @@ React is the frontend under `src/`):
 │       │   ├── mod.rs                   # command registry
 │       │   ├── health_check.rs          # S1 startup hook → returns Corrupted | Ok
 │       │   ├── export_json.rs           # S3 corruption recovery export (stub payload)
+│       │   ├── get_preference.rs        # S6 — read user_preferences by key
+│       │   ├── set_preference.rs        # S6 — write user_preferences by key
 │       │   └── trigger_test_error.rs    # S4 verification helper
 │       └── paths.rs                     # resolve db path via `dirs` crate, platform-correct
 ├── src/                                 # React frontend (Vite root)
@@ -141,7 +145,8 @@ React is the frontend under `src/`):
 │   │   ├── t.ts                         # lookup function + missing-key fallback + dev warning
 │   │   └── zh-CN.ts                     # dictionary (keys consumed by all visible strings)
 │   ├── api/
-│   │   └── ipc.ts                       # typed Tauri command wrappers + AppError → i18n-key mapping
+│   │   ├── ipc.ts                       # typed Tauri command wrappers + AppError → i18n-key mapping
+│   │   └── preferences.ts               # S6 — typed wrapper for get/set_preference, with Zod-validated theme values
 │   ├── styles/
 │   │   └── tokens.css                   # design tokens (color, spacing, type) from design review
 │   ├── __tests__/

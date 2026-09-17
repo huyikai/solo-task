@@ -124,6 +124,8 @@ Design review (design-taste-frontend):
 - [ ] T014 [Green] Implement `pub fn connect_and_init(path: &Path) -> Result<Connection, AppError>` in `src-tauri/src/db/mod.rs`: open conn, run `PRAGMA journal_mode=WAL`, run migrations (idempotent), wrap everything in transaction (Principle VII.4 panic-safe).
 - [ ] T015 [P] [Red] Write failing integration test `src-tauri/src/db/tests.rs::test_integrity_check_detects_corruption` asserting that after writing non-SQLite bytes to a temp file, `db::integrity_check(&conn)` returns `Err(AppError::DbCorrupted)`.
 - [ ] T016 [Green] Implement `pub fn integrity_check(conn: &Connection) -> Result<(), AppError>` in `src-tauri/src/db/mod.rs` running `PRAGMA integrity_check` and mapping any non-`ok` result to `DbCorrupted`.
+- [ ] T016a [P] [Red] Write failing integration test `src-tauri/src/db/tests.rs::test_user_preferences_table_seeded` asserting that `connect_and_init` creates `user_preferences` table with one row (`theme.mode` = `"system"`).
+- [ ] T016b [Green] Extend migration v1 in `src-tauri/src/db/migrations.rs` to include `CREATE TABLE user_preferences` + seed row (per data-model.md). Re-run T016a → GREEN; verify T013/T015 still pass (no schema drift).
 - [ ] T017 [P] [Red] Write failing test `src/i18n/t.test.ts` asserting: (a) `t('app.title')` returns `'Solo Task'`; (b) `t('missing.key')` returns `'<missing:missing.key>'` and `console.warn` was called in dev mode.
 - [ ] T018 [Green] Implement `src/i18n/t.ts` (lookup function + missing-key fallback + `import.meta.env.DEV` warning) and `src/i18n/zh-CN.ts` (dictionary with 24 keys per data-model.md). Run `pnpm test` → confirm GREEN.
 
@@ -224,6 +226,16 @@ Design review (design-taste-frontend):
 - [ ] T044 [Green] Implement `src-tauri/src/commands/trigger_test_error.rs` — switch on variant, return the matching `AppError`. Run `cargo test` → T041 GREEN.
 - [ ] T045 [Green] Update `src/views/Settings.tsx` (from Phase 4): add dev-only "Test Error" picker (gated by `import.meta.env.DEV` per Q3), dispatches `triggerTestError` then renders `ErrorToast` with the returned error. Run `pnpm test` → all S1-S4 tests green.
 - [ ] T046 [Visual] **🔔 DESIGN REVIEW D4**: invoke `/design-taste-frontend` skill on Settings page + ConfirmDialog + Test Error picker + ErrorToast. Single commit if changes; commit body includes review summary.
+- [ ] T046a [P] [Red] Write failing Rust test `src-tauri/src/commands/get_preference.rs::tests::test_get_returns_seeded_theme_default` asserting `get_preference("theme.mode")` after a fresh DB returns `value: "\"system\""`.
+- [ ] T046b [P] [Red] Write failing Rust test `src-tauri/src/commands/get_preference.rs::tests::test_get_missing_key_returns_unknown` asserting `get_preference("nonexistent.key")` returns `Err(AppError::Unknown("preference_not_found: ..."))`.
+- [ ] T046c [P] [Red] Write failing Rust test `src-tauri/src/commands/set_preference.rs::tests::test_set_then_get_round_trip` asserting `set_preference("theme.mode", "\"dark\"")` followed by `get_preference` returns the dark value, with `updated_at` advancing.
+- [ ] T046d [Green] Implement `src-tauri/src/commands/get_preference.rs` and `set_preference.rs` per contracts/ipc.md. Run `cargo test` → T046a/b/c GREEN. Register both commands in `src-tauri/src/main.rs`.
+- [ ] T046e [P] [Red] Write failing test `src/__tests__/ThemeSwitcher.test.tsx`: render `<ThemeSwitcher value="system" onChange={vi.fn()} />`, assert 3 radio buttons with labels from `t('settings.theme.system/light/dark')` and `system` checked; clicking `dark` calls `onChange("dark")`.
+- [ ] T046f [P] [Green] Implement `src/components/ThemeSwitcher.tsx` per `design.md` Section 2.6 — segmented control with ARIA `role="radiogroup"`, radius-md 8px, accent border on selected. Run `pnpm test` → T046e GREEN.
+- [ ] T046g [P] [Green] Implement `src/api/preferences.ts` — typed wrapper for `getPreference`/`setPreference` with theme validation (`'system' | 'light' | 'dark'`). Run `pnpm test` → typed wrapper covered.
+- [ ] T046h [Green] Update `src/views/Settings.tsx`: on mount call `getPreference('theme.mode')` (default `'system'` if missing); render `<ThemeSwitcher>` in Appearance group; on change call `setPreference` and apply immediately via `document.documentElement.classList.toggle('dark', resolvedTheme === 'dark')` based on `resolvedTheme` computed from user choice + `prefers-color-scheme`. Run `pnpm test` → all S1-S4 + S6 tests green.
+- [ ] T046i Add 6 new i18n keys to `src/i18n/zh-CN.ts`: `settings.appearance`, `settings.theme`, `settings.theme.system`, `settings.theme.light`, `settings.theme.dark`, `settings.theme.currentHint`. Run `pnpm check:i18n` → 0 hardcoded strings.
+- [ ] T046j [Visual] **🔔 DESIGN REVIEW D4 (extended)**: ThemeSwitcher is now part of Settings. Run `/design-taste-frontend` skill against Settings page + ConfirmDialog + Test Error picker + ThemeSwitcher + ErrorToast. Single commit if changes; commit body includes review summary.
 
 **Checkpoint**: In dev mode, Settings shows Test Error picker; each variant renders the correct i18n text; no internal stacks visible. S4 acceptance scenarios 1-4 verifiable.
 

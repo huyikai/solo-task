@@ -20,6 +20,13 @@ CREATE TABLE migrations (
   description TEXT    NOT NULL
 );
 
+-- User preferences (key-value store for app-wide settings)
+CREATE TABLE user_preferences (
+  key        TEXT    PRIMARY KEY NOT NULL,  -- e.g. 'theme.mode'
+  value      TEXT    NOT NULL,              -- JSON-encoded or plain text
+  updated_at TEXT    NOT NULL
+);
+
 -- Tasks: filled in by follow-up specs (basic CRUD)
 CREATE TABLE tasks (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -68,6 +75,10 @@ CREATE TABLE reminders (
 -- Record that v1 has been applied
 INSERT INTO migrations (version, applied_at, description)
 VALUES (1, '<utc-iso8601>', 'initial foundation schema: empty tables');
+
+-- Seed default preferences
+INSERT INTO user_preferences (key, value, updated_at) VALUES
+  ('theme.mode', '"system"', '<utc-iso8601>');
 ```
 
 **Validation rules** (enforced in follow-up specs; schema leaves room):
@@ -75,6 +86,9 @@ VALUES (1, '<utc-iso8601>', 'initial foundation schema: empty tables');
   in follow-up migration
 - `tasks.priority` ∈ {'none', 'low', 'med', 'high'}
 - `reminders.recurrence` format: deferred to reminders spec
+- `user_preferences.key`: known set is currently `theme.mode` only
+- `user_preferences.value` for `theme.mode`: JSON-encoded string ∈
+  `'"system"'`, `'"light"'`, `'"dark"'`
 
 **State transitions** (foundation: none; tasks table is empty)
 

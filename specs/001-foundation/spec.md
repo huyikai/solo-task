@@ -115,6 +115,8 @@
 2. **Given** `design.md` 第 3 节 anti-pattern 清单存在, **When** 在主窗口逐条对照, **Then** 31 条全部 ✅, 0 条 ❌
 3. **Given** 应用处于 light mode, **When** 切换系统为 dark mode, **Then** 应用自动跟随, 视觉层次保持一致(无对比度崩塌)
 4. **Given** 应用启动完成, **When** 与 `design.md` Section 2.1 Button 矩阵对照实际渲染, **Then** 每个 variant × size 组合都符合视觉描述(primary 蓝填充、secondary 白底边、ghost 透明、danger 红)
+5. **Given** 应用处于默认主题(跟随系统), **When** 用户打开 Settings 切换到"暗色", **Then** 应用立即变为 dark theme,设置被持久化到 DB(关闭再打开应用仍是暗色)
+6. **Given** 用户已选择"暗色", **When** 切到"亮色"再切回"跟随系统", **Then** 应用跟随当前系统设置,DB 中存储为 "system"
 
 ---
 
@@ -145,10 +147,11 @@
 - **FR-011**: 应用 MUST 包含 GitHub Actions CI workflow(`.github/workflows/ci.yml`),在 macOS-latest 和 windows-latest runner 上运行 `cargo check`、`cargo test`、`pnpm install --frozen-lockfile` + `pnpm exec tsc --noEmit`、`pnpm test`、以及 `pnpm run check:i18n`。任一 runner 失败 MUST 阻止 merge。
 - **FR-012**: 应用 MUST 包含 TDD pre-push git hook,自动检查即将 push 的 commits,任何 production-only scope MUST 在同 push 内有同 scope 的测试 commit 在前。违反规则 MUST 阻止 push。
 - **FR-013**: 应用 MUST 实现主样式系统(设计 token + 基础组件 Button / Card / Layout),且样式设计 MUST 通过 `design-taste-frontend` skill 评审。评审摘要 MUST 附在落地该样式的 commit body 中。
+- **FR-018**: Settings 页面 MUST 提供主题切换控件(3 选项 segmented control: 跟随系统 / 亮色 / 暗色),允许用户覆盖 FR-017 的默认行为。控件 MUST 使用 `design.md` Section 2.6 中描述的 segmented control 视觉规范。控件状态变化 MUST 立即应用 (无需重启) 并持久化到 DB(`user_preferences` 表)。
 - **FR-014**: 应用 MUST 在 spec/plan 阶段产出设计指引,作为 implement 阶段的视觉输入。该指引作为 `specs/001-foundation/design.md` 落地,包含 design tokens (color/spacing/typography/radius/shadow)、组件视觉骨架描述、anti-pattern 清单(31 条)、pre-flight pass 标准。
 - **FR-015**: 实际渲染 MUST 严格符合 `design.md` Section 1 的 token 值。任何 token 偏离(不同 hex、不同 spacing、不同字号、不同 radius) MUST 在 commit body 中说明。
 - **FR-016**: `design.md` 第 3 节 anti-pattern 清单 31 条 MUST 在 implement 阶段逐条 ✅。0 容忍 ❌。pre-flight fail = 不允许 commit。
-- **FR-017**: 应用 MUST 跟随系统主题(`prefers-color-scheme`),不在应用内做主题切换。dark mode 下视觉层次 MUST 与 light mode 保持一致(无对比度崩塌、accent 调亮)。
+- **FR-017**: 应用 MUST 默认跟随系统主题(`prefers-color-scheme`),并通过 Settings 提供手动覆盖(三个选项:跟随系统 / 亮色 / 暗色)。手动选择 MUST 持久化到 DB,跨应用重启保留。dark mode 下视觉层次 MUST 与 light mode 保持一致(无对比度崩塌、accent 调亮)。
 
 ### Key Entities *(include if feature involves data)*
 

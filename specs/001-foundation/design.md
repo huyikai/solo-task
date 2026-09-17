@@ -21,7 +21,12 @@
 
 **System choice**: 不引入 shadcn/ui / Radix Themes / 任何组件库 (避免默认态、避免二次定制)。用原生 Tailwind + 几个自建原子组件。理由: 一个人维护, 不需要 shadcn 那种 "你拥有代码" 的复杂度; 反正要全部定制, 直接写更短。
 
-**Theme lock**: 单主题 = 跟随系统 (`prefers-color-scheme: dark` / `light`), 不在应用内做切换 (避免 scope creep; Constitution v1.4.0 I18n 立场预留)。
+**Theme lock**: **默认跟随系统** (`prefers-color-scheme: dark` / `light`), 但 Settings 提供手动覆盖。三个选项:
+- **跟随系统** (default): 应用 CSS `dark:` variant 由系统决定
+- **亮色**: 强制 light theme, 忽略系统
+- **暗色**: 强制 dark theme, 忽略系统
+
+用户选择持久化到 DB (`user_preferences` 表), 跨重启保留。MVP 阶段不在应用内做主题切换的快捷键 (避免 scope creep), 仅通过 Settings 切换。
 
 ---
 
@@ -300,6 +305,9 @@ module.exports = {
 - Layout 内显示 (非全屏)
 - 页面标题: `text-2xl semibold` "设置"
 - 分组列表 (grouped sections):
+  - 外观 (Appearance)
+    - 主题 (Theme): 3 选项 segmented control (跟随系统 / 亮色 / 暗色), 当前选中态用 `--accent` 边框 + text-medium
+    - 当前模式文字提示: text-sm muted, 例如 "跟随系统 (当前: 暗色)"
   - 数据 (Data)
     - 检查更新 (Button variant="secondary", 点击 → loading 1s → 显示"已是最新")
     - 清除所有数据 (Button variant="danger", 点击 → ConfirmDialog)
@@ -307,7 +315,14 @@ module.exports = {
     - 版本号 `v0.1.0` (text-sm muted, mono font)
 - 分组间距: `gap-8`
 - 组内间距: `gap-3`
-- 每个 action 项: `flex justify-between items-center`, label 在左, button 在右
+- 每个 action 项: `flex justify-between items-center`, label 在左, control 在右
+
+**Segmented Control** (Theme 选择器子组件):
+- 3 个按钮并排, 共享 border-radius-md 8px (Shape Consistency Lock)
+- 未选中: bg `--surface`, text `--text-muted`, 1px border `--border`
+- 选中: bg `--bg`, text `--text-primary`, border `--accent` 2px
+- 尺寸: height 36px, padding `px-3`, text-sm
+- ARIA: `role="radiogroup"`, 每个 `role="radio"`, 选中 `aria-checked="true"`
 
 **ConfirmDialog** (子组件):
 - Modal overlay: `--bg` 50% 透明
@@ -373,6 +388,8 @@ module.exports = {
 29. **❌ 无硬编码中文** 在 `.tsx` 组件中 → 必须 `t('key')` 包装
 30. **❌ 无 emoji 任务状态图标** (✅/⏳/❌) → 用 lucide 的 Circle/Clock/CheckCircle
 31. **❌ 无 "Beta" / "Preview" / "v0.x" 角标** 在 Settings 主标题 (允许在 About 版本号旁)
+32. **❌ 无 theme toggle 在顶栏/hero 等显眼位置** → 仅在 Settings 内 (Section 2.6), 不做成太阳/月亮图标按钮
+33. **❌ 无未持久化的 theme 选择** → 必须存 DB (`user_preferences` 表), 跨重启保留
 
 ---
 
