@@ -1,17 +1,18 @@
 <!-- Sync Impact Report
-Version: 1.2.0 → 1.3.0
-Bump rationale: MINOR — added Core Principle IX (Design Quality). No principle
-removed or redefined. Existing principles unaffected.
+Version: 1.3.0 → 1.4.0
+Bump rationale: MINOR — added explicit package manager (pnpm) and tightened TypeScript
+versioning language in Technology Stack. No principle added or redefined; existing
+principles unaffected.
 Modified principles: none renamed.
 Added sections:
-- Core Principle IX. Design Quality (NON-NEGOTIABLE) — mandates use of the
-  /design-taste-frontend skill for any UI work and requires an inline review
-  summary on push.
+- Technology Stack bullet: Package manager — pnpm (^9.x)
+- Technology Stack bullet: TypeScript — ^5.x (soft range, lockfile guarantees reproducibility)
+- Quality Gate bullet: TS check uses `pnpm exec tsc --noEmit`
+- Dependency Upgrade footnote: lockfile is the source of truth, `pnpm install --frozen-lockfile` is required in CI
 Removed sections: none
 Follow-up TODOs:
-- The exact review-summary format and the skill-invocation pattern will be
-  refined in the project-skeleton spec; this amendment locks the policy,
-  not the tooling.
+- plan.md and tasks.md for 001-foundation contain `npm` invocations that should be
+  migrated to `pnpm`; that is a docs follow-up, not a constitution follow-up.
 -->
 
 # Solo Task Constitution
@@ -217,8 +218,13 @@ the product feeling intentional.
 ## Technology Stack
 
 - **Desktop shell**: Tauri 2.x (Rust 1.78+)
-- **UI**: React 18 + TypeScript 5.x
-- **Build tool**: Vite (default Tauri template)
+- **UI**: React 18 + TypeScript ^5.x (strict mode; soft range, lockfile
+  guarantees reproducibility — see Dependency Upgrades footnote)
+- **Package manager**: pnpm ^9.x (soft range, lockfile-pinned). npm and
+  yarn are forbidden for this project. CI MUST use
+  `pnpm install --frozen-lockfile` to keep builds reproducible.
+- **Build tool**: Vite (default Tauri template); invoked via `pnpm exec`
+  or pnpm scripts (never `npx` directly)
 - **State / data fetching**: React Query or equivalent for IPC cache;
   Zustand or Context for UI-local state — pick the lighter option per case
 - **Styling**: Tailwind CSS or CSS modules — pick one and stay consistent
@@ -265,8 +271,9 @@ the product feeling intentional.
   - For any UI-touching change, the `design-taste-frontend` skill has
     been invoked and its review summary included per Principle IX.
   - `cargo check` + `cargo clippy -- -D warnings` clean on Rust side
-  - `tsc --noEmit` clean on TypeScript side
-  - `cargo test` and the React test runner both pass locally
+  - `pnpm exec tsc --noEmit` clean on TypeScript side (pnpm, not npx —
+    see Technology Stack)
+  - `cargo test` and `pnpm test` both pass locally
   - GitHub Actions CI is green on both `macos-latest` and
     `windows-latest` runners
   - App boots and core flow works on the developer's macOS box
@@ -302,6 +309,12 @@ Upgrades are tiered by blast radius:
   spec MUST include: version delta, breaking-change inventory, risk
   assessment, and a migration path. Implementation follows the regular
   Spec Kit flow.
+
+**Lockfile discipline** (applies to all tiers above): `pnpm-lock.yaml` is
+the source of truth for resolved versions in this project. CI and local
+installs MUST use `pnpm install --frozen-lockfile`. A lockfile change
+without a matching `chore(deps):` or scoped commit is a Quality Gate
+failure.
 
 ## Automation & CI
 
@@ -347,4 +360,4 @@ Upgrade tiers requires a constitution amendment:
    current constitution. The implementer MUST verify and explicitly call
    out any deviation in the commit body.
 
-**Version**: 1.3.0 | **Ratified**: 2026-09-17 | **Last Amended**: 2026-09-17
+**Version**: 1.4.0 | **Ratified**: 2026-09-17 | **Last Amended**: 2026-09-17
