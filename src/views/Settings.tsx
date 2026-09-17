@@ -26,7 +26,7 @@ function applyTheme(mode: ThemeMode) {
   }
 }
 
-export default function Settings({ onBack }: SettingsProps) {
+export default function Settings(_: SettingsProps) {
   const [theme, setTheme] = useState<ThemeMode>("system");
   const [systemDark, setSystemDark] = useState(
     typeof window !== "undefined" &&
@@ -162,14 +162,6 @@ export default function Settings({ onBack }: SettingsProps) {
         }}
         onCancel={() => setConfirmOpen(false)}
       />
-
-      {onBack && (
-        <div>
-          <Button variant="ghost" size="sm" onClick={onBack}>
-            ← {t("views.list")}
-          </Button>
-        </div>
-      )}
     </div>
   );
 }

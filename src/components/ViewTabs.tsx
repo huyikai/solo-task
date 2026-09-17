@@ -15,17 +15,17 @@ const tabs: Array<{ key: ViewKind; labelKey: string }> = [
 
 export default function ViewTabs({ active, onChange }: ViewTabsProps) {
   return (
-    <div role="tablist" className="flex gap-4 border-b border-border px-6">
+    <div role="tablist" className="flex gap-1">
       {tabs.map(({ key, labelKey }) => (
         <button
           key={key}
           role="tab"
           aria-selected={active === key}
           onClick={() => onChange(key)}
-          className={`-mb-px border-b-2 px-4 py-2 text-base transition-colors duration-150 ${
+          className={`rounded-md px-3 py-1.5 text-sm transition-colors duration-150 ${
             active === key
-              ? "border-accent font-medium text-text-primary"
-              : "border-transparent text-text-muted hover:text-text-primary"
+              ? "bg-bg font-medium text-text-primary"
+              : "text-text-muted hover:bg-bg hover:text-text-primary"
           }`}
         >
           {t(labelKey)}

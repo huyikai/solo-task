@@ -84,16 +84,34 @@ function App() {
   }
 
   return (
-    <Layout onOpenSettings={() => setRoute("settings")}>
-      {route === "settings" ? (
-        <Settings onBack={() => setRoute("views")} />
-      ) : (
-        <div className="flex flex-col gap-6">
+    <Layout
+      onOpenSettings={route === "views" ? () => setRoute("settings") : undefined}
+      activeTab={
+        route === "views" ? (
           <ViewTabs active={activeView} onChange={setActiveView} />
+        ) : undefined
+      }
+      headerLeft={
+        route === "settings" ? (
+          <button
+            type="button"
+            onClick={() => setRoute("views")}
+            className="rounded-md px-2 py-1 text-sm text-text-muted transition-colors duration-150 hover:bg-bg hover:text-text-primary"
+            aria-label="back"
+          >
+            ← {t("views.list")}
+          </button>
+        ) : undefined
+      }
+    >
+      {route === "settings" ? (
+        <Settings />
+      ) : (
+        <>
           {activeView === "list" && <ListView />}
           {activeView === "board" && <BoardView />}
           {activeView === "gantt" && <GanttView />}
-        </div>
+        </>
       )}
     </Layout>
   );

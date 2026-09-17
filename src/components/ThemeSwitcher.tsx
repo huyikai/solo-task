@@ -29,11 +29,6 @@ export default function ThemeSwitcher({ value, onChange }: ThemeSwitcherProps) {
                 ? "bg-bg font-medium text-text-primary"
                 : "bg-surface text-text-muted hover:text-text-primary"
             }`}
-            style={
-              selected
-                ? { boxShadow: "inset 0 0 0 2px var(--accent)" }
-                : undefined
-            }
           >
             {t(labelKey)}
           </button>

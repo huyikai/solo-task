@@ -351,14 +351,19 @@ design-amendment spec.
 
 ### 6.3 Layout (App Shell)
 
-**Structure**: top bar + main content area. No sidebar (Settings entry
-lives in top-bar right corner).
+**Structure**: top bar + main content area. No sidebar. Three-column
+top bar: `左 | 中 | 右` via CSS grid `grid-cols-[1fr_auto_1fr]`.
 
 - Top bar:
   - Height: `h-14` (56px)
   - Horizontal padding: `px-6` (24px)
-  - Left: app name "Solo Task" (text-base medium, always visible)
-  - Right: Settings entry button (icon, secondary ghost)
+  - **Left slot** (`headerLeft`): app name "Solo Task" (text-base medium)
+    in views route; on settings route, an inline "← {list}" back button
+    styled as ghost (rounded-md, px-2 py-1, text-sm, hover bg-bg).
+  - **Center slot** (`activeTab`): ViewTabs component in views route;
+    empty in settings route.
+  - **Right slot**: Settings gear icon button (secondary ghost, p-2,
+    hover bg-bg + text-text-primary). Hidden in settings route.
   - Background: `--surface`, separated from main content by 1px `--border` bottom line
 - Main content area:
   - Padding: `p-6` or `p-8`
@@ -367,16 +372,19 @@ lives in top-bar right corner).
 
 ### 6.4 ViewTabs
 
-Located below Layout top bar, above main content area.
+Lives inside the Layout top bar's center slot (NOT a separate row).
 
 - Horizontal layout, three tabs: `列表` / `看板` / `甘特图`
-- Each tab:
-  - Padding: `px-4 py-2`
-  - text-base
-  - Selected: text `--text-primary` medium + bottom border 2px `--accent`
-  - Unselected: text `--text-muted` + transparent bottom border (layout stable)
-- Spacing: `gap-2` or larger `gap-4`
+- Tab shape: `rounded-md px-3 py-1.5 text-sm`
+- Selected: `bg-bg` (slightly lighter than surrounding surface) +
+  `font-medium` + text-text-primary
+- Unselected: bg transparent + text-text-muted, hover `bg-bg` + text-text-primary
+- Spacing: `gap-1` (tight, tabs sit together as a group)
 - ARIA: `role="tablist"`, each tab `role="tab"`, selected `aria-selected="true"`
+
+**No accent border / no underline.** Selected state is conveyed only
+by background tint + medium weight. Avoids the AI-default "blue glow
+on active tab" pattern (anti-pattern #3).
 
 ### 6.5 CorruptedView
 
@@ -416,10 +424,14 @@ Located below Layout top bar, above main content area.
 **Segmented Control** (Theme selector sub-component):
 
 - 3 buttons side-by-side, shared border-radius-md 8px (Shape Consistency Lock)
-- Unselected: bg `--surface`, text `--text-muted`, 1px border `--border`
-- Selected: bg `--bg`, text `--text-primary`, border `--accent` 2px
-- Size: height 36px, padding `px-3`, text-sm
+- Selected: `bg-bg` + `font-medium` + text-text-primary
+- Unselected: bg-surface + text-text-muted, hover text-text-primary
+- Size: height 36px (h-9), padding `px-3`, text-sm
 - ARIA: `role="radiogroup"`, each `role="radio"`, selected `aria-checked="true"`
+
+**No accent border, no inset box-shadow.** Selected state is conveyed
+only by background tint + medium weight. Consistent with ViewTabs
+selection pattern above.
 
 **ConfirmDialog** (sub-component):
 
