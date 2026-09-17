@@ -107,7 +107,7 @@ Design review (design-taste-frontend):
 - [ ] T008c [P] Author `src/components/Card.tsx` **严格按照 `.specify/memory/design.md` Section 6.2**：surface + border + padding + shadow-sm。
 - [ ] T008d Author `src/components/Layout.tsx` **严格按照 `.specify/memory/design.md` Section 6.3**：h-14 顶栏 + 主内容区，Settings 入口在右上角。
 - [ ] T008e Author `src/components/ViewTabs.tsx` **严格按照 `.specify/memory/design.md` Section 6.4**：role="tablist"，选中状态 2px accent 下边线。
-- [ ] T008f Author `src/pages/DesignPreview.tsx` (dev-only, gated by `import.meta.env.DEV`) — 把上面 5 个组件并排展示，作为 D1 评审的可视化对象。Phase 8 T057 删除。
+- [ ] T008f Author `src/pages/DesignPreview.tsx` (dev-only, gated by `import.meta.env.DEV`) — 把上面 5 个组件并排展示。**这是 D1 评审的可视化对象**（替代 AI 生图——生图模型对密集中文 + hex 码渲染不可靠，HTML 预览让你看实际像素）。Phase 8 T057 删除。
 - [ ] T008g **🔔 Invoke `/design-taste-frontend` skill** on tokens + Button + Card + Layout + ViewTabs via DesignPreview。Skill runs the 33-item anti-pattern checklist from `.specify/memory/design.md` Section 2. Capture review summary.
 - [ ] T008h Refactor if pre-flight fails (rename tokens / swap colors / adjust spacing). Loop until pre-flight passes.
 - [ ] T008i Single commit: `feat(design): implement `.specify/memory/design.md` tokens + Section 6 components (D1)`. Commit body MUST include review summary + reference to the global design file.
