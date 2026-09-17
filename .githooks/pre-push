@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# TDD pre-push hook (Constitution Principle VI + Q1)
+#
+# Rules enforced on the range being pushed:
+# 1. Force-push to main is rejected outright.
+# 2. Every commit that modifies production code (non-test) under a
+#    conventional-commit scope (e.g. feat(foo):) MUST be preceded, within
+#    the same push, by a commit in the SAME scope that modified a test file.
+#
+# Install: git config core.hooksPath .githooks
+
+set -euo pipefail
+
+remote="$1"
+url="$2"
+
+# --- Rule 1: no force-push to main ---
+current_branch="$(git rev-parse --abbrev-ref HEAD)"
+if [ "$current_branch" = "main" ]; then
+  # detect force push: any pushed ref whose old commit is not ancestor of new
+  while read -r local_ref local_sha remote_ref remote_sha; do
+    [ "$local_sha" = "0000000000000000000000000000000000000000" ] && continue
+    if ! git merge-base --is-ancestor "$remote_sha" "$local_sha" 2>/dev/null; then
+      echo "✗ pre-push: force-push to $remote_ref is not allowed (Q1)" >&2
+      exit 1
+    fi
+  done
+fi
+
+# --- Rule 2: per-scope test-before-production ---
+zero="0000000000000000000000000000000000000000"
+while read -r local_ref local_sha remote_ref remote_sha; do
+  [ "$local_sha" = "$zero" ] && continue # deletion
+
+  # Determine commit range
+  if [ "$remote_sha" = "$zero" ]; then
+    range="$local_sha"
+    commits="$(git rev-list "$local_sha" --not --all)"
+  else
+    range="$remote_sha..$local_sha"
+    commits="$(git rev-list "$range")"
+  fi
+
+  # commits newest-first; invert to oldest-first
+  ordered="$(echo "$commands" 2>/dev/null || true)"
+  ordered="$(echo "$commits" | tac)"
+
+  declare -a scope_has_test=()
+  for c in $ordered; do
+    subject="$(git log -1 --format='%s' "$c")"
+    # extract scope: type(scope): ...
+    scope="$(echo "$subject" | sed -n 's/^[a-z]*(\([^)]*\)).*/\1/p')"
+    [ -z "$scope" ] && continue # no scope, skip rule
+
+    files="$(git diff-tree --no-commit-id --name-only -r "$c")"
+    touches_test="$(echo "$files" | grep -E '(^|/)(__tests__|tests?)/|\.(test|spec)\.[jt]sx?$|_test\.rs$' || true)"
+    touches_prod="$(echo "$files" | grep -vE '(^|/)(__tests__|tests?)/|\.(test|spec)\.[jt]sx?$|_test\.rs$|\.md$|^\.github/|^\.githooks/|^scripts/' || true)"
+
+    if [ -n "$touches_test" ]; then
+      scope_has_test+=("$scope")
+    fi
+    if [ -n "$touches_prod" ]; then
+      found=0
+      for s in "${scope_has_test[@]:-}"; do
+        [ "$s" = "$scope" ] && found=1 && break
+      done
+      if [ "$found" = "0" ]; then
+        echo "✗ pre-push: commit $c ($subject) touches production code in scope '$scope' without a preceding test commit in the same push (TDD, Principle VI)." >&2
+        echo "  Add a failing-then-passing test commit with scope ($scope) before the production commit." >&2
+        exit 1
+      fi
+    fi
+  done
+  unset scope_has_test
+done
+
+echo "✓ pre-push: TDD order check passed"
+exit 0
