@@ -1,0 +1,172 @@
+import { useCallback, useEffect, useState } from "react";
+import Button from "@/components/Button";
+import Card from "@/components/Card";
+import ConfirmDialog from "@/components/ConfirmDialog";
+import ThemeSwitcher, { type ThemeMode } from "@/components/ThemeSwitcher";
+import ErrorToast from "@/components/ErrorToast";
+import {
+  getPreference,
+  setPreference,
+  triggerTestError,
+  type AppErrorSerialized,
+  type TestErrorVariant,
+} from "@/api/ipc";
+import { t } from "@/i18n/t";
+
+interface SettingsProps {
+  onBack?: () => void;
+}
+
+function applyTheme(mode: ThemeMode) {
+  const root = document.documentElement;
+  if (mode === "system") {
+    root.removeAttribute("data-theme");
+  } else {
+    root.setAttribute("data-theme", mode);
+  }
+}
+
+export default function Settings({ onBack }: SettingsProps) {
+  const [theme, setTheme] = useState<ThemeMode>("system");
+  const [systemDark, setSystemDark] = useState(
+    typeof window !== "undefined" &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches,
+  );
+  const [checking, setChecking] = useState(false);
+  const [noUpdate, setNoUpdate] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [cleared, setCleared] = useState(false);
+  const [testError, setTestError] = useState<AppErrorSerialized | null>(null);
+
+  useEffect(() => {
+    void getPreference("theme.mode").then((result) => {
+      if (result.ok) {
+        try {
+          const parsed = JSON.parse(result.data.value) as ThemeMode;
+          if (parsed === "system" || parsed === "light" || parsed === "dark") {
+            setTheme(parsed);
+            applyTheme(parsed);
+          }
+        } catch {
+          // 保持默认 system
+        }
+      }
+    });
+  }, []);
+
+  const handleThemeChange = useCallback(async (mode: ThemeMode) => {
+    setTheme(mode);
+    applyTheme(mode);
+    await setPreference("theme.mode", JSON.stringify(mode));
+  }, []);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const handler = (e: MediaQueryListEvent) => setSystemDark(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  function handleCheckUpdate() {
+    setChecking(true);
+    setTimeout(() => {
+      setChecking(false);
+      setNoUpdate(true);
+    }, 1000);
+  }
+
+  const resolvedMode = theme === "system" ? (systemDark ? "暗色" : "亮色") : theme === "dark" ? "暗色" : "亮色";
+
+  return (
+    <div className="mx-auto flex max-w-2xl flex-col gap-8 py-8">
+      <h1 className="text-2xl font-semibold">{t("settings.title")}</h1>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="text-lg font-medium">{t("settings.appearance")}</h2>
+        <Card className="flex items-center justify-between">
+          <span className="text-base">{t("settings.theme")}</span>
+          <div className="flex flex-col items-end gap-1">
+            <ThemeSwitcher value={theme} onChange={(m) => void handleThemeChange(m)} />
+            <span className="text-xs text-text-muted">
+              {t("settings.theme.currentHint", { mode: resolvedMode })}
+            </span>
+          </div>
+        </Card>
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="text-lg font-medium">{t("settings.data")}</h2>
+        <Card className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <span className="text-base">{t("settings.check_for_update")}</span>
+            <div className="flex items-center gap-2">
+              {noUpdate && <span className="text-sm text-text-muted">{t("settings.no_update")}</span>}
+              <Button variant="secondary" size="sm" loading={checking} onClick={handleCheckUpdate}>
+                {checking ? t("settings.checking") : t("settings.check_for_update")}
+              </Button>
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-base">{t("settings.clear_data")}</span>
+            <div className="flex items-center gap-2">
+              {cleared && <span className="text-sm text-text-muted">{t("settings.clear_done")}</span>}
+              <Button variant="danger" size="sm" onClick={() => setConfirmOpen(true)}>
+                {t("settings.clear_data")}
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="text-lg font-medium">{t("settings.about")}</h2>
+        <Card className="flex items-center justify-between">
+          <span className="text-base">{t("settings.version")}</span>
+          <span className="font-mono text-sm text-text-muted">v0.1.0</span>
+        </Card>
+      </section>
+
+      {import.meta.env.DEV && (
+        <section className="flex flex-col gap-3">
+          <h2 className="text-lg font-medium">{t("settings.developer")}</h2>
+          <Card className="flex flex-wrap items-center gap-2">
+            {(["db_locked", "db_corrupted", "permission_denied", "unknown"] as TestErrorVariant[]).map(
+              (variant) => (
+                <Button
+                  key={variant}
+                  variant="secondary"
+                  size="sm"
+                  onClick={async () => {
+                    const result = await triggerTestError(variant);
+                    if (!result.ok) setTestError(result.error);
+                  }}
+                >
+                  {variant}
+                </Button>
+              ),
+            )}
+          </Card>
+          {testError && <ErrorToast error={testError} />}
+        </section>
+      )}
+
+      <ConfirmDialog
+        open={confirmOpen}
+        expectedText={t("settings.confirm_clear_placeholder")}
+        onConfirm={() => {
+          setConfirmOpen(false);
+          setCleared(true);
+        }}
+        onCancel={() => setConfirmOpen(false)}
+      />
+
+      {onBack && (
+        <div>
+          <Button variant="ghost" size="sm" onClick={onBack}>
+            ← {t("views.list")}
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}

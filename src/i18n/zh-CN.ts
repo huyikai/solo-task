@@ -9,6 +9,7 @@ const zhCN = {
 
   "settings.title": "设置",
   "settings.appearance": "外观",
+  "settings.data": "数据",
   "settings.theme": "主题",
   "settings.theme.system": "跟随系统",
   "settings.theme.light": "亮色",
@@ -18,6 +19,7 @@ const zhCN = {
   "settings.checking": "检查中",
   "settings.no_update": "已是最新",
   "settings.clear_data": "清除所有数据",
+  "settings.clear_done": "已清除",
   "settings.confirm_clear_title": "确认清除所有数据?",
   "settings.confirm_clear_message": "此操作不可撤销, 输入 DELETE 确认",
   "settings.confirm_clear_placeholder": "DELETE",
@@ -40,6 +42,7 @@ const zhCN = {
   "error.db_corrupted": "数据库损坏",
   "error.permission_denied": "权限不足",
   "error.unknown": "操作失败, 请稍后重试",
+  "error.retry": "重试",
 } as const;
 
 export default zhCN;
