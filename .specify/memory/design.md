@@ -309,13 +309,140 @@ Design review (design-taste-frontend):
 
 ---
 
-## 5. Amending This Document
+## 6. Established Component Library
 
-设计系统的变更 (token 调整 / 新增 anti-pattern / dials 调整) 是 **MINOR amendment**
-(新增原则类内容) 或 **PATCH** (修正/澄清), 通过 `docs: amend design to vX.Y.Z`
-commit 在 main 上完成。
+Components introduced and visually defined by the foundation feature.
+Any spec that uses these components MUST inherit these visual
+descriptions (no redefinition per feature). A feature that introduces a
+**new** component visual pattern MUST add it to this section via a
+design-amendment spec.
 
-任何后续 spec 若发现本设计系统不足:
-- 不可就地修改本文件
-- 通过 `/speckit-specify` 写一个 "design-amendment" spec, 在 plan.md 引用本文件, 在 tasks.md 列出具体变更
-- implement 完成后再 amend 本文件
+### 6.1 Button
+
+**Matrix**:
+
+| Variant | Background | Border | Text | Hover | Active |
+|---|---|---|---|---|---|
+| primary | `--accent` | none | `#FFFFFF` | `--accent-hover` | `scale(0.98)` |
+| secondary | `--surface` | `1px --border-strong` | `--text-primary` | bg `--bg` | `scale(0.98)` |
+| ghost | transparent | none | `--text-primary` | bg `--bg` | `scale(0.98)` |
+| danger | `--error` | none | `#FFFFFF` | darken 8% | `scale(0.98)` |
+
+**Size**:
+
+| Size | Height | Padding | Font |
+|---|---|---|---|
+| sm | 32px | `px-3` | text-sm |
+| md | 40px | `px-4` | text-base |
+
+**Radius**: 8px (Shape Consistency Lock per Section 1.4).
+**Focus**: 2px outline `--accent`, offset 2px, WCAG 2.4.7 compliant.
+**Disabled**: opacity 0.5, cursor not-allowed, no hover.
+**Loading**: text replaced with same-size spinner (16px).
+
+### 6.2 Card
+
+- Background: `--surface`
+- 1px border: `--border`
+- Radius: 8px
+- Padding: `p-4` (16px)
+- Shadow: `shadow-sm` default, `shadow-md` on hover (toggleable)
+- Internal layout: title (text-lg medium) + subtitle (text-sm muted, optional) + content (gap-3)
+
+### 6.3 Layout (App Shell)
+
+**Structure**: top bar + main content area. No sidebar (Settings entry
+lives in top-bar right corner).
+
+- Top bar:
+  - Height: `h-14` (56px)
+  - Horizontal padding: `px-6` (24px)
+  - Left: app name "Solo Task" (text-base medium, always visible)
+  - Right: Settings entry button (icon, secondary ghost)
+  - Background: `--surface`, separated from main content by 1px `--border` bottom line
+- Main content area:
+  - Padding: `p-6` or `p-8`
+  - Max width: unlimited (Mac window typically 1024+px, content fills)
+  - Background: `--bg` (creates layer with surface)
+
+### 6.4 ViewTabs
+
+Located below Layout top bar, above main content area.
+
+- Horizontal layout, three tabs: `列表` / `看板` / `甘特图`
+- Each tab:
+  - Padding: `px-4 py-2`
+  - text-base
+  - Selected: text `--text-primary` medium + bottom border 2px `--accent`
+  - Unselected: text `--text-muted` + transparent bottom border (layout stable)
+- Spacing: `gap-2` or larger `gap-4`
+- ARIA: `role="tablist"`, each tab `role="tab"`, selected `aria-selected="true"`
+
+### 6.5 CorruptedView
+
+**Visual tone**: calm, NOT alarm. A corrupted DB is a state, not an error.
+
+- Full-screen centered layout (Layout not shown)
+- Top: single icon (warning triangle, `--warning` color, 32px)
+- Title: `text-2xl semibold` "数据库损坏"
+- Subtitle: `text-base muted`, max-width `prose` (65ch)
+  - Content: explain situation + promise no deletion + guide to export
+- Primary action: `Button variant="primary"` "导出为 JSON"
+- Secondary action: `Button variant="ghost"` "进入设置" (allow user to manually clear data before exporting)
+- Spacing: icon-to-title `gap-4`, title-to-subtitle `gap-2`, subtitle-to-buttons `gap-6`
+- Page padding: `py-16`
+
+**Forbidden**: red banner, exclamation marks, flashing, emoji.
+
+### 6.6 Settings
+
+**Visual tone**: dense but ordered, like macOS System Preferences.
+
+- Displayed inside Layout (not full-screen)
+- Page title: `text-2xl semibold` "设置"
+- Grouped sections:
+  - 外观 (Appearance)
+    - 主题 (Theme): 3-option segmented control (跟随系统 / 亮色 / 暗色), current selection uses `--accent` border + text-medium
+    - Current mode hint: text-sm muted, e.g. "跟随系统 (当前: 暗色)"
+  - 数据 (Data)
+    - 检查更新 (Button variant="secondary", click → loading 1s → show "已是最新")
+    - 清除所有数据 (Button variant="danger", click → ConfirmDialog)
+  - 关于 (About)
+    - Version `v0.1.0` (text-sm muted, mono font)
+- Group spacing: `gap-8`
+- Inner spacing: `gap-3`
+- Each action item: `flex justify-between items-center`, label left, control right
+
+**Segmented Control** (Theme selector sub-component):
+
+- 3 buttons side-by-side, shared border-radius-md 8px (Shape Consistency Lock)
+- Unselected: bg `--surface`, text `--text-muted`, 1px border `--border`
+- Selected: bg `--bg`, text `--text-primary`, border `--accent` 2px
+- Size: height 36px, padding `px-3`, text-sm
+- ARIA: `role="radiogroup"`, each `role="radio"`, selected `aria-checked="true"`
+
+**ConfirmDialog** (sub-component):
+
+- Modal overlay: `--bg` 50% transparent
+- Centered card: 480px wide, padding `p-6`, radius `lg` (12px), shadow `lg`
+- Title: `text-xl semibold` "确认清除所有数据?"
+- Content: text-base muted, explain "此操作不可撤销, 输入 DELETE 确认"
+- Input: Input component, placeholder "DELETE"
+- Button group: `flex justify-end gap-2`
+  - 取消 (secondary)
+  - 确认清除 (danger), disabled until input === 'DELETE'
+
+---
+
+## 7. Amending This Document
+
+Design system changes (token adjustment / new anti-pattern / dials
+shift) are **MINOR amendment** (additive principle-like content) or
+**PATCH** (correction/clarification), landed on `main` via a
+`docs: amend design to vX.Y.Z` commit.
+
+Any spec that finds the design system insufficient:
+- MUST NOT modify this file in place
+- Produces a "design-amendment" sub-spec via `/speckit-specify`, with
+  plan.md referencing this file and tasks.md listing concrete changes
+- Implement completes, then this file is amended

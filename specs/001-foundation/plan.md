@@ -83,7 +83,6 @@ choices above come from Constitution v1.3.0 or are unambiguous defaults.
 
 ```text
 specs/001-foundation/
-├── design.md           # Spec-phase design output (tokens, components, anti-patterns)
 ├── plan.md             # This file
 ├── data-model.md       # Phase 1 output — DB schema, AppError, ExportPayload, I18nKey
 ├── contracts/
@@ -247,7 +246,7 @@ UI scopes additionally require:
 
 **Design is decided in the spec/plan phase, not implemented in the
 implement phase.** The full design language for this feature lives in
-[`design.md`](design.md) — produced before any code is written,
+[`.specify/memory/design.md`](../../../.specify/memory/design.md) — produced before any code is written,
 referenced by every UI implementation, and validated by 4 pre-flight
 checkpoints during implement.
 
@@ -260,15 +259,16 @@ Points"):
 4. **D4** — Settings page + ConfirmDialog + Test Error picker
 
 Each checkpoint invokes `/design-taste-frontend` skill against the
-running UI, runs the 31-item anti-pattern checklist from `design.md`
-Section 3, and produces a summary in the commit body. `Pre-flight
+running UI, runs the 33-item anti-pattern checklist from
+`.specify/memory/design.md` Section 2, and produces a summary in the commit body. `Pre-flight
 check: fail` blocks the commit until fixed.
 
 Why this sequencing:
 - Tokens and visual rhythm are foundational; once wrong, every
   downstream component inherits the mistake.
-- A spec-phase `design.md` lets implementation move fast — the design
-  decisions are already made and stable.
+- A project-level design file (`.specify/memory/design.md`) lets
+  implementation move fast — the design decisions are already made
+  and stable.
 - Anti-pattern checklist is mechanical (per the skill's Pre-Flight
   Check, Section 14 of design-taste-frontend): every item is either
   ✅ or ❌, no judgment calls.

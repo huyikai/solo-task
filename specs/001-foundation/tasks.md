@@ -6,13 +6,12 @@
 - data-model.md (6 SQLite tables, AppError, ExportPayload, I18nKey)
 - contracts/ipc.md (3 IPC commands)
 - quickstart.md (8-step local validation)
-- design.md (foundation-local component visual skeletons)
 
-**Global design reference**: `/Users/.../.specify/memory/design.md` (Constitution
-Principle X, v1.5.0 — tokens, anti-patterns, pre-flight). All UI tasks MUST
-inherit from this file. Foundation-local `design.md` adds only the
-component visual skeletons (Button matrix / Card / Layout / ViewTabs /
-CorruptedView / Settings) and the 4 review checkpoints.
+**Global design reference**: `.specify/memory/design.md` (Constitution
+Principle X, v1.5.0). All UI tasks inherit tokens (Section 1), component
+visual skeletons (Section 6 — Button/Card/Layout/ViewTabs/CorruptedView/
+Settings), anti-patterns (Section 2, 33 items), and pre-flight standard
+(Section 3). Foundation-local files do not redefine any of these.
 
 **Prerequisites**: plan.md ✅, spec.md ✅, data-model.md ✅, contracts/ ✅, quickstart.md ✅
 
@@ -48,13 +47,15 @@ Single Tauri crate layout (per plan.md):
 - **Q2**: DB corrupted → navigation tabs disabled (only CorruptedView + Settings reachable)
 - **Q3**: `trigger_test_error` button visible only when `import.meta.env.DEV`
 
-## Design Reference (constitution Principle IX)
+## Design Reference (constitution Principles IX + X)
 
-UI design is **decided in spec/plan phase** (see [`design.md`](design.md)),
+UI design is **decided in spec/plan phase** (project-level file:
+`.specify/memory/design.md`, locked by Constitution Principle X),
 **implemented in this phase**, and **validated at 4 pre-flight
-checkpoints** (D1-D4). Per-component post-hoc review is wasteful;
-`design.md` is the single source of truth for tokens, components, and
-anti-patterns.
+checkpoints** (D1-D4). Per-component post-hoc review is wasteful; the
+global design file is the single source of truth for tokens, component
+visual skeletons (Section 6), and the 33-item anti-pattern checklist
+(Section 2).
 
 | Review ID | Scope | When in tasks.md |
 |---|---|---|
@@ -64,7 +65,7 @@ anti-patterns.
 | **D4** | Settings page + ConfirmDialog + Test Error picker (dev only) | End of Phase 6 Visual |
 
 Each review invokes `/design-taste-frontend` skill against the running
-UI, runs the 31-item anti-pattern checklist from `design.md` Section 3,
+UI, runs the 33-item anti-pattern checklist from `.specify/memory/design.md` Section 2,
 and produces a summary in the commit body:
 
 ```
@@ -97,21 +98,21 @@ Design review (design-taste-frontend):
 
 ## Phase 1.5: Design Implementation (按 design.md 落地)
 
-**Purpose**: 把 `design.md` 中已定的设计语言落地到代码（tokens + 组件视觉骨架），跑 D1 评审。**TDD-skip** for visual choices (tokens 没有行为；组件骨架只是 props + JSX 形状，行为测试在 Phase 3 之上叠加)。
+**Purpose**: 把 `.specify/memory/design.md` 中已定的设计语言落地到代码（tokens + 组件视觉骨架），跑 D1 评审。**TDD-skip** for visual choices (tokens 没有行为；组件骨架只是 props + JSX 形状，行为测试在 Phase 3 之上叠加)。
 
-**Why this phase exists**: 设计决策已在 `design.md` 完成，本阶段是机械落地，避免在 implement 时再决定视觉。这样后续每个 UI scope 只需照搬 tokens，不必每次重新讨论视觉。
+**Why this phase exists**: 设计决策已在 `.specify/memory/design.md` 完成，本阶段是机械落地，避免在 implement 时再决定视觉。这样后续每个 UI scope 只需照搬 tokens，不必每次重新讨论视觉。
 
-- [ ] T008a [P] Author `src/styles/tokens.css` **严格按照 `design.md` Section 1 的值**：色板 (light + dark) / spacing scale / typography scale / radius / shadow / font family / z-index。Wire into Tailwind via `theme.extend` in `tailwind.config.ts` (per design.md Section 1.8 mapping)。
-- [ ] T008b [P] Author `src/components/Button.tsx` **严格按照 `design.md` Section 2.1**：4 variants × 2 sizes 矩阵，radius `md`，focus 2px outline。
-- [ ] T008c [P] Author `src/components/Card.tsx` **严格按照 `design.md` Section 2.2**：surface + border + padding + shadow-sm。
-- [ ] T008d Author `src/components/Layout.tsx` **严格按照 `design.md` Section 2.3**：h-14 顶栏 + 主内容区，Settings 入口在右上角。
-- [ ] T008e Author `src/components/ViewTabs.tsx` **严格按照 `design.md` Section 2.4**：role="tablist"，选中状态 2px accent 下边线。
+- [ ] T008a [P] Author `src/styles/tokens.css` **严格按照 `.specify/memory/design.md` Section 1 的值**：色板 (light + dark) / spacing scale / typography scale / radius / shadow / font family / z-index。Wire into Tailwind via `theme.extend` in `tailwind.config.ts` (per `.specify/memory/design.md` Section 1.8 mapping)。
+- [ ] T008b [P] Author `src/components/Button.tsx` **严格按照 `.specify/memory/design.md` Section 6.1**：4 variants × 2 sizes 矩阵，radius `md`，focus 2px outline。
+- [ ] T008c [P] Author `src/components/Card.tsx` **严格按照 `.specify/memory/design.md` Section 6.2**：surface + border + padding + shadow-sm。
+- [ ] T008d Author `src/components/Layout.tsx` **严格按照 `.specify/memory/design.md` Section 6.3**：h-14 顶栏 + 主内容区，Settings 入口在右上角。
+- [ ] T008e Author `src/components/ViewTabs.tsx` **严格按照 `.specify/memory/design.md` Section 6.4**：role="tablist"，选中状态 2px accent 下边线。
 - [ ] T008f Author `src/pages/DesignPreview.tsx` (dev-only, gated by `import.meta.env.DEV`) — 把上面 5 个组件并排展示，作为 D1 评审的可视化对象。Phase 8 T057 删除。
-- [ ] T008g **🔔 Invoke `/design-taste-frontend` skill** on tokens + Button + Card + Layout + ViewTabs via DesignPreview。Skill runs the 31-item anti-pattern checklist from `design.md` Section 3. Capture review summary.
+- [ ] T008g **🔔 Invoke `/design-taste-frontend` skill** on tokens + Button + Card + Layout + ViewTabs via DesignPreview。Skill runs the 33-item anti-pattern checklist from `.specify/memory/design.md` Section 2. Capture review summary.
 - [ ] T008h Refactor if pre-flight fails (rename tokens / swap colors / adjust spacing). Loop until pre-flight passes.
-- [ ] T008i Single commit: `feat(design): implement design.md tokens + visual skeletons (D1)`. Commit body MUST include review summary + reference to `design.md`.
+- [ ] T008i Single commit: `feat(design): implement `.specify/memory/design.md` tokens + Section 6 components (D1)`. Commit body MUST include review summary + reference to the global design file.
 
-**Checkpoint**: `pnpm tauri dev` shows DesignPreview page (dev-only) with all 5 components visible. Visual quality passes D1 pre-flight (31-item checklist 0 ❌). Foundation visual style is **locked** to `design.md` for all subsequent UI work.
+**Checkpoint**: `pnpm tauri dev` shows DesignPreview page (dev-only) with all 5 components visible. Visual quality passes D1 pre-flight (33-item checklist 0 ❌). Foundation visual style is **locked** to `.specify/memory/design.md` for all subsequent UI work.
 
 **Transition to Phase 2**: this phase produces visual artifacts; components are "skeleton only" (no behavior). Phase 3+ will add behavior tests on top — components from this phase are reused, not rewritten.
 
@@ -238,7 +239,7 @@ Design review (design-taste-frontend):
 - [ ] T046c [P] [Red] Write failing Rust test `src-tauri/src/commands/set_preference.rs::tests::test_set_then_get_round_trip` asserting `set_preference("theme.mode", "\"dark\"")` followed by `get_preference` returns the dark value, with `updated_at` advancing.
 - [ ] T046d [Green] Implement `src-tauri/src/commands/get_preference.rs` and `set_preference.rs` per contracts/ipc.md. Run `cargo test` → T046a/b/c GREEN. Register both commands in `src-tauri/src/main.rs`.
 - [ ] T046e [P] [Red] Write failing test `src/__tests__/ThemeSwitcher.test.tsx`: render `<ThemeSwitcher value="system" onChange={vi.fn()} />`, assert 3 radio buttons with labels from `t('settings.theme.system/light/dark')` and `system` checked; clicking `dark` calls `onChange("dark")`.
-- [ ] T046f [P] [Green] Implement `src/components/ThemeSwitcher.tsx` per `design.md` Section 2.6 — segmented control with ARIA `role="radiogroup"`, radius-md 8px, accent border on selected. Run `pnpm test` → T046e GREEN.
+- [ ] T046f [P] [Green] Implement `src/components/ThemeSwitcher.tsx` per `.specify/memory/design.md` Section 6.6 — segmented control with ARIA `role="radiogroup"`, radius-md 8px, accent border on selected. Run `pnpm test` → T046e GREEN.
 - [ ] T046g [P] [Green] Implement `src/api/preferences.ts` — typed wrapper for `getPreference`/`setPreference` with theme validation (`'system' | 'light' | 'dark'`). Run `pnpm test` → typed wrapper covered.
 - [ ] T046h [Green] Update `src/views/Settings.tsx`: on mount call `getPreference('theme.mode')` (default `'system'` if missing); render `<ThemeSwitcher>` in Appearance group; on change call `setPreference` and apply immediately via `document.documentElement.classList.toggle('dark', resolvedTheme === 'dark')` based on `resolvedTheme` computed from user choice + `prefers-color-scheme`. Run `pnpm test` → all S1-S4 + S6 tests green.
 - [ ] T046i Add 6 new i18n keys to `src/i18n/zh-CN.ts`: `settings.appearance`, `settings.theme`, `settings.theme.system`, `settings.theme.light`, `settings.theme.dark`, `settings.theme.currentHint`. Run `pnpm check:i18n` → 0 hardcoded strings.
