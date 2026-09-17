@@ -123,7 +123,7 @@
 - **FR-008**: 应用 MUST 提供 i18n lookup 函数(`t(key: string)`),所有用户可见字符串 MUST 通过该函数从字典文件渲染。组件源码中 MUST 不出现硬编码中文。字典文件初版至少包含骨架所需的所有 key 的中文翻译。
 - **FR-009**: 数据库写入操作(初版仅限于 migration 写入) MUST 在 SQLite 事务中执行,失败时事务回滚,数据库不进入半写入状态。
 - **FR-010**: 应用 MUST 提供一个"导出为 JSON" 入口(初版仅在损坏提示界面可用,后续 spec 在 Settings 暴露)。导出的 JSON 文件初版结构包含 `schema_version`、`exported_at`、`tasks`、`subtasks`、`tags`、`reminders`、`warnings` 字段。
-- **FR-011**: 应用 MUST 包含 GitHub Actions CI workflow(`.github/workflows/ci.yml`),在 macOS-latest 和 windows-latest runner 上运行 `cargo check`、`cargo test`、`tsc --noEmit`、`npm test`。任一 runner 失败 MUST 阻止 merge。
+- **FR-011**: 应用 MUST 包含 GitHub Actions CI workflow(`.github/workflows/ci.yml`),在 macOS-latest 和 windows-latest runner 上运行 `cargo check`、`cargo test`、`pnpm install --frozen-lockfile` + `pnpm exec tsc --noEmit`、`pnpm test`、以及 `pnpm run check:i18n`。任一 runner 失败 MUST 阻止 merge。
 - **FR-012**: 应用 MUST 包含 TDD pre-push git hook,自动检查即将 push 的 commits,任何 production-only scope MUST 在同 push 内有同 scope 的测试 commit 在前。违反规则 MUST 阻止 push。
 - **FR-013**: 应用 MUST 实现主样式系统(设计 token + 基础组件 Button / Card / Layout),且样式设计 MUST 通过 `design-taste-frontend` skill 评审。评审摘要 MUST 附在落地该样式的 commit body 中。
 

@@ -28,6 +28,8 @@ GitHub Actions 双 runner CI、TDD pre-push hook、通过 design-taste-frontend 
     `vite = "^5"`, `typescript = "^5"`, `vitest = "^1"`,
     `@testing-library/react = "^14"`, `@testing-library/jest-dom = "^6"`,
     `@testing-library/user-event = "^14"`, `jsdom = "^24"`, `tailwindcss = "^3"`
+- **Package manager**: pnpm ^9.x (Constitution v1.4.0). npm and yarn forbidden.
+  Lockfile is `pnpm-lock.yaml`; CI uses `pnpm install --frozen-lockfile`.
 - **Storage**: SQLite 3 via `rusqlite` (bundled, no system dep); file at
   `~/Library/Application Support/com.huyikai.solo-task/tasks.db` (macOS) /
   `%APPDATA%\com.huyikai.solo-task\tasks.db` (Windows), via `dirs` crate
@@ -66,7 +68,7 @@ GitHub Actions 双 runner CI、TDD pre-push hook、通过 design-taste-frontend 
 | VII. Failure & Recovery | ✅ PASS | (1) DB integrity_check on startup, corrupted → CorruptedView + export button; (2) notification permission is out of scope here (no reminders yet); (3) typed `AppError` enum serialized across IPC, frontend renders by variant; (4) initial migration wrapped in transaction (future writes will follow same pattern). |
 | VIII. Data Escape Hatch — JSON Export | ✅ PASS (stub) | `export_json` IPC command writes placeholder `ExportPayload` JSON with `warnings: ["database_corrupted"]`. Real data shape in follow-up spec. |
 | IX. Design Quality | ✅ PASS | Button / Card / Layout components go through `design-taste-frontend` skill before commit. Review summary required in commit body. |
-| Quality Gates (pre-push) | ✅ PASS | Hook script provided; CI workflow runs `cargo check`, `cargo test`, `tsc --noEmit`, `npm test` on macOS + Windows. |
+| Quality Gates (pre-push) | ✅ PASS | Hook script provided; CI workflow runs `cargo check`, `cargo test`, `pnpm exec tsc --noEmit`, `pnpm test` on macOS + Windows. |
 
 No violations. Proceeding to Phase 0 research is unnecessary — all technical
 choices above come from Constitution v1.3.0 or are unambiguous defaults.
@@ -208,8 +210,8 @@ to React.
 
 详见 [`quickstart.md`](quickstart.md)。本地验证骨架的 6 步：
 
-1. `npm install` + `cd src-tauri && cargo fetch`
-2. `npm run tauri dev` → 应用启动,主窗口显示三视图骨架
+1. `pnpm install` + `cd src-tauri && cargo fetch`
+2. `pnpm tauri dev` → 应用启动,主窗口显示三视图骨架
 3. 切视图 tab → 状态正确切换
 4. 打开 Settings → 看到两个 stub 按钮 + 二次确认
 5. 触发"测试错误"按钮 → UI 显示对应 i18n 错误提示

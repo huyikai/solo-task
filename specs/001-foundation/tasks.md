@@ -43,7 +43,7 @@ Single Tauri crate layout (per plan.md):
 
 **Purpose**: Tauri 2 + React 18 + TS5 + Vite scaffold. **TDD-skip** (pure config per Constitution Principle VI exemption list).
 
-- [ ] T001 Initialize Tauri 2.x project at repo root via `npm create tauri-app@latest` (select React + TypeScript + Vite)
+- [ ] T001 Initialize Tauri 2.x project at repo root via `pnpm create tauri-app@latest` (select React + TypeScript + Vite)
 - [ ] T002 [P] Add Rust dependencies to `src-tauri/Cargo.toml`: `rusqlite = { version = "0.31", features = ["bundled"] }`, `serde`, `serde_json`, `thiserror`, `dirs`, `tempfile` (dev), `tauri-plugin-dialog`
 - [ ] T003 [P] Add frontend dependencies to `package.json`: `@tauri-apps/api ^2`, `tailwindcss ^3`, `vitest ^1`, `@testing-library/react ^14`, `@testing-library/jest-dom ^6`, `@testing-library/user-event ^14`, `jsdom ^24`, `@vitest/coverage-v8`
 - [ ] T004 [P] Configure `tsconfig.json` with `strict: true` and `paths` alias `@/*` → `src/*`
@@ -52,7 +52,7 @@ Single Tauri crate layout (per plan.md):
 - [ ] T007 [P] Create directory skeleton: `src-tauri/src/{db,commands}/`, `src/{views,components,i18n,api,styles,test,__tests__}/`, `.githooks/`, `.github/workflows/`
 - [ ] T008 [P] Update `.gitignore`: ensure `node_modules/`, `src-tauri/target/`, `dist/`, `data/`, `.DS_Store` are ignored (already present); add `.githooks/.installed`
 
-**Checkpoint**: `npm install` + `cd src-tauri && cargo fetch` complete; `npm run tauri dev` launches an empty Tauri window (default template content, not our UI yet).
+**Checkpoint**: `pnpm install` + `cd src-tauri && cargo fetch` complete; `pnpm tauri dev` launches an empty Tauri window (default template content, not our UI yet).
 
 ---
 
@@ -71,9 +71,9 @@ Single Tauri crate layout (per plan.md):
 - [ ] T015 [P] [Red] Write failing integration test `src-tauri/src/db/tests.rs::test_integrity_check_detects_corruption` asserting that after writing non-SQLite bytes to a temp file, `db::integrity_check(&conn)` returns `Err(AppError::DbCorrupted)`.
 - [ ] T016 [Green] Implement `pub fn integrity_check(conn: &Connection) -> Result<(), AppError>` in `src-tauri/src/db/mod.rs` running `PRAGMA integrity_check` and mapping any non-`ok` result to `DbCorrupted`.
 - [ ] T017 [P] [Red] Write failing test `src/i18n/t.test.ts` asserting: (a) `t('app.title')` returns `'Solo Task'`; (b) `t('missing.key')` returns `'<missing:missing.key>'` and `console.warn` was called in dev mode.
-- [ ] T018 [Green] Implement `src/i18n/t.ts` (lookup function + missing-key fallback + `import.meta.env.DEV` warning) and `src/i18n/zh-CN.ts` (dictionary with 24 keys per data-model.md). Run `npm test` → confirm GREEN.
+- [ ] T018 [Green] Implement `src/i18n/t.ts` (lookup function + missing-key fallback + `import.meta.env.DEV` warning) and `src/i18n/zh-CN.ts` (dictionary with 24 keys per data-model.md). Run `pnpm test` → confirm GREEN.
 
-**Checkpoint**: `cargo test` and `npm test` both green for error/paths/db/i18n scopes. UI can now safely import i18n keys and call IPC commands.
+**Checkpoint**: `cargo test` and `pnpm test` both green for error/paths/db/i18n scopes. UI can now safely import i18n keys and call IPC commands.
 
 ---
 
@@ -87,16 +87,16 @@ Single Tauri crate layout (per plan.md):
 
 - [ ] T019 [P] [Red] Write failing test `src/__tests__/App.test.tsx`: render `<App />` after mocked `healthCheck()` resolves `{ok:true}` → assert three `ViewTabs` buttons render with labels from `t('views.list')`, `t('views.board')`, `t('views.gantt')`; clicking board sets active view (assert by data-testid or aria-current).
 - [ ] T020 [P] [Red] Write failing test `src/__tests__/ViewTabs.test.tsx`: render three tabs, assert only one has `aria-current="page"` initially; clicking the second updates aria-current.
-- [ ] T021 [P] [Red] Write failing integration test `src/__tests__/startup.test.tsx` (or via `npm run tauri dev` smoke in quickstart): assert `healthCheck()` is called once on App mount, and that the initial render shows the placeholder.
+- [ ] T021 [P] [Red] Write failing integration test `src/__tests__/startup.test.tsx` (or via `pnpm tauri dev` smoke in quickstart): assert `healthCheck()` is called once on App mount, and that the initial render shows the placeholder.
 
 ### Implementation for User Story 1
 
-- [ ] T022 [P] [Green] Implement `src/components/Button.tsx` — design-token Button (variants: primary/secondary/ghost; sizes: sm/md). Run `npm test` → existing tests still pass; manual visual check after T026.
-- [ ] T023 [P] [Green] Implement `src/components/Card.tsx` — design-token Card wrapper. Run `npm test` → still green.
-- [ ] T024 [P] [Green] Implement `src/components/Layout.tsx` — App shell (top bar placeholder + main content slot). Run `npm test` → still green.
-- [ ] T025 [P] [Green] Implement `src/components/ViewTabs.tsx` — three buttons with `aria-current`, dispatches `onChange(view)` prop. Run `npm test ViewTabs` → confirm GREEN for T020.
-- [ ] T026 [Green] Implement `src/views/ListView.tsx`, `src/views/BoardView.tsx`, `src/views/GanttView.tsx` — each renders `<Card><p>{t('views.placeholder')}</p></Card>`. Run `npm test` → App.test now green for T019. **🔔 DESIGN REVIEW REQUIRED**: invoke `/design-taste-frontend` skill on the rendered Layout + tabs + views; append review summary to commit body.
-- [ ] T027 [Green] Implement `src/App.tsx` — state machine `{health: 'loading' | 'ok' | 'corrupted' | 'locked', activeView: 'list'|'board'|'gantt'}`; on mount calls `healthCheck()`; on `ok` renders `<Layout><ViewTabs/>{activeView content}</Layout>`. Run `npm test` → all S1 tests GREEN.
+- [ ] T022 [P] [Green] Implement `src/components/Button.tsx` — design-token Button (variants: primary/secondary/ghost; sizes: sm/md). Run `pnpm test` → existing tests still pass; manual visual check after T026.
+- [ ] T023 [P] [Green] Implement `src/components/Card.tsx` — design-token Card wrapper. Run `pnpm test` → still green.
+- [ ] T024 [P] [Green] Implement `src/components/Layout.tsx` — App shell (top bar placeholder + main content slot). Run `pnpm test` → still green.
+- [ ] T025 [P] [Green] Implement `src/components/ViewTabs.tsx` — three buttons with `aria-current`, dispatches `onChange(view)` prop. Run `pnpm test ViewTabs` → confirm GREEN for T020.
+- [ ] T026 [Green] Implement `src/views/ListView.tsx`, `src/views/BoardView.tsx`, `src/views/GanttView.tsx` — each renders `<Card><p>{t('views.placeholder')}</p></Card>`. Run `pnpm test` → App.test now green for T019. **🔔 DESIGN REVIEW REQUIRED**: invoke `/design-taste-frontend` skill on the rendered Layout + tabs + views; append review summary to commit body.
+- [ ] T027 [Green] Implement `src/App.tsx` — state machine `{health: 'loading' | 'ok' | 'corrupted' | 'locked', activeView: 'list'|'board'|'gantt'}`; on mount calls `healthCheck()`; on `ok` renders `<Layout><ViewTabs/>{activeView content}</Layout>`. Run `pnpm test` → all S1 tests GREEN.
 
 **🔔 DESIGN REVIEW COMMIT GATE**: T026 commit body MUST include:
 
@@ -107,7 +107,7 @@ Design review (design-taste-frontend):
 - Pre-flight check: <pass | fail>
 ```
 
-**Checkpoint**: `npm run tauri dev` shows three view tabs; clicking switches; closing leaves valid DB file. S1 acceptance scenarios 1-4 verifiable.
+**Checkpoint**: `pnpm tauri dev` shows three view tabs; clicking switches; closing leaves valid DB file. S1 acceptance scenarios 1-4 verifiable.
 
 ---
 
@@ -125,9 +125,9 @@ Design review (design-taste-frontend):
 
 ### Implementation for User Story 2
 
-- [ ] T031 [P] [Green] Implement `src/components/ConfirmDialog.tsx` — typed-name confirmation (props: `open`, `expectedText`, `onConfirm`, `onCancel`). Run `npm test` → T029 GREEN.
-- [ ] T032 [Green] Implement `src/views/Settings.tsx` — two stub buttons + confirm dialog wired to `t('settings.*')` keys; "Check for Update" stub uses `setTimeout` to flip loading→no_update. Run `npm test` → T028 + T030 GREEN. **🔔 DESIGN REVIEW REQUIRED**: invoke `/design-taste-frontend` skill on Settings page; append review summary to commit body.
-- [ ] T033 [Green] Wire Settings entry into `src/App.tsx`: add a Settings icon/button to Layout header; clicking sets `activeView` (or new `route` state) → render `<Settings />`. Run `npm test` → all S1+S2 tests green; manual smoke: `npm run tauri dev` shows entry.
+- [ ] T031 [P] [Green] Implement `src/components/ConfirmDialog.tsx` — typed-name confirmation (props: `open`, `expectedText`, `onConfirm`, `onCancel`). Run `pnpm test` → T029 GREEN.
+- [ ] T032 [Green] Implement `src/views/Settings.tsx` — two stub buttons + confirm dialog wired to `t('settings.*')` keys; "Check for Update" stub uses `setTimeout` to flip loading→no_update. Run `pnpm test` → T028 + T030 GREEN. **🔔 DESIGN REVIEW REQUIRED**: invoke `/design-taste-frontend` skill on Settings page; append review summary to commit body.
+- [ ] T033 [Green] Wire Settings entry into `src/App.tsx`: add a Settings icon/button to Layout header; clicking sets `activeView` (or new `route` state) → render `<Settings />`. Run `pnpm test` → all S1+S2 tests green; manual smoke: `pnpm tauri dev` shows entry.
 
 **🔔 DESIGN REVIEW COMMIT GATE**: T032 commit body MUST include design review summary (format from Phase 3).
 
@@ -150,9 +150,9 @@ Design review (design-taste-frontend):
 ### Implementation for User Story 3
 
 - [ ] T037 [Green] Implement `pub fn export_json(conn_path: &Path, output: &Path) -> Result<ExportSummary, AppError>` in `src-tauri/src/commands/export_json.rs`: open conn in read-only mode (best-effort even if corrupted), serialize `ExportPayload` per data-model.md, write JSON to output path. Run `cargo test` → T034 GREEN.
-- [ ] T038 [Green] Register IPC commands in `src-tauri/src/main.rs` (and `lib.rs` per Tauri 2 convention): `health_check`, `export_json`, `trigger_test_error`. Run `npm run tauri build` once to confirm commands are wired (no behavior test yet — comes in S4).
-- [ ] T039 [Green] Implement `src/views/CorruptedView.tsx` — renders title + message + export button; on click invokes `tauri-plugin-dialog` save dialog then `exportJson(path)` from `src/api/ipc.ts`. Run `npm test` → T035 + T036 GREEN. **🔔 DESIGN REVIEW REQUIRED**.
-- [ ] T040 [Green] Update `src/App.tsx`: handle `health: 'corrupted'` state → render `<CorruptedView />` (and disable tabs per Q2). Run `npm test` → all S1+S2+S3 tests green.
+- [ ] T038 [Green] Register IPC commands in `src-tauri/src/main.rs` (and `lib.rs` per Tauri 2 convention): `health_check`, `export_json`, `trigger_test_error`. Run `pnpm tauri build` once to confirm commands are wired (no behavior test yet — comes in S4).
+- [ ] T039 [Green] Implement `src/views/CorruptedView.tsx` — renders title + message + export button; on click invokes `tauri-plugin-dialog` save dialog then `exportJson(path)` from `src/api/ipc.ts`. Run `pnpm test` → T035 + T036 GREEN. **🔔 DESIGN REVIEW REQUIRED**.
+- [ ] T040 [Green] Update `src/App.tsx`: handle `health: 'corrupted'` state → render `<CorruptedView />` (and disable tabs per Q2). Run `pnpm test` → all S1+S2+S3 tests green.
 
 **🔔 DESIGN REVIEW COMMIT GATE**: T039 commit body MUST include design review summary.
 
@@ -174,10 +174,10 @@ Design review (design-taste-frontend):
 
 ### Implementation for User Story 4
 
-- [ ] T044 [Green] Implement `src/api/ipc.ts` — typed wrappers per contracts/ipc.md; `IpcResult<T>` discriminated union; `i18nKeyFor(error)` mapping per data-model.md table. Run `npm test` → T041 GREEN.
-- [ ] T045 [Green] Implement `src/components/ErrorToast.tsx` — renders `t(i18nKeyFor(error))`, never `error.message`. Run `npm test` → T042 GREEN. **🔔 DESIGN REVIEW REQUIRED**.
+- [ ] T044 [Green] Implement `src/api/ipc.ts` — typed wrappers per contracts/ipc.md; `IpcResult<T>` discriminated union; `i18nKeyFor(error)` mapping per data-model.md table. Run `pnpm test` → T041 GREEN.
+- [ ] T045 [Green] Implement `src/components/ErrorToast.tsx` — renders `t(i18nKeyFor(error))`, never `error.message`. Run `pnpm test` → T042 GREEN. **🔔 DESIGN REVIEW REQUIRED**.
 - [ ] T046 [Green] Implement `src-tauri/src/commands/trigger_test_error.rs` — switch on variant, return the matching `AppError`. Run `cargo test` → T043 GREEN.
-- [ ] T047 [Green] Update `src/views/Settings.tsx` (from Phase 4): add dev-only "Test Error" picker (gated by `import.meta.env.DEV` per Q3), dispatches `triggerTestError` then renders `ErrorToast` with the returned error. Run `npm test` → all S1-S4 tests green. **🔔 DESIGN REVIEW REQUIRED** (modifies Settings).
+- [ ] T047 [Green] Update `src/views/Settings.tsx` (from Phase 4): add dev-only "Test Error" picker (gated by `import.meta.env.DEV` per Q3), dispatches `triggerTestError` then renders `ErrorToast` with the returned error. Run `pnpm test` → all S1-S4 tests green. **🔔 DESIGN REVIEW REQUIRED** (modifies Settings).
 
 **🔔 DESIGN REVIEW COMMIT GATES**: T045 and T047 commit bodies MUST include design review summaries.
 
@@ -193,15 +193,15 @@ Design review (design-taste-frontend):
 
 ### Tests for User Story 5 (TDD — write FIRST, extends Phase 2 work)
 
-- [ ] T048 [P] [Red] Write failing grep-style test `scripts/check-i18n.mjs`: walks `src/**/*.{ts,tsx}` excluding `src/i18n/`, fails if any CJK Unified Ideograph (一-鿿) appears. Wire into `npm test` via `vitest` config or as pre-test script.
+- [ ] T048 [P] [Red] Write failing grep-style test `scripts/check-i18n.mjs`: walks `src/**/*.{ts,tsx}` excluding `src/i18n/`, fails if any CJK Unified Ideograph (一-鿿) appears. Wire into `pnpm test` via `vitest` config or as pre-test script.
 - [ ] T049 [P] [Red] Write failing test `src/__tests__/i18n.test.ts` (extends T017): verify all 24 I18nKey values from data-model.md exist in `zh-CN.ts`; assert `t()` returns the same string for variable interpolation cases (e.g. `t('corrupted.exporting', { path })`).
 
 ### Implementation for User Story 5
 
-- [ ] T050 [Green] Implement `scripts/check-i18n.mjs` — regex CJK scan; integrates with `vitest globalSetup` or runs as `npm run check:i18n`. Run → T048 GREEN.
-- [ ] T051 [Green] Audit every component written in Phases 3-6 for hardcoded strings; replace with `t(...)` calls; add missing keys to `zh-CN.ts`. Run `npm run check:i18n` → must report 0 hardcoded strings. Run `npm test` → all tests green.
+- [ ] T050 [Green] Implement `scripts/check-i18n.mjs` — regex CJK scan; integrates with `vitest globalSetup` or runs as `pnpm check:i18n`. Run → T048 GREEN.
+- [ ] T051 [Green] Audit every component written in Phases 3-6 for hardcoded strings; replace with `t(...)` calls; add missing keys to `zh-CN.ts`. Run `pnpm check:i18n` → must report 0 hardcoded strings. Run `pnpm test` → all tests green.
 
-**Checkpoint**: `npm run check:i18n` passes; no hardcoded Chinese outside dictionary. S5 acceptance scenarios 1-3 verifiable.
+**Checkpoint**: `pnpm check:i18n` passes; no hardcoded Chinese outside dictionary. S5 acceptance scenarios 1-3 verifiable.
 
 ---
 
@@ -212,12 +212,12 @@ Design review (design-taste-frontend):
 - [ ] T052 [P] Implement `.githooks/pre-push` bash script: walks commits about to be pushed; for any commit modifying production code (non-test path), requires an earlier commit in same push with same scope that modified a test path; rejects force-push to `main` (Q1).
 - [ ] T053 [P] Add `.githooks/README.md` with install instructions: `git config core.hooksPath .githooks` + chmod +x.
 - [ ] T054 [P] Implement `scripts/test-prepush.sh`: positive + negative test cases for the hook (run hook against synthetic git refs, assert exit codes).
-- [ ] T055 [P] Implement `.github/workflows/ci.yml`: trigger on push to main + PR; matrix `os: [macos-latest, windows-latest]`; steps: checkout, setup-node, setup-rust, `cargo check`, `cargo test`, `npm ci`, `npx tsc --noEmit`, `npm test`, `npm run check:i18n`. Both runners required.
+- [ ] T055 [P] Implement `.github/workflows/ci.yml`: trigger on push to main + PR; matrix `os: [macos-latest, windows-latest]`; steps: checkout, setup-node, setup-rust, `cargo check`, `cargo test`, `pnpm install --frozen-lockfile`, `pnpm exec tsc --noEmit`, `pnpm test`, `pnpm check:i18n`. Both runners required.
 - [ ] T056 [P] Add `package.json` script `check:i18n`: `node scripts/check-i18n.mjs`.
-- [ ] T057 [P] Add `package.json` scripts `test:rust` and aggregate `test:all` running both `cargo test` and `npm test`.
+- [ ] T057 [P] Add `package.json` scripts `test:rust` and aggregate `test:all` running both `cargo test` and `pnpm test`.
 - [ ] T058 Run full quickstart.md validation locally (steps 2-8); fix any failures.
 - [ ] T059 Push a scratch PR to verify CI is green on macOS + Windows runners; close + delete branch after.
-- [ ] T060 Final cleanup: remove any debug logs, dead code, console.log calls; verify `cargo clippy -- -D warnings` clean and `tsc --noEmit` clean.
+- [ ] T060 Final cleanup: remove any debug logs, dead code, console.log calls; verify `cargo clippy -- -D warnings` clean and `pnpm exec tsc --noEmit` clean.
 
 **Checkpoint**: Foundation slice ready for follow-up specs (CRUD / reminders / gantt).
 

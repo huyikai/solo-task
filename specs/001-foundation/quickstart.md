@@ -25,7 +25,7 @@ local steps + one CI step cover every Acceptance Scenario in the spec.
 ## 1. Install dependencies
 
 ```bash
-npm install
+pnpm install
 cd src-tauri && cargo fetch && cd ..
 ```
 
@@ -40,7 +40,7 @@ Expected: no errors. `node_modules/` populated, `Cargo.lock` populated.
 cd src-tauri && cargo test && cd ..
 
 # Frontend tests
-npm test
+pnpm test
 ```
 
 Expected:
@@ -65,7 +65,7 @@ fix it before continuing.
 ## 3. Launch the app and verify S1 (启动并看到主窗口骨架)
 
 ```bash
-npm run tauri dev
+pnpm tauri dev
 ```
 
 Expected:
@@ -125,7 +125,7 @@ echo "this is not a sqlite file" > \
   "$HOME/Library/Application Support/com.huyikai.solo-task/tasks.db"
 
 # Re-launch
-npm run tauri dev
+pnpm tauri dev
 ```
 
 Expected:
@@ -169,8 +169,8 @@ Expected: GitHub Actions shows two jobs, both green:
 Each runs:
 - `cargo check`
 - `cargo test`
-- `npm ci && npx tsc --noEmit`
-- `npm test`
+- `pnpm install --frozen-lockfile && pnpm exec tsc --noEmit`
+- `pnpm test`
 
 After verification, close the PR and delete the branch:
 
@@ -231,6 +231,6 @@ git reset --hard origin/main
 | S5 全局 i18n 入口 | 2 (tests cover), 3-6 (visual check) | ⬜ |
 | CI gate | 7 | ⬜ |
 | Pre-push hook | 8 | ⬜ |
-| Performance budgets | manual: time cold start with `time npm run tauri dev` | ⬜ |
+| Performance budgets | manual: time cold start with `time pnpm tauri dev` | ⬜ |
 
 When every box is checked, the foundation is ready for the next spec.
