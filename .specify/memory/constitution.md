@@ -1,8 +1,29 @@
 <!-- Sync Impact Report
-Version: 1.5.0 → 1.6.0
-Bump rationale: MINOR — Principle X tightened. Added explicit ban on
-feature-local design.md except for declared, justified deviations.
-Added the rule that "universal / reusable" design artifacts MUST be
+Version: 1.4.0 → 1.5.0
+Bump rationale: MINOR — added shadcn/ui + Radix as an optional,
+explicitly-blessed design-system dependency. Principle IV is narrowed:
+"no third-party component library" is removed; we now allow shadcn/ui
+because it ships source we own + Radix primitives that are a11y-grade.
+The "no Tailwind preset" rule is added because shadcn requires raw
+Tailwind tokens.
+Modified principles:
+- IV. Tauri + React + SQLite — Locked Stack: narrowed to forbid
+  alternative component libraries, not shadcn + Radix.
+- New "Lockfile discipline for shadcn" sub-bullet under Dependency
+  Upgrades: shadcn source MUST be in src/components/ui/, never imported
+  from a third-party package.
+Added sections:
+- Technology Stack bullet: "Component primitives: shadcn/ui (Radix-based,
+  source-in-repo) — optional"
+Removed sections: none
+Follow-up TODOs:
+- Existing self-built components (Button/Card/etc.) MAY stay OR be
+  migrated feature-by-feature. No forced rewrite.
+- The "shadcn CLI" MUST NOT be invoked automatically; primitives are
+  hand-copied / hand-written per Principle XI to keep source auditable.
+-->
+
+# Solo Task Constitution
 promoted to governance layer (project-level memory, sibling to this
 constitution), not invented per feature.
 Modified principles:
@@ -81,9 +102,22 @@ TypeScript. The data store is SQLite accessed through Rust (via `rusqlite`
 or `sqlx`). The frontend MUST NOT bundle Node/Electron/Chromium — Tauri
 uses the OS WebView, which keeps the installer under ~50 MB. Switching to
 Electron, adding a backend server, or replacing SQLite with a network
-database are all forbidden without a constitution amendment. Rationale:
-the stack is chosen for small binary, fast cold start, and a single
-developer can hold it in their head.
+database are all forbidden without a constitution amendment.
+
+**Component primitives**: `shadcn/ui` (Radix-based, source-in-repo) is
+explicitly blessed as an OPTIONAL dependency. When primitives are
+adopted, their source MUST live under `src/components/ui/` and MUST be
+reviewed through `design-taste-frontend` before merging. The `shadcn`
+CLI MUST NOT be invoked automatically — copy patterns manually per
+Principle XI so the source stays auditable. No other component
+libraries (MUI, Chakra, Antd, Blueprint, Mantine, etc.) are allowed.
+Rationale: shadcn ships unstyled, accessible primitives that compose
+with our Tailwind tokens (Section 1 of `.specify/memory/design.md`).
+It keeps the project in control of the visual surface while
+delegating accessibility / focus / keyboard plumbing to Radix.
+
+Rationale for the stack: chosen for small binary, fast cold start,
+and a single developer can hold it in their head.
 
 ### V. Architecture — Rust Owns the System, React Owns the UI
 System capabilities (filesystem, SQLite, OS notifications, clipboard,
@@ -432,4 +466,4 @@ Upgrade tiers, or the project-level design system
    current constitution. The implementer MUST verify and explicitly call
    out any deviation in the commit body.
 
-**Version**: 1.6.0 | **Ratified**: 2026-09-17 | **Last Amended**: 2026-09-17
+**Version**: 1.5.0 | **Ratified**: 2026-09-17 | **Last Amended**: 2026-09-17
