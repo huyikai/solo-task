@@ -351,24 +351,36 @@ design-amendment spec.
 
 ### 6.3 Layout (App Shell)
 
-**Structure**: top bar + main content area. No sidebar. Three-column
-top bar: `左 | 中 | 右` via CSS grid `grid-cols-[1fr_auto_1fr]`.
+**Structure**: TWO horizontal bands at the top + main content area.
 
-- Top bar:
-  - Height: `h-14` (56px)
-  - Horizontal padding: `px-6` (24px)
-  - **Left slot** (`headerLeft`): app name "Solo Task" (text-base medium)
-    in views route; on settings route, an inline "← {list}" back button
-    styled as ghost (rounded-md, px-2 py-1, text-sm, hover bg-bg).
-  - **Center slot** (`activeTab`): ViewTabs component in views route;
-    empty in settings route.
-  - **Right slot**: Settings gear icon button (secondary ghost, p-2,
-    hover bg-bg + text-text-primary). Hidden in settings route.
-  - Background: `--surface`, separated from main content by 1px `--border` bottom line
-- Main content area:
-  - Padding: `p-6` or `p-8`
-  - Max width: unlimited (Mac window typically 1024+px, content fills)
-  - Background: `--bg` (creates layer with surface)
+**Band 1 — TitleBar (frameless window chrome)**:
+- `tauri.conf.json` uses `"decorations": false` so the OS title bar
+  (close / minimize / maximize) is hidden. We draw our own.
+- Height: `h-9` (36px)
+- Background: `--surface`, separated from sub-header by 1px `--border` bottom
+- **Layout**: `flex justify-between items-center`
+  - **Left** (gap-1.5): three window control buttons (no-drag region)
+    - macOS: traffic-light dots (red `#ff5f57` / amber `#ffbd2e` / green `#28c940`)
+      — order: minimize, maximize, close
+    - Windows/Linux: square buttons (一 / 口 / X) in order minimize, maximize, close
+  - **Middle**: passed as `children` prop (typically `ViewTabs`)
+  - **Right**: 68px reserved spacer (Layout puts Settings gear here in Band 2)
+- **Drag region**: the entire TitleBar is `data-tauri-drag-region`; buttons opt
+  out via `WebkitAppRegion: no-drag` so they're clickable
+- **Actions**: `getCurrentWindow().minimize() / toggleMaximize() / close()`
+
+**Band 2 — Sub-header (visual context)**:
+- Height: `h-10` (40px), not draggable
+- Background: `--surface`, separated from main content by 1px `--border` bottom
+- **Left**: page title text (`text-sm font-medium text-text-muted`):
+  - views route: 当前视图的 `views.list` / `views.board` / `views.gantt`
+  - settings route: `settings.title`
+- **Right**: Settings gear button (secondary ghost); hidden in settings route
+
+**Main content area**:
+- Padding: `p-6` or `p-8`
+- Max width: unlimited (Mac window typically 1024+px, content fills)
+- Background: `--bg` (creates layer with surface)
 
 ### 6.4 ViewTabs
 

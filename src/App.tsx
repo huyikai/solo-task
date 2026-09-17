@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import DesignPreview from "@/pages/DesignPreview";
+import TitleBar from "@/components/TitleBar";
 import Layout from "@/components/Layout";
 import ViewTabs, { type ViewKind } from "@/components/ViewTabs";
 import ListView from "@/views/ListView";
@@ -84,36 +85,33 @@ function App() {
   }
 
   return (
-    <Layout
-      onOpenSettings={route === "views" ? () => setRoute("settings") : undefined}
-      activeTab={
-        route === "views" ? (
-          <ViewTabs active={activeView} onChange={setActiveView} />
-        ) : undefined
-      }
-      headerLeft={
-        route === "settings" ? (
-          <button
-            type="button"
-            onClick={() => setRoute("views")}
-            className="rounded-md px-2 py-1 text-sm text-text-muted transition-colors duration-150 hover:bg-bg hover:text-text-primary"
-            aria-label="back"
-          >
-            ← {t("views.list")}
-          </button>
-        ) : undefined
-      }
-    >
-      {route === "settings" ? (
-        <Settings />
-      ) : (
-        <>
-          {activeView === "list" && <ListView />}
-          {activeView === "board" && <BoardView />}
-          {activeView === "gantt" && <GanttView />}
-        </>
-      )}
-    </Layout>
+    <>
+      <TitleBar>
+        <ViewTabs active={activeView} onChange={setActiveView} />
+      </TitleBar>
+      <Layout
+        headerLeft={
+          route === "settings" ? t("settings.title") : t(`views.${activeView}`)
+        }
+        onOpenSettings={
+          route === "settings"
+            ? null
+            : route === "views"
+              ? () => setRoute("settings")
+              : undefined
+        }
+      >
+        {route === "settings" ? (
+          <Settings onBack={() => setRoute("views")} />
+        ) : (
+          <>
+            {activeView === "list" && <ListView />}
+            {activeView === "board" && <BoardView />}
+            {activeView === "gantt" && <GanttView />}
+          </>
+        )}
+      </Layout>
+    </>
   );
 }
 
