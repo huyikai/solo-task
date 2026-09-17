@@ -237,6 +237,32 @@ UI scopes additionally require:
 4. Run `design-taste-frontend` skill against the rendered component
 5. Include review summary in commit body
 
+### UI Design Phasing
+
+`design-taste-frontend` skill is invoked at **four checkpoints only**, not
+per component. The full list is in `tasks.md` "Design Review Points"
+section; the rationale:
+
+- **Per-component post-hoc review is wasteful** — you write 200 lines,
+  then get 10 anti-pattern flags, then rewrite. Tokens and visual rhythm
+  are foundational; once wrong, every downstream component inherits the
+  mistake.
+- **Front-loading design with a single Layout-level review** gives the
+  rest of the project a visually-correct foundation to build behavior on.
+- The four checkpoints are:
+  1. **D1** — design tokens (colors, spacing, type, shadow, radius)
+  2. **D2** — Layout shell + three view-tab placeholders
+  3. **D3** — CorruptedView (emergency-state UX deserves its own review)
+  4. **D4** — Settings page + ConfirmDialog + Test Error picker
+
+UI scopes (Phase 3-6) follow **Visual-first-then-Behavior**: visual
+skeleton from Phase 1.5 + new view content → behavior tests → behavior
+implementation → design review only if D2/D3/D4 needs re-running.
+
+Phase 1.5 is **explicitly TDD-skip** for visual choices: tokens have no
+behavior; Layout shell has only props/JSX shape — behavior tests come in
+Phase 3 on top of the existing skeletons.
+
 Pre-push hook verifies: any commit whose scope matches a `feat.*` or
 `fix.*` pattern and which modifies non-test source MUST have an earlier
 commit in the same push (same scope) that modified a test file.
