@@ -4,3 +4,6 @@ data/
 # agent 密钥配置位于 data/agent.config.json（随 data/ 目录忽略）
 *.local
 .env
+
+# Claude / agent 配置（按 spec-kit 安全提示忽略，避免凭据泄露）
+.claude/
