@@ -42,8 +42,8 @@ function SettingsGear({ onClick }: { onClick: () => void }) {
 }
 
 /**
- * Layout = main content area + optional floating header-right slot.
- * TitleBar (frameless window chrome) is rendered separately by App.
+ * 透明 Layout: 主内容从窗口最顶部开始, 标题栏由 TitleBar 浮动提供.
+ * 这里只管 (tabs 区 + 主内容) + 设置齿轮.
  */
 export default function Layout({
   onOpenSettings,
@@ -58,7 +58,7 @@ export default function Layout({
   return (
     <div className="flex h-full flex-col bg-bg">
       {rightSlot && (
-        <div className="flex justify-end px-6 pt-4">{rightSlot}</div>
+        <div className="flex justify-end px-6 pt-3">{rightSlot}</div>
       )}
       <main className={cn("flex-1 overflow-auto p-6", className)}>{children}</main>
     </div>

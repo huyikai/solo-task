@@ -1,9 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/components/ui/tabs";
 import DesignPreview from "@/pages/DesignPreview";
 import TitleBar from "@/components/TitleBar";
 import Layout from "@/components/Layout";
-import ViewTabs, { type ViewKind } from "@/components/ViewTabs";
 import ListView from "@/views/ListView";
 import BoardView from "@/views/BoardView";
 import GanttView from "@/views/GanttView";
@@ -12,6 +17,7 @@ import Settings from "@/views/Settings";
 import { healthCheck, i18nKeyFor, type IpcResult } from "@/api/ipc";
 import { t } from "@/i18n/t";
 
+type ViewKind = "list" | "board" | "gantt";
 type Health = "loading" | "ok" | "corrupted" | "locked";
 
 function App() {
@@ -62,7 +68,6 @@ function App() {
       <CorruptedView
         onOpenSettings={() => {
           setHealth("loading");
-          // Settings 仍可进入 (S3: 允许用户主动放弃数据), 但保持 corrupted 状态标记
           setRoute("settings");
           setHealth("ok");
         }}
@@ -81,22 +86,38 @@ function App() {
 
   return (
     <>
-      <TitleBar>
-        <ViewTabs active={activeView} onChange={setActiveView} />
-      </TitleBar>
+      <TitleBar />
       <Layout
         onOpenSettings={
           route === "views" ? () => setRoute("settings") : null
         }
+        className="pt-0"
       >
         {route === "settings" ? (
           <Settings onBack={() => setRoute("views")} />
         ) : (
-          <>
-            {activeView === "list" && <ListView />}
-            {activeView === "board" && <BoardView />}
-            {activeView === "gantt" && <GanttView />}
-          </>
+          <Tabs
+            value={activeView}
+            onValueChange={(v) => setActiveView(v as ViewKind)}
+            orientation="horizontal"
+          >
+            <div className="mb-4 flex justify-center">
+              <TabsList>
+                <TabsTrigger value="list">{t("views.list")}</TabsTrigger>
+                <TabsTrigger value="board">{t("views.board")}</TabsTrigger>
+                <TabsTrigger value="gantt">{t("views.gantt")}</TabsTrigger>
+              </TabsList>
+            </div>
+            <TabsContent value="list">
+              <ListView />
+            </TabsContent>
+            <TabsContent value="board">
+              <BoardView />
+            </TabsContent>
+            <TabsContent value="gantt">
+              <GanttView />
+            </TabsContent>
+          </Tabs>
         )}
       </Layout>
     </>

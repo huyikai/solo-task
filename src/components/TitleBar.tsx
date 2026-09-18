@@ -7,15 +7,19 @@ interface TitleBarProps {
   children?: React.ReactNode;
 }
 
-export function TitleBar({ children }: TitleBarProps) {
+/**
+ * 透明 TitleBar: 不渲染背景条, 仅在左上角浮动三个窗口控制按钮.
+ * Tab / 设置入口等 UI 由 Layout 渲染, 不再有 h-9 占位.
+ */
+export function TitleBar(_: TitleBarProps = {}) {
   return (
     <div
       data-tauri-drag-region
-      className="flex h-9 shrink-0 select-none items-center border-b border-border bg-surface px-3"
+      className="fixed left-0 top-0 z-50 flex h-9 items-center gap-1.5 pl-3 pr-3 pointer-events-none"
       style={{ WebkitAppRegion: "drag" } as React.CSSProperties}
     >
       <div
-        className="flex items-center gap-1.5"
+        className="pointer-events-auto flex items-center gap-1.5"
         style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
       >
         <WindowButton
@@ -45,11 +49,6 @@ export function TitleBar({ children }: TitleBarProps) {
           color="#ff5f57"
         />
       </div>
-
-      <div className="flex flex-1 items-center justify-center px-6">
-        {children}
-      </div>
-      <div className="w-[68px]" />
     </div>
   );
 }

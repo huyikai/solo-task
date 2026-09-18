@@ -5,8 +5,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/components/ui/tabs";
 import Layout from "@/components/Layout";
-import ViewTabs from "@/components/ViewTabs";
 import { t } from "@/i18n/t";
 
 export default function DesignPreview() {
@@ -16,10 +21,25 @@ export default function DesignPreview() {
         <h1 className="text-2xl font-semibold">Design Preview</h1>
 
         <section className="flex flex-col gap-3">
-          <h2 className="text-lg font-medium">ViewTabs</h2>
+          <h2 className="text-lg font-medium">Tabs (shadcn, Base UI)</h2>
           <Card>
             <CardContent className="pt-4">
-              <ViewTabs active="list" onChange={() => {}} />
+              <Tabs defaultValue="list">
+                <TabsList>
+                  <TabsTrigger value="list">{t("views.list")}</TabsTrigger>
+                  <TabsTrigger value="board">{t("views.board")}</TabsTrigger>
+                  <TabsTrigger value="gantt">{t("views.gantt")}</TabsTrigger>
+                </TabsList>
+                <TabsContent value="list">
+                  <p className="text-text-muted p-4">{t("views.placeholder")}</p>
+                </TabsContent>
+                <TabsContent value="board">
+                  <p className="text-text-muted p-4">{t("views.placeholder")}</p>
+                </TabsContent>
+                <TabsContent value="gantt">
+                  <p className="text-text-muted p-4">{t("views.placeholder")}</p>
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </section>

@@ -4,14 +4,13 @@ import userEvent from "@testing-library/user-event";
 import App from "@/App";
 import * as ipc from "@/api/ipc";
 
-// Mock IPC layer — App 启动时会调用 healthCheck
 vi.mock("@/api/ipc", () => ({
   healthCheck: vi.fn(),
 }));
 
 const mockedHealthCheck = vi.mocked(ipc.healthCheck);
 
-describe("App view switching (S1)", () => {
+describe("App view switching (S1, S7)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockedHealthCheck.mockResolvedValue({ ok: true, data: { ok: true } });
@@ -19,7 +18,6 @@ describe("App view switching (S1)", () => {
 
   test("renders three view tabs after healthy startup", async () => {
     render(<App />);
-    // 等 healthCheck resolve 后 UI 出现
     expect(await screen.findByRole("tablist")).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "列表" })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "看板" })).toBeInTheDocument();
@@ -56,8 +54,8 @@ describe("App view switching (S1)", () => {
     const user = userEvent.setup();
     render(<App />);
     await screen.findByRole("tablist");
-    expect(screen.getByText("Hello Solo Task")).toBeInTheDocument();
+    expect(screen.getAllByText("Hello Solo Task").length).toBeGreaterThan(0);
     await user.click(screen.getByRole("tab", { name: "看板" }));
-    expect(screen.getByText("Hello Solo Task")).toBeInTheDocument();
+    expect(screen.getAllByText("Hello Solo Task").length).toBeGreaterThan(0);
   });
 });
