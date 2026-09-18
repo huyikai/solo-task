@@ -26,6 +26,7 @@ export type AppErrorVariant =
   | "db_locked"
   | "db_corrupted"
   | "task_not_found"
+  | "validation"
   | "permission_denied"
   | "io_error"
   | "unknown";
@@ -47,6 +48,8 @@ export function i18nKeyFor(error: AppErrorSerialized): I18nKey {
       return "error.db_corrupted";
     case "permission_denied":
       return "error.permission_denied";
+    case "validation":
+      return "error.validation";
     case "task_not_found":
     case "io_error":
     case "unknown":
@@ -71,6 +74,7 @@ function normalizeError(raw: unknown): AppErrorSerialized {
       "db_locked",
       "db_corrupted",
       "task_not_found",
+      "validation",
       "permission_denied",
       "io_error",
       "unknown",
@@ -96,6 +100,58 @@ export function getPreference(key: string): Promise<IpcResult<PreferenceValue>> 
 
 export function setPreference(key: string, value: string): Promise<IpcResult<null>> {
   return call<null>("set_preference", { key, value });
+}
+
+// --- 任务 CRUD (spec 003, contracts/ipc.md) ---
+
+export type TaskStatus = "todo" | "doing" | "done";
+export type TaskPriority = "none" | "low" | "med" | "high";
+
+export interface Task {
+  id: number;
+  title: string;
+  description: string;
+  status: TaskStatus;
+  priority: TaskPriority;
+  due_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface NewTaskInput {
+  title: string;
+  description?: string;
+  priority?: TaskPriority;
+  due_at?: string | null;
+}
+
+export interface TaskPatchInput {
+  id: number;
+  title?: string;
+  description?: string;
+  priority?: TaskPriority;
+  /** JSON null → 显式清空; 缺省 → 不动 */
+  due_at?: string | null;
+}
+
+export function createTask(input: NewTaskInput): Promise<IpcResult<Task>> {
+  return call<Task>("create_task", { input });
+}
+
+export function listTasks(): Promise<IpcResult<Task[]>> {
+  return call<Task[]>("list_tasks");
+}
+
+export function updateTask(patch: TaskPatchInput): Promise<IpcResult<Task>> {
+  return call<Task>("update_task", { patch });
+}
+
+export function setTaskStatus(id: number, status: TaskStatus): Promise<IpcResult<Task>> {
+  return call<Task>("set_task_status", { id, status });
+}
+
+export function deleteTask(id: number): Promise<IpcResult<null>> {
+  return call<null>("delete_task", { id });
 }
 
 export type TestErrorVariant = Extract<

@@ -42,6 +42,7 @@ const zhCN = {
   "error.db_corrupted": "数据库损坏",
   "error.permission_denied": "权限不足",
   "error.unknown": "操作失败, 请稍后重试",
+  "error.validation": "输入不符合要求",
   "error.retry": "重试",
 } as const;
 
