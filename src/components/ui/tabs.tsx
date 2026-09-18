@@ -1,22 +1,23 @@
 "use client";
 
 import * as React from "react";
-import { Tabs } from "@base-ui/react/tabs";
+import { Tabs as TabsPrimitive } from "@base-ui/react/tabs";
 import { cn } from "@/lib/utils";
 
-// shadcn-style Tabs (Base UI edition per ui.shadcn.com/docs/components/base/tabs).
-// Tabs.Root = group container with onValueChange / defaultValue.
-// Tabs.List = tab strip.
-// Tabs.Tab = individual trigger button.
-// Tabs.Panel = content panel.
+// shadcn-style Tabs (Base UI edition, per ui.shadcn.com/docs/components/base/tabs).
+// Naming follows the canonical shadcn export shape:
+//   Tabs         — group container (was: TabsPrimitive.Root)
+//   TabsList      — tab strip
+//   TabsTrigger   — individual trigger button (Base UI primitive name: Tabs.Tab)
+//   TabsContent   — content panel (Base UI primitive name: Tabs.Panel)
 
-const TabsRoot = Tabs.Root;
+const Tabs = TabsPrimitive.Root;
 
 const TabsList = React.forwardRef<
-  React.ElementRef<typeof Tabs.List>,
-  React.ComponentPropsWithoutRef<typeof Tabs.List>
+  React.ElementRef<typeof TabsPrimitive.List>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
 >(({ className, ...props }, ref) => (
-  <Tabs.List
+  <TabsPrimitive.List
     ref={ref}
     className={cn(
       "inline-flex h-10 items-center justify-center gap-1 rounded-md text-text-muted",
@@ -28,10 +29,10 @@ const TabsList = React.forwardRef<
 TabsList.displayName = "TabsList";
 
 const TabsTrigger = React.forwardRef<
-  React.ElementRef<typeof Tabs.Tab>,
-  React.ComponentPropsWithoutRef<typeof Tabs.Tab>
+  React.ElementRef<typeof TabsPrimitive.Tab>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Tab>
 >(({ className, ...props }, ref) => (
-  <Tabs.Tab
+  <TabsPrimitive.Tab
     ref={ref}
     className={cn(
       "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium",
@@ -47,19 +48,16 @@ const TabsTrigger = React.forwardRef<
 ));
 TabsTrigger.displayName = "TabsTrigger";
 
-const TabsPanel = React.forwardRef<
-  React.ElementRef<typeof Tabs.Panel>,
-  React.ComponentPropsWithoutRef<typeof Tabs.Panel>
+const TabsContent = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Panel>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Panel>
 >(({ className, ...props }, ref) => (
-  <Tabs.Panel
+  <TabsPrimitive.Panel
     ref={ref}
     className={cn("focus-visible:outline-none", className)}
     {...props}
   />
 ));
-TabsPanel.displayName = "TabsPanel";
+TabsContent.displayName = "TabsContent";
 
-// Compatibility aliases (some users prefer Content naming)
-const TabsContent = TabsPanel;
-
-export { TabsRoot as Tabs, TabsList, TabsTrigger, TabsPanel, TabsContent };
+export { Tabs, TabsList, TabsTrigger, TabsContent };
