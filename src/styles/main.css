@@ -8,6 +8,8 @@
   --bg: #fafafa;
   --surface: #ffffff;
   --surface-elevated: #ffffff;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
   --text-primary: #18181b;
   --text-muted: #71717a;
   --text-subtle: #a1a1aa;
@@ -34,6 +36,8 @@
     --bg: #09090b;
     --surface: #18181b;
     --surface-elevated: #27272a;
+    --muted: #27272a;
+    --muted-foreground: #a1a1aa;
     --text-primary: #fafafa;
     --text-muted: #a1a1aa;
     --text-subtle: #71717a;
@@ -56,6 +60,8 @@
   --bg: #09090b;
   --surface: #18181b;
   --surface-elevated: #27272a;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
   --text-primary: #fafafa;
   --text-muted: #a1a1aa;
   --text-subtle: #71717a;

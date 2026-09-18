@@ -9,6 +9,8 @@ export default {
         bg: "var(--bg)",
         surface: "var(--surface)",
         "surface-elevated": "var(--surface-elevated)",
+        muted: "var(--muted)",
+        "muted-foreground": "var(--muted-foreground)",
         "text-primary": "var(--text-primary)",
         "text-muted": "var(--text-muted)",
         "text-subtle": "var(--text-subtle)",

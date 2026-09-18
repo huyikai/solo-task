@@ -42,7 +42,7 @@ const tabsListVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-bg",
+        default: "bg-muted",
         line: "gap-1 bg-transparent",
       },
     },
@@ -77,7 +77,7 @@ function TabsTrigger({
       data-slot="tabs-trigger"
       className={cn(
         // Base
-        "relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap text-text-primary/60 transition-all group-data-[orientation=vertical]/tabs:w-full group-data-[orientation=vertical]/tabs:justify-start hover:text-text-primary focus-visible:border-accent focus-visible:ring-[3px] focus-visible:ring-accent/50 focus-visible:outline-1 focus-visible:outline-accent disabled:pointer-events-none disabled:opacity-50 group-data-[variant=default]/tabs-list:data-[state=active]:shadow-sm group-data-[variant=line]/tabs-list:data-[state=active]:shadow-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground transition-all group-data-[orientation=vertical]/tabs:w-full group-data-[orientation=vertical]/tabs:justify-start hover:text-text-primary focus-visible:border-accent focus-visible:ring-[3px] focus-visible:ring-accent/50 focus-visible:outline-1 focus-visible:outline-accent disabled:pointer-events-none disabled:opacity-50 group-data-[variant=default]/tabs-list:data-[state=active]:shadow-sm group-data-[variant=line]/tabs-list:data-[state=active]:shadow-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         // Line variant: no bg, just bottom indicator
         "group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent",
         // Active state
