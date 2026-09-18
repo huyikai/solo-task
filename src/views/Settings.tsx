@@ -22,7 +22,7 @@ function applyTheme(mode: ThemeMode) {
   }
 }
 
-export default function Settings(_: { onBack?: () => void } = {}) {
+export default function Settings({ onBack }: { onBack?: () => void } = {}) {
   const [theme, setTheme] = useState<ThemeMode>("system");
   const [systemDark, setSystemDark] = useState(
     typeof window !== "undefined" &&
@@ -78,6 +78,16 @@ export default function Settings(_: { onBack?: () => void } = {}) {
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-8 py-8">
+      {onBack && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="-ml-3 w-fit"
+          onClick={onBack}
+        >
+          ← {t("views.list")}
+        </Button>
+      )}
       <h1 className="text-2xl font-semibold">{t("settings.title")}</h1>
 
       <section className="flex flex-col gap-3">

@@ -191,45 +191,37 @@ dark 模式下 shadow 透明度减半 (`rgba(0,0,0,0.4)`), 不然会显得"贴�
 | modal | 50 | 模态对话框 |
 | toast | 60 | 错误提示 |
 
-### 1.8 Tailwind Config 映射
+### 1.8 Semantic token strategy (shadcn-first)
 
-```js
-// tailwind.config.ts (摘要)
-module.exports = {
-  darkMode: 'media',  // 跟随系统
-  theme: {
-    extend: {
-      colors: {
-        bg: 'var(--bg)',
-        surface: 'var(--surface)',
-        'surface-elevated': 'var(--surface-elevated)',
-        'text-primary': 'var(--text-primary)',
-        'text-muted': 'var(--text-muted)',
-        'text-subtle': 'var(--text-subtle)',
-        border: 'var(--border)',
-        'border-strong': 'var(--border-strong)',
-        accent: 'var(--accent)',
-        'accent-hover': 'var(--accent-hover)',
-        // shadcn semantic aliases (source components use these names)
-        background: 'var(--bg)',
-        foreground: 'var(--text-primary)',
-        muted: 'var(--bg)',
-        'muted-foreground': 'var(--text-muted)',
-        ring: 'var(--accent)',
-      },
-      fontFamily: {
-        sans: ['var(--font-sans)'],
-        mono: ['var(--font-mono)'],
-      },
-      borderRadius: {
-        sm: '4px',
-        md: '8px',
-        lg: '12px',
-      },
-    },
-  },
-};
-```
+All new UI MUST use shadcn semantic tokens first. The canonical names
+are:
+
+| shadcn token | Light | Dark | Meaning |
+|---|---|---|---|
+| `background` | `#FAFAFA` | `#09090B` | App background |
+| `foreground` | `#18181B` | `#FAFAFA` | Primary text |
+| `card` | `#FFFFFF` | `#18181B` | Card surface |
+| `popover` | `#FFFFFF` | `#27272A` | Elevated surface |
+| `primary` | `#2563EB` | `#3B82F6` | Primary action |
+| `secondary` | `#F4F4F5` | `#27272A` | Secondary surface |
+| `muted` | `#F4F4F5` | `#27272A` | Muted container, including TabsList |
+| `muted-foreground` | `#71717A` | `#A1A1AA` | Muted text |
+| `accent` | `#F4F4F5` | `#27272A` | Hover / selected neutral surface |
+| `destructive` | `#DC2626` | `#EF4444` | Destructive action |
+| `border` / `input` | `#E4E4E7` | `#27272A` | Borders and inputs |
+| `ring` | `#2563EB` | `#3B82F6` | Focus ring |
+
+These variables are defined in `src/styles/main.css` and mapped in
+`tailwind.config.ts`. Existing project aliases (`bg`, `surface`,
+`text-primary`, etc.) remain only for compatibility; new components MUST
+prefer `bg-background`, `text-foreground`, `bg-card`, `bg-muted`,
+`text-muted-foreground`, `border-border`, and `ring-ring`.
+
+The default shadcn theme switching model is CSS variables + a `dark`
+class or system media query. This project uses `data-theme="light|dark"`
+for the persisted Settings override and removes the attribute for
+`system` mode. Theme controls belong in Settings and use the shadcn
+Radio Group / Toggle Group pattern when a matching primitive exists.
 
 ---
 
@@ -385,6 +377,9 @@ window controls are source-owned under `src/components/TitleBar.tsx`.
   app header or sub-header band.
 - Settings gear lives in the content area top-right when the views route
   is active; Settings itself has no gear.
+- Settings route: a shadcn `Button` with `variant="ghost"` and a back
+  arrow is rendered at the top-left of the Settings content, returning
+  to the active view.
 - Main content: `p-6` or `p-8`, `--bg`, max width unlimited.
 
 ### 6.4 Tabs (shadcn new-york-v4 source-owned)

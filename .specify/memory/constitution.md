@@ -1,22 +1,19 @@
 <!-- Sync Impact Report
-Version: 1.6.0 → 1.7.0
-Bump rationale: MINOR — repaired the accumulated Sync Impact Report,
-made shadcn/ui the preferred component primitive for all new UI work,
-and synchronized governance wording with the adopted source-in-repo
-shadcn implementation.
+Version: 1.7.0 → 1.8.0
+Bump rationale: MINOR — made shadcn-first development an explicit
+workflow requirement, standardized shadcn semantic theme tokens, and
+added the Settings return control as a required app-shell behavior.
 Modified principles:
-- IV. Tauri + React + SQLite — Locked Stack: shadcn/ui + Radix is no
-  longer merely optional for new UI; it is the preferred path. Other
-  component libraries remain forbidden.
-- X. Design System Continuity: global design.md is now explicitly
-  shadcn-compatible and must document primitive variants.
+- IV. Tauri + React + SQLite — Locked Stack: new reusable UI MUST check
+  the current shadcn registry/docs first and prefer source-owned shadcn
+  primitives; hand-rolled primitives require a plan-level reason.
+- X. Design System Continuity: semantic token strategy now follows
+  shadcn CSS-variable theming.
 Added sections:
-- Technology Stack preference rule for new reusable UI primitives.
+- Technology Stack workflow rule for `pnpm dlx shadcn@latest add <component>`
+- Explicit Settings route return affordance requirement
 Removed sections: none
-Follow-up TODOs:
-- Existing components already migrated to `src/components/ui/` remain
-  the baseline; future components should follow the same source-owned
-  shadcn pattern.
+Follow-up TODOs: none.
 -->
 
 # Solo Task Constitution
@@ -89,12 +86,20 @@ corresponding source under `src/components/ui/` rather than hand-rolling
 an equivalent. Its source MUST be reviewed through
 `design-taste-frontend` before merging. The `shadcn` CLI MAY be used
 when the generated source is reviewed and adapted to our tokens; it MUST
-not be committed blindly. No other component libraries (MUI, Chakra,
-Antd, Blueprint, Mantine, etc.) are allowed.
+not be committed blindly.
 
-Existing non-shadcn code MAY be migrated incrementally, but any new
-component or substantial rewrite MUST use the shadcn source-owned
-pattern unless a plan documents why no suitable primitive exists.
+The implementer MUST check the current shadcn registry/docs before
+creating or styling a reusable UI primitive, using the current
+`pnpm dlx shadcn@latest add <component>` path or the matching documented
+source. A new hand-rolled primitive requires a plan-level reason that
+shadcn has no suitable component or primitive.
+
+No other component libraries (MUI, Chakra, Antd, Blueprint, Mantine,
+etc.) are allowed. Existing non-shadcn code MAY be migrated
+incrementally, but any new component or substantial rewrite MUST use the
+shadcn source-owned pattern unless a plan documents why no suitable
+primitive exists.
+
 **Platform-bridge UI is the explicit exception**: `TitleBar.tsx` may
 hand-roll the three native window-control buttons and drag region because
 shadcn has no window-manager primitive for Tauri. That exception MUST NOT
@@ -103,6 +108,9 @@ Rationale: shadcn ships accessible source we own, composes with our
 Tailwind tokens, and makes future UI consistent without hiding behavior
 behind a third-party runtime.
 
+The app shell MUST provide an obvious return action on the Settings
+route, implemented with the preferred shadcn `Button` primitive and
+placed at the top-left of the Settings content.
 ### V. Architecture — Rust Owns the System, React Owns the UI
 System capabilities (filesystem, SQLite, OS notifications, clipboard,
 autostart, window management, native dialogs) live in the Rust backend.
@@ -450,4 +458,4 @@ Upgrade tiers, or the project-level design system
    current constitution. The implementer MUST verify and explicitly call
    out any deviation in the commit body.
 
-**Version**: 1.7.0 | **Ratified**: 2026-09-17 | **Last Amended**: 2026-09-18
+**Version**: 1.8.0 | **Ratified**: 2026-09-17 | **Last Amended**: 2026-09-18
