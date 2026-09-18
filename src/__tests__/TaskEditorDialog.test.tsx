@@ -189,3 +189,34 @@ describe("TaskEditorDialog (calendar picker)", () => {
     );
   });
 });
+
+describe("TaskEditorDialog visual spec (design.md §6.7, v1.1.0)", () => {
+  test("dialog width locked to sm:max-w-[425px] (shadcn form convention)", () => {
+    render(
+      <TaskEditorDialog
+        open
+        mode="create"
+        onOpenChange={vi.fn()}
+        onSubmit={vi.fn()}
+      />,
+    );
+    const content = document.querySelector('[data-slot="dialog-content"]');
+    expect(content?.classList.contains("sm:max-w-[425px]")).toBe(true);
+  });
+
+  test("selected priority option carries the §6.6 shadow-sm elevation cue", () => {
+    render(
+      <TaskEditorDialog
+        open
+        mode="create"
+        onOpenChange={vi.fn()}
+        onSubmit={vi.fn()}
+      />,
+    );
+    const group = screen.getByRole("radiogroup", { name: "优先级" });
+    const selected = within(group).getByRole("radio", { name: "无" });
+    expect(selected).toHaveAttribute("aria-checked", "true");
+    // 无 shadow 的选中态在视觉评审中被误读为"没有选中态"
+    expect(selected.classList.contains("shadow-sm")).toBe(true);
+  });
+});

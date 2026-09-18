@@ -77,6 +77,22 @@ describe("ListView rendering (S2)", () => {
     expect(screen.queryByTestId("task-row")).not.toBeInTheDocument();
   });
 
+  test("empty state centers in the viewport remainder (design.md §6.7 v1.1.0)", async () => {
+    mockedListTasks.mockResolvedValue({ ok: true, data: [] });
+
+    render(<ListView />);
+
+    // 列表容器 min-h-full 撑满主区域, 空态块 flex-1 + justify-center
+    // 在剩余空间垂直居中 (原 py-16 在高窗口下头重脚轻)。
+    const emptyBlock = (await screen.findByText("还没有任务")).parentElement;
+    expect(emptyBlock?.classList.contains("flex-1")).toBe(true);
+    expect(emptyBlock?.classList.contains("justify-center")).toBe(true);
+    const listRoot = screen
+      .getByRole("button", { name: "新建任务" })
+      .closest(".min-h-full");
+    expect(listRoot).not.toBeNull();
+  });
+
   test("surfaces an error toast when listTasks fails", async () => {
     mockedListTasks.mockResolvedValue({
       ok: false,
