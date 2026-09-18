@@ -22,14 +22,23 @@
 >   (S3), `Settings.test.tsx` (S2), `IpcErrorRender.test.tsx` (S4) —
 >   these three files were missing on disk despite being listed in
 >   `quickstart.md` step 2.
+> - Dev-time filesystem side effects: `scripts/dev-smoke.sh` (wired as
+>   `pnpm dev:smoke`, commit `8248156`) launches `pnpm tauri dev`,
+>   waits for `http://localhost:1420`, then verifies the SQLite file
+>   lands at `~/Library/Application Support/com.huyikai.solo-task/tasks.db`
+>   with the expected 7-table schema. This is the only signal that
+>   T021 / FR-001 fires on first launch; jsdom cannot observe it.
+>   End-to-end run on the local machine: devUrl reachable, 4096-byte
+>   DB file written, all seven tables present.
 >
 > `tasks.md` checkbox grid is retained **unmodified** as a historical
-> record. Remaining gaps:
+> record. No remaining gaps.
 >
-> - T021 — `pnpm tauri dev` smoke in the app shell: jsdom tests cover
->   the rendering path (App.test.tsx), but the "DB file is created on
->   disk after first launch" side effect cannot be exercised in CI.
->   Manual verification remains the only signal.
+> Note for follow-up specs: the pre-push hook had two latent bugs that
+> bypassed TDD enforcement on new-branch pushes (dead-code typo and a
+> `rev-list --not --all` under-include). Both fixed in commit `245c122`.
+> Subsequent spec work (003+) can rely on the hook for genuine TDD
+> enforcement.
 
 **Input**: User description: "项目骨架 (Foundation) — 第一次把项目骨架搭起来,把 constitution v1.4.0 中所有 '应用启动 / 项目启动时' 应具备的基础设施一次性落地"
 
