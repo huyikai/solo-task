@@ -11,6 +11,8 @@ pub enum AppError {
     DbCorrupted,
     #[error("task not found: {0}")]
     TaskNotFound(i64),
+    #[error("validation failed: {0}")]
+    Validation(String),
     #[error("permission denied: {0}")]
     PermissionDenied(String),
     #[error("io error: {0}")]
