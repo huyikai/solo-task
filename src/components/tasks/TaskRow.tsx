@@ -18,13 +18,15 @@ const STATUS_STYLE: Record<TaskStatus, string> = {
 
 interface TaskRowProps {
   task: Task;
-  onStatusCycle: (task: Task) => void;
+  /** 点击状态徽标: 传入任务 id 与循环后的下一状态 (todo→doing→done→todo)。 */
+  onStatusCycle: (id: number, nextStatus: TaskStatus) => void;
   onEdit: (task: Task) => void;
   onDelete: (task: Task) => void;
 }
 
 export function TaskRow({ task, onStatusCycle, onEdit, onDelete }: TaskRowProps) {
   const dueDate = task.due_at ? task.due_at.slice(0, 10) : null;
+  const nextStatus = STATUS_CYCLE[task.status];
 
   return (
     <div
@@ -34,7 +36,7 @@ export function TaskRow({ task, onStatusCycle, onEdit, onDelete }: TaskRowProps)
     >
       <button
         type="button"
-        onClick={() => onStatusCycle(task)}
+        onClick={() => onStatusCycle(task.id, nextStatus)}
         title={t("tasks.status.cycle_hint")}
         className={`rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors duration-150 hover:opacity-80 ${STATUS_STYLE[task.status]}`}
       >
