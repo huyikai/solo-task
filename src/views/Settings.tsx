@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import Button from "@/components/Button";
-import Card from "@/components/Card";
-import ConfirmDialog from "@/components/ConfirmDialog";
-import ThemeSwitcher, { type ThemeMode } from "@/components/ThemeSwitcher";
-import ErrorToast from "@/components/ErrorToast";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { ErrorToast } from "@/components/ui/error-toast";
+import { ThemeSwitcher, type ThemeMode } from "@/components/ThemeSwitcher";
 import {
   getPreference,
   setPreference,
@@ -12,10 +12,6 @@ import {
   type TestErrorVariant,
 } from "@/api/ipc";
 import { t } from "@/i18n/t";
-
-interface SettingsProps {
-  onBack?: () => void;
-}
 
 function applyTheme(mode: ThemeMode) {
   const root = document.documentElement;
@@ -26,7 +22,7 @@ function applyTheme(mode: ThemeMode) {
   }
 }
 
-export default function Settings(_: SettingsProps) {
+export default function Settings(_: { onBack?: () => void } = {}) {
   const [theme, setTheme] = useState<ThemeMode>("system");
   const [systemDark, setSystemDark] = useState(
     typeof window !== "undefined" &&
@@ -86,68 +82,93 @@ export default function Settings(_: SettingsProps) {
 
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-medium">{t("settings.appearance")}</h2>
-        <Card className="flex items-center justify-between">
-          <span className="text-base">{t("settings.theme")}</span>
-          <div className="flex flex-col items-end gap-1">
-            <ThemeSwitcher value={theme} onChange={(m) => void handleThemeChange(m)} />
-            <span className="text-xs text-text-muted">
-              {t("settings.theme.currentHint", { mode: t(resolvedKey) })}
-            </span>
-          </div>
+        <Card>
+          <CardContent className="flex items-center justify-between pt-4">
+            <span className="text-base">{t("settings.theme")}</span>
+            <div className="flex flex-col items-end gap-1">
+              <ThemeSwitcher value={theme} onChange={(m) => void handleThemeChange(m)} />
+              <span className="text-xs text-text-muted">
+                {t("settings.theme.currentHint", { mode: t(resolvedKey) })}
+              </span>
+            </div>
+          </CardContent>
         </Card>
       </section>
 
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-medium">{t("settings.data")}</h2>
-        <Card className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <span className="text-base">{t("settings.check_for_update")}</span>
-            <div className="flex items-center gap-2">
-              {noUpdate && <span className="text-sm text-text-muted">{t("settings.no_update")}</span>}
-              <Button variant="secondary" size="sm" loading={checking} onClick={handleCheckUpdate}>
-                {checking ? t("settings.checking") : t("settings.check_for_update")}
-              </Button>
+        <Card>
+          <CardContent className="flex flex-col gap-3 pt-4">
+            <div className="flex items-center justify-between">
+              <span className="text-base">{t("settings.check_for_update")}</span>
+              <div className="flex items-center gap-2">
+                {noUpdate && (
+                  <span className="text-sm text-text-muted">
+                    {t("settings.no_update")}
+                  </span>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={checking}
+                  onClick={handleCheckUpdate}
+                >
+                  {checking ? t("settings.checking") : t("settings.check_for_update")}
+                </Button>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-base">{t("settings.clear_data")}</span>
-            <div className="flex items-center gap-2">
-              {cleared && <span className="text-sm text-text-muted">{t("settings.clear_done")}</span>}
-              <Button variant="danger" size="sm" onClick={() => setConfirmOpen(true)}>
-                {t("settings.clear_data")}
-              </Button>
+            <div className="flex items-center justify-between">
+              <span className="text-base">{t("settings.clear_data")}</span>
+              <div className="flex items-center gap-2">
+                {cleared && (
+                  <span className="text-sm text-text-muted">
+                    {t("settings.clear_done")}
+                  </span>
+                )}
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setConfirmOpen(true)}
+                >
+                  {t("settings.clear_data")}
+                </Button>
+              </div>
             </div>
-          </div>
+          </CardContent>
         </Card>
       </section>
 
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-medium">{t("settings.about")}</h2>
-        <Card className="flex items-center justify-between">
-          <span className="text-base">{t("settings.version")}</span>
-          <span className="font-mono text-sm text-text-muted">v0.1.0</span>
+        <Card>
+          <CardContent className="flex items-center justify-between pt-4">
+            <span className="text-base">{t("settings.version")}</span>
+            <span className="font-mono text-sm text-text-muted">v0.1.0</span>
+          </CardContent>
         </Card>
       </section>
 
       {import.meta.env.DEV && (
         <section className="flex flex-col gap-3">
           <h2 className="text-lg font-medium">{t("settings.developer")}</h2>
-          <Card className="flex flex-wrap items-center gap-2">
-            {(["db_locked", "db_corrupted", "permission_denied", "unknown"] as TestErrorVariant[]).map(
-              (variant) => (
-                <Button
-                  key={variant}
-                  variant="secondary"
-                  size="sm"
-                  onClick={async () => {
-                    const result = await triggerTestError(variant);
-                    if (!result.ok) setTestError(result.error);
-                  }}
-                >
-                  {variant}
-                </Button>
-              ),
-            )}
+          <Card>
+            <CardContent className="flex flex-wrap items-center gap-2 pt-4">
+              {(["db_locked", "db_corrupted", "permission_denied", "unknown"] as TestErrorVariant[]).map(
+                (variant) => (
+                  <Button
+                    key={variant}
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      const result = await triggerTestError(variant);
+                      if (!result.ok) setTestError(result.error);
+                    }}
+                  >
+                    {variant}
+                  </Button>
+                ),
+              )}
+            </CardContent>
           </Card>
           {testError && <ErrorToast error={testError} />}
         </section>
@@ -156,6 +177,10 @@ export default function Settings(_: SettingsProps) {
       <ConfirmDialog
         open={confirmOpen}
         expectedText={t("settings.confirm_clear_placeholder")}
+        title={t("settings.confirm_clear_title")}
+        message={t("settings.confirm_clear_message")}
+        confirmLabel={t("settings.confirm_clear_button")}
+        cancelLabel={t("settings.cancel")}
         onConfirm={() => {
           setConfirmOpen(false);
           setCleared(true);

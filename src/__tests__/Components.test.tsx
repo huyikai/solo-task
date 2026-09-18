@@ -1,8 +1,8 @@
 import { describe, expect, test, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import ConfirmDialog from "@/components/ui/confirm-dialog";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
-import ConfirmDialog from "@/components/ConfirmDialog";
 
 describe("ThemeSwitcher (S6)", () => {
   test("renders 3 options with system checked by default", () => {
@@ -38,6 +38,8 @@ describe("ConfirmDialog (S2)", () => {
       <ConfirmDialog
         open
         expectedText="DELETE"
+        confirmLabel="确认清除"
+        cancelLabel="取消"
         onConfirm={onConfirm}
         onCancel={vi.fn()}
       />,
@@ -62,7 +64,14 @@ describe("ConfirmDialog (S2)", () => {
     const onConfirm = vi.fn();
     const onCancel = vi.fn();
     render(
-      <ConfirmDialog open expectedText="DELETE" onConfirm={onConfirm} onCancel={onCancel} />,
+      <ConfirmDialog
+        open
+        expectedText="DELETE"
+        confirmLabel="确认清除"
+        cancelLabel="取消"
+        onConfirm={onConfirm}
+        onCancel={onCancel}
+      />,
     );
     await user.click(screen.getByRole("button", { name: "取消" }));
     expect(onCancel).toHaveBeenCalledOnce();

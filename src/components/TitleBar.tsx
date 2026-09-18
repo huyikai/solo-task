@@ -1,20 +1,13 @@
+import { cn } from "@/lib/utils";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
-// Detect platform once at module load (bundler-resolved, not runtime).
 const isMac = navigator.platform.toUpperCase().includes("MAC");
 
 interface TitleBarProps {
-  /** 内容（应用名 / tab / 设置按钮）放中间槽位。整条 TitleBar 可拖动。 */
   children?: React.ReactNode;
 }
 
-export default function TitleBar({ children }: TitleBarProps) {
-  // Window controls are only meaningful on non-mac frameless windows,
-  // but macOS users still expect traffic-light buttons in the top-left.
-  // We render the same set on all platforms for consistency (frameless
-  // means we always draw them ourselves).
-  const controlsVisible = true;
-
+export function TitleBar({ children }: TitleBarProps) {
   return (
     <div
       data-tauri-drag-region
@@ -25,44 +18,37 @@ export default function TitleBar({ children }: TitleBarProps) {
         className="flex items-center gap-1.5"
         style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
       >
-        {controlsVisible && (
-          <>
-            <WindowButton
-              variant={isMac ? "traffic" : "minimize"}
-              onClick={() => void getCurrentWindow().minimize()}
-              label="minimize"
-              color="#ffbd2e"
-            />
-            {isMac ? (
-              <WindowButton
-                variant="traffic"
-                onClick={() => void getCurrentWindow().toggleMaximize()}
-                label="maximize"
-                color="#28c940"
-              />
-            ) : (
-              <WindowButton
-                variant="maximize"
-                onClick={() => void getCurrentWindow().toggleMaximize()}
-                label="maximize"
-              />
-            )}
-            <WindowButton
-              variant={isMac ? "traffic" : "close"}
-              onClick={() => void getCurrentWindow().close()}
-              label="close"
-              color="#ff5f57"
-            />
-          </>
+        <WindowButton
+          variant={isMac ? "traffic" : "minimize"}
+          onClick={() => void getCurrentWindow().minimize()}
+          label="minimize"
+          color="#ffbd2e"
+        />
+        {isMac ? (
+          <WindowButton
+            variant="traffic"
+            onClick={() => void getCurrentWindow().toggleMaximize()}
+            label="maximize"
+            color="#28c940"
+          />
+        ) : (
+          <WindowButton
+            variant="maximize"
+            onClick={() => void getCurrentWindow().toggleMaximize()}
+            label="maximize"
+          />
         )}
+        <WindowButton
+          variant={isMac ? "traffic" : "close"}
+          onClick={() => void getCurrentWindow().close()}
+          label="close"
+          color="#ff5f57"
+        />
       </div>
 
-      {/* 中间内容槽位: 保持与 Layout 一致的水平 padding */}
       <div className="flex flex-1 items-center justify-center px-6">
         {children}
       </div>
-
-      {/* 右侧预留 (Layout 会把齿轮放在这里, 但要拖动区域连贯) */}
       <div className="w-[68px]" />
     </div>
   );
@@ -77,13 +63,15 @@ interface WindowButtonProps {
 
 function WindowButton({ variant, onClick, label, color }: WindowButtonProps) {
   if (variant === "traffic") {
-    // macOS 风格: 彩色圆点, hover 显示对应图标
     return (
       <button
         type="button"
         onClick={onClick}
         aria-label={label}
-        className="group flex h-3 w-3 items-center justify-center rounded-full"
+        className={cn(
+          "group flex h-3 w-3 items-center justify-center rounded-full",
+          "transition-opacity",
+        )}
         style={{ background: color }}
       >
         <svg
@@ -115,7 +103,6 @@ function WindowButton({ variant, onClick, label, color }: WindowButtonProps) {
     );
   }
 
-  // Windows 风格: 方形按钮, hover 显示对应图标
   const glyph = (() => {
     if (variant === "minimize") return <line x1="2" y1="9" x2="14" y2="9" />;
     if (variant === "maximize") return <rect x="2" y="2" width="12" height="12" />;
@@ -132,8 +119,10 @@ function WindowButton({ variant, onClick, label, color }: WindowButtonProps) {
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="group flex h-9 w-11 items-center justify-center text-text-muted transition-colors duration-150 hover:bg-bg hover:text-text-primary"
-      style={variant === "close" ? undefined : undefined}
+      className={cn(
+        "group flex h-9 w-11 items-center justify-center text-text-muted",
+        "transition-colors duration-150 hover:bg-bg hover:text-text-primary",
+      )}
     >
       <svg
         width="16"
@@ -150,3 +139,5 @@ function WindowButton({ variant, onClick, label, color }: WindowButtonProps) {
     </button>
   );
 }
+
+export default TitleBar;

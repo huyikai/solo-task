@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import DesignPreview from "@/pages/DesignPreview";
 import TitleBar from "@/components/TitleBar";
 import Layout from "@/components/Layout";
@@ -73,13 +74,7 @@ function App() {
     return (
       <main className="flex h-full flex-col items-center justify-center gap-6">
         <p className="text-text-muted">{lockError ?? t("error.db_locked")}</p>
-        <button
-          type="button"
-          onClick={() => void check()}
-          className="rounded-md bg-accent px-4 py-2 font-medium text-white transition-colors duration-150 hover:bg-accent-hover"
-        >
-          {t("error.retry")}
-        </button>
+        <Button onClick={() => void check()}>{t("error.retry")}</Button>
       </main>
     );
   }
@@ -90,15 +85,8 @@ function App() {
         <ViewTabs active={activeView} onChange={setActiveView} />
       </TitleBar>
       <Layout
-        headerLeft={
-          route === "settings" ? t("settings.title") : t(`views.${activeView}`)
-        }
         onOpenSettings={
-          route === "settings"
-            ? null
-            : route === "views"
-              ? () => setRoute("settings")
-              : undefined
+          route === "views" ? () => setRoute("settings") : null
         }
       >
         {route === "settings" ? (

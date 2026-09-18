@@ -1,13 +1,14 @@
 import type { ReactNode } from "react";
 import { t } from "@/i18n/t";
+import { cn } from "@/lib/utils";
 
 interface LayoutProps {
-  /** 左上角文字 (视图标题/页面标题). 留空则显示默认 "Solo Task". */
-  headerLeft?: string;
   /** 右上角控件 (设置齿轮等). 缺省 = 自动渲染齿轮按钮, 传 null = 不渲染. */
   onOpenSettings?: (() => void) | null;
   /** 右上角自定义节点. 优先于 onOpenSettings. */
   headerRight?: ReactNode;
+  /** 主区域 className override. */
+  className?: string;
   children: ReactNode;
 }
 
@@ -16,12 +17,15 @@ function SettingsGear({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="rounded-md p-2 text-text-muted transition-colors duration-150 hover:bg-bg hover:text-text-primary"
       aria-label={t("app.settings")}
+      className={cn(
+        "inline-flex h-9 w-9 items-center justify-center rounded-md text-text-muted",
+        "transition-colors duration-150 hover:bg-bg hover:text-text-primary",
+      )}
     >
       <svg
-        width="20"
-        height="20"
+        width="18"
+        height="18"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -38,35 +42,25 @@ function SettingsGear({ onClick }: { onClick: () => void }) {
 }
 
 /**
- * 视觉 sub-header: 紧贴 TitleBar 下方, 显示当前视图/页面标题
- * (左上角) + 设置入口 (右上角).
- *
- * TitleBar 独立在更外层 (带窗口控制 + drag region), 此处不可拖动.
+ * Layout = main content area + optional floating header-right slot.
+ * TitleBar (frameless window chrome) is rendered separately by App.
  */
 export default function Layout({
-  headerLeft,
   onOpenSettings,
   headerRight,
+  className,
   children,
 }: LayoutProps) {
   const rightSlot =
     headerRight ??
-    (onOpenSettings ? (
-      <SettingsGear onClick={onOpenSettings} />
-    ) : null);
+    (onOpenSettings ? <SettingsGear onClick={onOpenSettings} /> : null);
 
   return (
     <div className="flex h-full flex-col bg-bg">
-      <div
-        className="flex h-10 shrink-0 items-center justify-between border-b border-border bg-surface px-6"
-        data-testid="sub-header"
-      >
-        <span className="text-sm font-medium text-text-muted">
-          {headerLeft ?? "Solo Task"}
-        </span>
-        {rightSlot && <div className="flex items-center">{rightSlot}</div>}
-      </div>
-      <main className="flex-1 overflow-auto p-6">{children}</main>
+      {rightSlot && (
+        <div className="flex justify-end px-6 pt-4">{rightSlot}</div>
+      )}
+      <main className={cn("flex-1 overflow-auto p-6", className)}>{children}</main>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Button from "@/components/Button";
+import { Button } from "@/components/ui/button";
 import { exportJson } from "@/api/ipc";
 import { t } from "@/i18n/t";
 
@@ -14,15 +14,12 @@ export default function CorruptedView({ onOpenSettings }: CorruptedViewProps) {
   async function handleExport() {
     setExporting(true);
     try {
-      // 原生保存对话框 via tauri-plugin-dialog
       const { save } = await import("@tauri-apps/plugin-dialog");
       const path = await save({
         defaultPath: `solo-task-export-${new Date().toISOString().slice(0, 10)}.json`,
         filters: [{ name: "JSON", extensions: ["json"] }],
       });
-      if (!path) {
-        return; // 用户取消
-      }
+      if (!path) return; // 用户取消
       const result = await exportJson(path);
       if (result.ok) {
         setSuccess(t("corrupted.export_success"));
@@ -57,7 +54,10 @@ export default function CorruptedView({ onOpenSettings }: CorruptedViewProps) {
       </p>
 
       <div className="flex items-center gap-3">
-        <Button variant="primary" loading={exporting} onClick={() => void handleExport()}>
+        <Button
+          disabled={exporting}
+          onClick={() => void handleExport()}
+        >
           {exporting ? t("corrupted.exporting") : t("corrupted.export")}
         </Button>
         {onOpenSettings && (
@@ -67,7 +67,11 @@ export default function CorruptedView({ onOpenSettings }: CorruptedViewProps) {
         )}
       </div>
 
-      {success && <p className="text-sm" style={{ color: "var(--success)" }}>{success}</p>}
+      {success && (
+        <p className="text-sm" style={{ color: "var(--success)" }}>
+          {success}
+        </p>
+      )}
     </main>
   );
 }

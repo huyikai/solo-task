@@ -1,6 +1,7 @@
-export type ViewKind = "list" | "board" | "gantt";
-
+import { cn } from "@/lib/utils";
 import { t } from "@/i18n/t";
+
+export type ViewKind = "list" | "board" | "gantt";
 
 interface ViewTabsProps {
   active: ViewKind;
@@ -13,7 +14,7 @@ const tabs: Array<{ key: ViewKind; labelKey: string }> = [
   { key: "gantt", labelKey: "views.gantt" },
 ];
 
-export default function ViewTabs({ active, onChange }: ViewTabsProps) {
+export function ViewTabs({ active, onChange }: ViewTabsProps) {
   return (
     <div role="tablist" className="flex gap-1">
       {tabs.map(({ key, labelKey }) => (
@@ -22,11 +23,12 @@ export default function ViewTabs({ active, onChange }: ViewTabsProps) {
           role="tab"
           aria-selected={active === key}
           onClick={() => onChange(key)}
-          className={`rounded-md px-3 py-1.5 text-sm transition-colors duration-150 ${
+          className={cn(
+            "rounded-md px-3 py-1.5 text-sm transition-colors duration-150",
             active === key
               ? "bg-bg font-medium text-text-primary"
-              : "text-text-muted hover:bg-bg hover:text-text-primary"
-          }`}
+              : "text-text-muted hover:bg-bg hover:text-text-primary",
+          )}
         >
           {t(labelKey)}
         </button>
@@ -34,3 +36,5 @@ export default function ViewTabs({ active, onChange }: ViewTabsProps) {
     </div>
   );
 }
+
+export default ViewTabs;
