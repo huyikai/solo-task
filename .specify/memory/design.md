@@ -3,6 +3,7 @@
 **Constitution Reference**: Principles IX-XI (Design Quality, Design System
 Continuity, Governance Layer Promotion, v1.7.0)
 **Skill invocation**: `/design-taste-frontend`
+**Version**: v1.1.0 (AA text-token sweep, segmented elevation, empty-state centering)
 **Last Amended**: 2026-09-18
 
 This document is the **single source of truth** for visual design in Solo
@@ -53,15 +54,15 @@ remain native React when no shadcn primitive exists.
 | `--surface` | `#FFFFFF` | 卡片表面 (zinc-0) |
 | `--surface-elevated` | `#FFFFFF` | 浮层、模态 |
 | `--text-primary` | `#18181B` | 主文本 (zinc-900) |
-| `--text-muted` | `#71717A` | 次要文本 (zinc-500) |
-| `--text-subtle` | `#A1A1AA` | 提示、占位 (zinc-400) |
+| `--text-muted` | `#52525B` | 次要文本 (zinc-600) |
+| `--text-subtle` | `#71717A` | 提示、占位 (zinc-500) |
 | `--border` | `#E4E4E7` | 1px 边框 (zinc-200) |
 | `--border-strong` | `#D4D4D8` | 强调边框 (zinc-300) |
 | `--accent` | `#2563EB` | 主操作 (blue-600), **仅一个**, 不发光 |
 | `--accent-hover` | `#1D4ED8` | (blue-700) |
 | `--error` | `#DC2626` | (red-600) |
-| `--success` | `#16A34A` | (green-600) |
-| `--warning` | `#D97706` | (amber-600) |
+| `--success` | `#15803D` | (green-700) |
+| `--warning` | `#B45309` | (amber-700) |
 
 #### Dark Theme
 
@@ -71,17 +72,24 @@ remain native React when no shadcn primitive exists.
 | `--surface` | `#18181B` | 卡片表面 (zinc-900) |
 | `--surface-elevated` | `#27272A` | 浮层、模态 (zinc-800) |
 | `--text-primary` | `#FAFAFA` | (zinc-50) |
-| `--text-muted` | `#A1A1AA` | (zinc-400) |
-| `--text-subtle` | `#71717A` | (zinc-500) |
+| `--text-muted` | `#D4D4D8` | (zinc-300) |
+| `--text-subtle` | `#A1A1AA` | (zinc-400) |
 | `--border` | `#27272A` | (zinc-800) |
 | `--border-strong` | `#3F3F46` | (zinc-700) |
-| `--accent` | `#3B82F6` | (blue-500), dark 下稍亮 |
+| `--accent` | `#2563EB` | 主操作 fill (blue-600; ring/focus 仍 `#3B82F6`) |
 | `--accent-hover` | `#60A5FA` | (blue-400) |
 | `--error` | `#EF4444` | (red-500) |
 | `--success` | `#22C55E` | (green-500) |
 | `--warning` | `#F59E0B` | (amber-500) |
 
 **饱和度约束**: 所有 accent / state 色 saturation < 80%。`--accent` 在 light 下用 `blue-600` 而非 `blue-500`, 避免过于明亮。
+
+**对比度约束 (v1.1.0)**: 一切用作**文字颜色**的 token 在其语义表面上必须
+≥ 4.5:1 (WCAG AA normal text), 包括状态徽标的 `--warning`/`--success` 与
+primary 按钮的 `--primary-foreground`。由 `src/__tests__/TokenContrast.test.ts`
+机器守护 (起因: 2026-09-18 设计评审发现浅色徽标 2.6-3.3:1 全线不达标,
+深色 subtle 3.7:1、深色 primary 白字 3.7:1 同样不达标)。`--destructive`
+不承载文字 (fill + 白字, dark 下经 `/60` 混合约 6.7:1), 不在本约束内。
 
 ### 1.2 Spacing Scale
 
@@ -202,10 +210,10 @@ are:
 | `foreground` | `#18181B` | `#FAFAFA` | Primary text |
 | `card` | `#FFFFFF` | `#18181B` | Card surface |
 | `popover` | `#FFFFFF` | `#27272A` | Elevated surface |
-| `primary` | `#2563EB` | `#3B82F6` | Primary action |
+| `primary` | `#2563EB` | `#2563EB` | Primary action (dark 用 blue-600 保白字 AA, v1.1.0) |
 | `secondary` | `#F4F4F5` | `#27272A` | Secondary surface |
 | `muted` | `#F4F4F5` | `#27272A` | Muted container, including TabsList |
-| `muted-foreground` | `#71717A` | `#A1A1AA` | Muted text |
+| `muted-foreground` | `#52525B` | `#D4D4D8` | Muted text (v1.1.0 阶梯上移) |
 | `accent` | `#F4F4F5` | `#27272A` | Hover / selected neutral surface |
 | `destructive` | `#DC2626` | `#EF4444` | Destructive action |
 | `border` / `input` | `#E4E4E7` | `#27272A` | Borders and inputs |
@@ -279,6 +287,8 @@ Radio Group / Toggle Group pattern when a matching primitive exists.
 31. ❌ 无 "Beta" / "Preview" / "v0.x" 角标 在 Settings 主标题 (允许在 About 版本号旁)
 32. ❌ 无 theme toggle 在顶栏/hero 等显眼位置 → 仅在 Settings 内 (外观分组), 不做成太阳/月亮图标按钮
 33. ❌ 无未持久化的 theme 选择 → 必须存 DB (`user_preferences` 表), 跨重启保留
+34. ❌ 无 < 4.5:1 (WCAG AA) 的文字色 token (text-primary/muted/subtle、状态
+    徽标 warning/success、primary 按钮文字) → `TokenContrast.test.ts` 机器守护 (v1.1.0)
 
 ---
 
@@ -445,14 +455,17 @@ not in a separate title bar. New tab groups MUST use this primitive.
 **Segmented Control** (Theme selector sub-component):
 
 - 3 buttons side-by-side, shared border-radius-md 8px (Shape Consistency Lock)
-- Selected: `bg-bg` + `font-medium` + text-text-primary
+- Selected: `bg-bg` + `font-medium` + text-text-primary + `shadow-sm`
 - Unselected: bg-surface + text-text-muted, hover text-text-primary
 - Size: height 36px (h-9), padding `px-3`, text-sm
 - ARIA: `role="radiogroup"`, each `role="radio"`, selected `aria-checked="true"`
 
-**No accent border, no inset box-shadow.** Selected state is conveyed
-only by background tint + medium weight. Consistent with ViewTabs
-selection pattern above.
+**No accent border, no inset box-shadow.** Selected state is conveyed by
+background tint + medium weight + a soft outer `shadow-sm` — the same
+elevation language as the Tabs trigger active state (v1.1.0: spec 003's
+editor priority group shipped the §6.6 pattern *without* the shadow and
+read as stateless in visual review; the shadow is now part of the locked
+pattern).
 
 **ConfirmDialog** (sub-component):
 
@@ -485,6 +498,8 @@ Content left-to-right:
   - todo → `--text-subtle` + `--border`
   - doing → `--warning`
   - done → `--success`
+  - (v1.1.0: light 下 `--warning`/`--success` 已加深为 amber-700 /
+    green-700 以满足 §1.1 对比度约束; token 名不变)
   - Click cycles todo→doing→done→todo; `title` hint from i18n.
 - Title: `text-base text-text-primary`, single-line truncate.
 - Priority label (only when != none): `text-xs`, `--muted` background
@@ -494,17 +509,22 @@ Content left-to-right:
 - Actions: two `Button variant="ghost" size="sm"` (编辑 / 删除),
   no icons.
 
-**Empty state**: centered `py-16`; `text-base text-text-muted` title
+**Empty state**: vertically centered in the viewport remainder — list
+container `min-h-full`, empty block `flex-1` + `justify-center`
+(v1.1.0; the original `py-16` read as top-heavy at tall window
+heights); `text-base text-text-muted` title
 "还没有任务" + `text-sm text-text-subtle` hint. No illustration, no
 call-to-action button duplicated in the empty body (the toolbar's
 新建任务 button remains the single entry).
 
-**TaskEditorDialog**: shadcn Dialog (`radius-lg`, `p-6`), title
+**TaskEditorDialog**: shadcn Dialog (`radius-lg`, `p-6`, width
+`sm:max-w-[425px]` — shadcn form convention, v1.1.0), title
 `text-lg font-semibold`, fields as vertical `label` groups
 (`gap-1.5`, label `text-sm font-medium`): Input (title, maxLength
 200), textarea styled with the Input token set (description,
 maxLength 5000), priority segmented radiogroup reusing the §6.6
-pattern (`h-8` options, selected = `bg-bg` + `font-medium`), due-date
+pattern (`h-8` options, selected = `bg-bg` + `font-medium` +
+`shadow-sm`, v1.1.0), due-date
   field as the established DatePicker pattern: outline trigger Button
   (calendar icon + `YYYY-MM-DD`, `--text-muted` placeholder "选择日期")
   opening a Popover with the Calendar primitive; explicit 清除 ghost
