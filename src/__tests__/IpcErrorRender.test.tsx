@@ -11,6 +11,7 @@ const ALL_VARIANTS: AppErrorVariant[] = [
   "db_locked",
   "db_corrupted",
   "task_not_found",
+  "validation",
   "permission_denied",
   "io_error",
   "unknown",
@@ -22,6 +23,7 @@ describe("i18nKeyFor (S4)", () => {
       db_locked: "error.db_locked",
       db_corrupted: "error.db_corrupted",
       task_not_found: "error.unknown",
+      validation: "error.validation",
       permission_denied: "error.permission_denied",
       io_error: "error.unknown",
       unknown: "error.unknown",
@@ -49,4 +51,13 @@ describe("ErrorToast rendering (S4)", () => {
       expect(alert).not.toHaveTextContent("internal stack leak");
     },
   );
+
+  test("renders the validation message for validation variant (003 FR-007)", () => {
+    render(
+      <ErrorToast error={{ variant: "validation", message: "title: too long" }} />,
+    );
+    const alert = screen.getByRole("alert");
+    expect(alert).toHaveTextContent("输入不符合要求");
+    expect(alert).not.toHaveTextContent("title: too long");
+  });
 });
