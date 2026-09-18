@@ -16,7 +16,7 @@ describe("shadcn-style Button (S6)", () => {
   test("supports variant=destructive", () => {
     render(<Button variant="destructive">危险操作</Button>);
     const btn = screen.getByRole("button", { name: "危险操作" });
-    expect(btn.className).toMatch(/error/);
+    expect(btn.className).toMatch(/bg-destructive/);
   });
 
   test("supports variant=outline", () => {

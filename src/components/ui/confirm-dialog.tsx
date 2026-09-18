@@ -74,9 +74,9 @@ export function ConfirmDialog({
           autoFocus
           data-testid="confirm-input"
           className={cn(
-            "h-10 w-full rounded-md border border-border-strong bg-bg px-3 text-base",
+            "h-10 w-full rounded-md border border-input bg-background px-3 text-base",
             "outline-none transition-colors duration-150",
-            "focus:border-accent",
+            "focus:border-ring",
           )}
         />
         <div className="flex justify-end gap-2">
