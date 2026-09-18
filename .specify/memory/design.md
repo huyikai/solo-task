@@ -504,8 +504,11 @@ call-to-action button duplicated in the empty body (the toolbar's
 (`gap-1.5`, label `text-sm font-medium`): Input (title, maxLength
 200), textarea styled with the Input token set (description,
 maxLength 5000), priority segmented radiogroup reusing the §6.6
-pattern (`h-8` options, selected = `bg-bg` + `font-medium`), date
-Input (`type="date"`). Footer: outline 取消 + primary 保存,
+pattern (`h-8` options, selected = `bg-bg` + `font-medium`), due-date
+  field as the established DatePicker pattern: outline trigger Button
+  (calendar icon + `YYYY-MM-DD`, `--text-muted` placeholder "选择日期")
+  opening a Popover with the Calendar primitive; explicit 清除 ghost
+  button appears only when a date is set. Footer: outline 取消 + primary 保存,
 disabled while the trimmed title is empty.
 
 **Delete confirmation**: ConfirmDialog with title interpolating the
