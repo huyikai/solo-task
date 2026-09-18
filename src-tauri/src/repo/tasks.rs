@@ -95,3 +95,93 @@ pub fn list_tasks(conn: &Connection) -> AppResult<Vec<Task>> {
 pub fn get_task(conn: &Connection, id: i64) -> AppResult<Task> {
     query_one(conn, id)
 }
+
+/// Partial update payload: `None` = leave the column untouched,
+/// `Some(None)` = explicitly clear (only meaningful for due_at).
+pub struct TaskPatchRow {
+    pub title: Option<String>,
+    pub description: Option<String>,
+    pub priority: Option<TaskPriority>,
+    pub due_at: Option<Option<String>>,
+}
+
+pub fn update_task(
+    conn: &Connection,
+    id: i64,
+    patch: &TaskPatchRow,
+    updated_at: &str,
+) -> AppResult<Task> {
+    // 动态 SET: 只更新显式传入的列 (FR-003 部分更新语义)。
+    let mut columns: Vec<&'static str> = Vec::new();
+    let mut params: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
+
+    if let Some(title) = &patch.title {
+        columns.push("title");
+        params.push(Box::new(title.clone()));
+    }
+    if let Some(description) = &patch.description {
+        columns.push("description");
+        params.push(Box::new(description.clone()));
+    }
+    if let Some(priority) = patch.priority {
+        columns.push("priority");
+        params.push(Box::new(priority.as_str().to_string()));
+    }
+    if let Some(due_at) = &patch.due_at {
+        columns.push("due_at");
+        params.push(Box::new(due_at.clone()));
+    }
+
+    if columns.is_empty() {
+        // 无字段可更新: 只刷 updated_at 语义不成立, 直接原样返回,
+        // 不产生写放大。
+        return query_one(conn, id);
+    }
+
+    columns.push("updated_at");
+    params.push(Box::new(updated_at.to_string()));
+
+    let sets_sql: Vec<String> = columns
+        .iter()
+        .enumerate()
+        .map(|(i, col)| format!("{col} = ?{}", i + 1))
+        .collect();
+    let sql = format!("UPDATE tasks SET {} WHERE id = ?", sets_sql.join(", "));
+    params.push(Box::new(id));
+
+    let affected = conn
+        .execute(&sql, params.iter().map(|p| p.as_ref()).collect::<Vec<_>>().as_slice())
+        .map_err(|e| map_sqlite(e, "update task"))?;
+    if affected == 0 {
+        return Err(AppError::TaskNotFound(id));
+    }
+    query_one(conn, id)
+}
+
+pub fn set_task_status(
+    conn: &Connection,
+    id: i64,
+    status: TaskStatus,
+    updated_at: &str,
+) -> AppResult<Task> {
+    let affected = conn
+        .execute(
+            "UPDATE tasks SET status = ?1, updated_at = ?2 WHERE id = ?3",
+            params![status.as_str(), updated_at, id],
+        )
+        .map_err(|e| map_sqlite(e, "set task status"))?;
+    if affected == 0 {
+        return Err(AppError::TaskNotFound(id));
+    }
+    query_one(conn, id)
+}
+
+pub fn delete_task(conn: &Connection, id: i64) -> AppResult<()> {
+    let affected = conn
+        .execute("DELETE FROM tasks WHERE id = ?1", params![id])
+        .map_err(|e| map_sqlite(e, "delete task"))?;
+    if affected == 0 {
+        return Err(AppError::TaskNotFound(id));
+    }
+    Ok(())
+}
