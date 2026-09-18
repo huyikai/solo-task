@@ -1,14 +1,19 @@
 # Solo Task Design System
 
-**Constitution Reference**: Principle X (Design System Continuity, v1.5.0)
+**Constitution Reference**: Principles IX-XI (Design Quality, Design System
+Continuity, Governance Layer Promotion, v1.7.0)
 **Skill invocation**: `/design-taste-frontend`
-**Last Amended**: 2026-09-17
+**Last Amended**: 2026-09-18
 
 This document is the **single source of truth** for visual design in Solo
 Task. It is project-level (not feature-level): every UI spec MUST
-reference these tokens, anti-patterns, and review standards. Per-feature
-design decisions (e.g. "this spec's TaskModal has these visual props") live
-in `specs/<feature>/design.md` and MUST NOT redefine these global values.
+reference these tokens, anti-patterns, component primitives, and review
+standards. Reusable component patterns live here under Section 6 and MUST
+not be redefined in individual specs.
+
+Feature-specific design is only allowed when a feature has a justified,
+non-reusable deviation under Constitution Principle X. In the normal case,
+there is no `specs/<feature>/design.md`.
 
 ---
 
@@ -24,7 +29,11 @@ in `specs/<feature>/design.md` and MUST NOT redefine these global values.
 | **MOTION_INTENSITY** | 3 (Static) | 待办工具是 daily-use, motion 多 = 烦。CSS `:hover` + `:active` 足矣 |
 | **VISUAL_DENSITY** | 3 (Art Gallery) | MVP 阶段内容稀疏, 大量空白帮助聚焦。后续 CRUD 接入后密度会自然上升 |
 
-**System choice**: 不引入 shadcn/ui / Radix Themes / 任何组件库 (避免默认态、避免二次定制)。用原生 Tailwind + 几个自建原子组件。理由: 一个人维护, 不需要 shadcn 那种 "你拥有代码" 的复杂度; 反正要全部定制, 直接写更短。
+**System choice**: shadcn/ui + Radix primitives (source-in-repo under
+`src/components/ui/`) is the preferred component foundation. New
+reusable primitives MUST use the shadcn source pattern first. Do not
+mix another component library. Small feature-specific wrappers may
+remain native React when no shadcn primitive exists.
 
 **Theme lock**: **默认跟随系统** (`prefers-color-scheme: dark` / `light`), 但 Settings 提供手动覆盖 (3 选项: 跟随系统 / 亮色 / 暗色)。用户选择持久化到 DB (`user_preferences` 表), 跨重启保留。
 
@@ -201,6 +210,12 @@ module.exports = {
         'border-strong': 'var(--border-strong)',
         accent: 'var(--accent)',
         'accent-hover': 'var(--accent-hover)',
+        // shadcn semantic aliases (source components use these names)
+        background: 'var(--bg)',
+        foreground: 'var(--text-primary)',
+        muted: 'var(--bg)',
+        'muted-foreground': 'var(--text-muted)',
+        ring: 'var(--accent)',
       },
       fontFamily: {
         sans: ['var(--font-sans)'],
@@ -298,14 +313,20 @@ Design review (design-taste-frontend):
 
 ## 4. How a UI Spec References This Document
 
-每个 `specs/<feature>/design.md` MUST:
+每个 `specs/<feature>/` UI spec MUST reference this file directly:
 
-1. **Section 0**: 重申 Design Read + Dials (引用本文件 Section 0, 注明本 feature 是否偏离)
-2. **Section 1**: 引用本文件 Section 1 (tokens), 不重复
-3. **Section 2**: 描述本 feature 特定的组件视觉骨架 (无 component 时此 section 为空)
-4. **Section 3**: 引用本文件 Section 2 (anti-pattern), 可在本 feature 加 ≤ 5 条 feature-specific 项
-5. **Section 4**: 列出本 feature 的 review checkpoint (D1, D2, ...) 和对应的待评审组件
-6. **Section 5**: 任何本 feature 对全局 design system 的偏离建议, 需触发 constitution amendment
+1. `plan.md` 声明: "no design deviation; inherits
+   `.specify/memory/design.md` verbatim" (the default path).
+2. `tasks.md` maps each UI checkpoint to Section 2 anti-patterns and
+   Section 6 component primitives.
+3. Feature-local `design.md` is forbidden by default. It exists only
+   under the explicit deviation process in Constitution Principle X.
+4. New reusable component patterns, tokens, or anti-pattern rules MUST
+   be added to this global file through a design-amendment spec before
+   their dependent feature ships.
+
+This makes shadcn source components under `src/components/ui/` and this
+file the shared UI contract for every future feature.
 
 ---
 
@@ -317,86 +338,79 @@ descriptions (no redefinition per feature). A feature that introduces a
 **new** component visual pattern MUST add it to this section via a
 design-amendment spec.
 
-### 6.1 Button
+### 6.1 Button (shadcn source-owned)
 
-**Matrix**:
+The preferred Button primitive is `src/components/ui/button.tsx`,
+following the shadcn `cva` + `cn()` pattern. Public variants:
 
-| Variant | Background | Border | Text | Hover | Active |
-|---|---|---|---|---|---|
-| primary | `--accent` | none | `#FFFFFF` | `--accent-hover` | `scale(0.98)` |
-| secondary | `--surface` | `1px --border-strong` | `--text-primary` | bg `--bg` | `scale(0.98)` |
-| ghost | transparent | none | `--text-primary` | bg `--bg` | `scale(0.98)` |
-| danger | `--error` | none | `#FFFFFF` | darken 8% | `scale(0.98)` |
+| Variant | Project mapping | Usage |
+|---|---|---|
+| `default` | `--accent` + white text | Primary action |
+| `destructive` | `--error` + white text | Destructive action |
+| `outline` | surface + border-strong | Secondary action |
+| `secondary` | surface + border-strong | Secondary action alias |
+| `ghost` | transparent, hover bg | Low emphasis |
+| `link` | accent underline | Inline action |
 
-**Size**:
+Sizes: `default` (h-10), `sm` (h-8), `lg` (h-11), `icon` (h-10 w-10).
+All variants inherit radius-md, focus-visible ring, disabled opacity,
+and active scale feedback from the shadcn source pattern. New buttons
+MUST use this primitive rather than hand-rolled `<button>` classes.
 
-| Size | Height | Padding | Font |
-|---|---|---|---|
-| sm | 32px | `px-3` | text-sm |
-| md | 40px | `px-4` | text-base |
+### 6.2 Card (shadcn source-owned)
 
-**Radius**: 8px (Shape Consistency Lock per Section 1.4).
-**Focus**: 2px outline `--accent`, offset 2px, WCAG 2.4.7 compliant.
-**Disabled**: opacity 0.5, cursor not-allowed, no hover.
-**Loading**: text replaced with same-size spinner (16px).
+The preferred Card primitive is `src/components/ui/card.tsx` with the
+canonical compound API:
 
-### 6.2 Card
+```tsx
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+```
 
-- Background: `--surface`
-- 1px border: `--border`
-- Radius: 8px
-- Padding: `p-4` (16px)
-- Shadow: `shadow-sm` default, `shadow-md` on hover (toggleable)
-- Internal layout: title (text-lg medium) + subtitle (text-sm muted, optional) + content (gap-3)
+Card / CardHeader / CardTitle / CardDescription / CardContent /
+CardFooter are composed rather than a bespoke wrapper per feature.
+Visual baseline: `--surface`, 1px `--border`, radius-md, shadow-sm,
+`p-4` content rhythm. `hoverable` is an explicitly supported extension
+that adds shadow-md on hover; do not add arbitrary card styling per page.
 
-### 6.3 Layout (App Shell)
+### 6.3 Layout + Frameless TitleBar
 
-**Structure**: TWO horizontal bands at the top + main content area.
+**Structure**: a transparent frameless TitleBar overlay plus a main
+content area. The OS chrome is disabled (`decorations: false`) and
+window controls are source-owned under `src/components/TitleBar.tsx`.
 
-**Band 1 — TitleBar (frameless window chrome)**:
-- `tauri.conf.json` uses `"decorations": false` so the OS title bar
-  (close / minimize / maximize) is hidden. We draw our own.
-- Height: `h-9` (36px)
-- Background: `--surface`, separated from sub-header by 1px `--border` bottom
-- **Layout**: `flex justify-between items-center`
-  - **Left** (gap-1.5): three window control buttons (no-drag region)
-    - macOS: traffic-light dots (red `#ff5f57` / amber `#ffbd2e` / green `#28c940`)
-      — order: minimize, maximize, close
-    - Windows/Linux: square buttons (一 / 口 / X) in order minimize, maximize, close
-  - **Middle**: passed as `children` prop (typically `ViewTabs`)
-  - **Right**: 68px reserved spacer (Layout puts Settings gear here in Band 2)
-- **Drag region**: the entire TitleBar is `data-tauri-drag-region`; buttons opt
-  out via `WebkitAppRegion: no-drag` so they're clickable
-- **Actions**: `getCurrentWindow().minimize() / toggleMaximize() / close()`
+- TitleBar: fixed overlay at the window top, `h-9`, transparent, no
+  visible background band; its traffic-light / Windows controls are
+  `no-drag`, while the surrounding region is `data-tauri-drag-region`.
+- Main content starts at the top of the window. No separate visible
+  app header or sub-header band.
+- Settings gear lives in the content area top-right when the views route
+  is active; Settings itself has no gear.
+- Main content: `p-6` or `p-8`, `--bg`, max width unlimited.
 
-**Band 2 — Sub-header (visual context)**:
-- Height: `h-10` (40px), not draggable
-- Background: `--surface`, separated from main content by 1px `--border` bottom
-- **Left**: page title text (`text-sm font-medium text-text-muted`):
-  - views route: 当前视图的 `views.list` / `views.board` / `views.gantt`
-  - settings route: `settings.title`
-- **Right**: Settings gear button (secondary ghost); hidden in settings route
+### 6.4 Tabs (shadcn new-york-v4 source-owned)
 
-**Main content area**:
-- Padding: `p-6` or `p-8`
-- Max width: unlimited (Mac window typically 1024+px, content fills)
-- Background: `--bg` (creates layer with surface)
+The preferred Tabs primitive is `src/components/ui/tabs.tsx`, installed
+from the default shadcn template (`pnpm dlx shadcn@latest add tabs`) and
+backed by `radix-ui`. The public API is exactly:
 
-### 6.4 ViewTabs
+```tsx
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+```
 
-Lives inside the Layout top bar's center slot (NOT a separate row).
+Foundation uses the default shadcn composition:
 
-- Horizontal layout, three tabs: `列表` / `看板` / `甘特图`
-- Tab shape: `rounded-md px-3 py-1.5 text-sm`
-- Selected: `bg-bg` (slightly lighter than surrounding surface) +
-  `font-medium` + text-text-primary
-- Unselected: bg transparent + text-text-muted, hover `bg-bg` + text-text-primary
-- Spacing: `gap-1` (tight, tabs sit together as a group)
-- ARIA: `role="tablist"`, each tab `role="tab"`, selected `aria-selected="true"`
+```text
+Tabs
+├── TabsList (default: muted background, rounded-lg, p-[3px], h-9)
+│   ├── TabsTrigger (active: bg-surface + shadow-sm)
+│   └── TabsTrigger
+└── TabsContent
+```
 
-**No accent border / no underline.** Selected state is conveyed only
-by background tint + medium weight. Avoids the AI-default "blue glow
-on active tab" pattern (anti-pattern #3).
+`TabsList variant="line"` remains available for screens that explicitly
+need an underline indicator. Foundation's list/board/gantt tabs use the
+default container variant and sit centered at the top of the main content,
+not in a separate title bar. New tab groups MUST use this primitive.
 
 ### 6.5 CorruptedView
 

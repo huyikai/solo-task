@@ -1,44 +1,22 @@
 <!-- Sync Impact Report
-Version: 1.4.0 → 1.5.0
-Bump rationale: MINOR — added shadcn/ui + Radix as an optional,
-explicitly-blessed design-system dependency. Principle IV is narrowed:
-"no third-party component library" is removed; we now allow shadcn/ui
-because it ships source we own + Radix primitives that are a11y-grade.
-The "no Tailwind preset" rule is added because shadcn requires raw
-Tailwind tokens.
+Version: 1.6.0 → 1.7.0
+Bump rationale: MINOR — repaired the accumulated Sync Impact Report,
+made shadcn/ui the preferred component primitive for all new UI work,
+and synchronized governance wording with the adopted source-in-repo
+shadcn implementation.
 Modified principles:
-- IV. Tauri + React + SQLite — Locked Stack: narrowed to forbid
-  alternative component libraries, not shadcn + Radix.
-- New "Lockfile discipline for shadcn" sub-bullet under Dependency
-  Upgrades: shadcn source MUST be in src/components/ui/, never imported
-  from a third-party package.
+- IV. Tauri + React + SQLite — Locked Stack: shadcn/ui + Radix is no
+  longer merely optional for new UI; it is the preferred path. Other
+  component libraries remain forbidden.
+- X. Design System Continuity: global design.md is now explicitly
+  shadcn-compatible and must document primitive variants.
 Added sections:
-- Technology Stack bullet: "Component primitives: shadcn/ui (Radix-based,
-  source-in-repo) — optional"
+- Technology Stack preference rule for new reusable UI primitives.
 Removed sections: none
 Follow-up TODOs:
-- Existing self-built components (Button/Card/etc.) MAY stay OR be
-  migrated feature-by-feature. No forced rewrite.
-- The "shadcn CLI" MUST NOT be invoked automatically; primitives are
-  hand-copied / hand-written per Principle XI to keep source auditable.
--->
-
-# Solo Task Constitution
-promoted to governance layer (project-level memory, sibling to this
-constitution), not invented per feature.
-Modified principles:
-- X. Design System Continuity — rewrote to forbid feature-local design.md
-  by default and require deviation justification when one is created.
-Added sections:
-- Principle XI. Governance Layer Promotion — explicit rule that
-  reusable / cross-feature design artifacts MUST be promoted to
-  `.specify/memory/`, not invented per feature.
-Removed sections: none
-Follow-up TODOs:
-- Existing specs (001-foundation) already align with the new rule (no
-  feature-local design.md after the previous collapse commit).
-- Future feature specs MUST check `.specify/memory/` first and only
-  create `specs/<feature>/design.md` if they have a declared deviation.
+- Existing components already migrated to `src/components/ui/` remain
+  the baseline; future components should follow the same source-owned
+  shadcn pattern.
 -->
 
 # Solo Task Constitution
@@ -105,19 +83,25 @@ Electron, adding a backend server, or replacing SQLite with a network
 database are all forbidden without a constitution amendment.
 
 **Component primitives**: `shadcn/ui` (Radix-based, source-in-repo) is
-explicitly blessed as an OPTIONAL dependency. When primitives are
-adopted, their source MUST live under `src/components/ui/` and MUST be
-reviewed through `design-taste-frontend` before merging. The `shadcn`
-CLI MUST NOT be invoked automatically — copy patterns manually per
-Principle XI so the source stays auditable. No other component
-libraries (MUI, Chakra, Antd, Blueprint, Mantine, etc.) are allowed.
-Rationale: shadcn ships unstyled, accessible primitives that compose
-with our Tailwind tokens (Section 1 of `.specify/memory/design.md`).
-It keeps the project in control of the visual surface while
-delegating accessibility / focus / keyboard plumbing to Radix.
+**the preferred path for all new reusable UI primitives**. When a
+shadcn primitive exists for the need, new UI MUST use or extend the
+corresponding source under `src/components/ui/` rather than hand-rolling
+an equivalent. Its source MUST be reviewed through
+`design-taste-frontend` before merging. The `shadcn` CLI MAY be used
+when the generated source is reviewed and adapted to our tokens; it MUST
+not be committed blindly. No other component libraries (MUI, Chakra,
+Antd, Blueprint, Mantine, etc.) are allowed.
 
-Rationale for the stack: chosen for small binary, fast cold start,
-and a single developer can hold it in their head.
+Existing non-shadcn code MAY be migrated incrementally, but any new
+component or substantial rewrite MUST use the shadcn source-owned
+pattern unless a plan documents why no suitable primitive exists.
+**Platform-bridge UI is the explicit exception**: `TitleBar.tsx` may
+hand-roll the three native window-control buttons and drag region because
+shadcn has no window-manager primitive for Tauri. That exception MUST NOT
+be used for ordinary buttons, dialogs, cards, tabs, inputs, or feedback.
+Rationale: shadcn ships accessible source we own, composes with our
+Tailwind tokens, and makes future UI consistent without hiding behavior
+behind a third-party runtime.
 
 ### V. Architecture — Rust Owns the System, React Owns the UI
 System capabilities (filesystem, SQLite, OS notifications, clipboard,
@@ -466,4 +450,4 @@ Upgrade tiers, or the project-level design system
    current constitution. The implementer MUST verify and explicitly call
    out any deviation in the commit body.
 
-**Version**: 1.5.0 | **Ratified**: 2026-09-17 | **Last Amended**: 2026-09-17
+**Version**: 1.7.0 | **Ratified**: 2026-09-17 | **Last Amended**: 2026-09-18

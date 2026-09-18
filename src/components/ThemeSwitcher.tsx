@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { t } from "@/i18n/t";
 
 export type ThemeMode = "system" | "light" | "dark";
@@ -24,20 +25,23 @@ export function ThemeSwitcher({ value, onChange }: ThemeSwitcherProps) {
       {options.map(({ key, labelKey }) => {
         const selected = value === key;
         return (
-          <button
+          <Button
             key={key}
+            type="button"
+            variant="ghost"
+            size="sm"
             role="radio"
             aria-checked={selected}
             onClick={() => onChange(key)}
             className={cn(
-              "h-9 px-3 text-sm transition-colors duration-150",
+              "h-9 rounded-md px-3 text-sm",
               selected
                 ? "bg-bg font-medium text-text-primary"
                 : "bg-surface text-text-muted hover:text-text-primary",
             )}
           >
             {t(labelKey)}
-          </button>
+          </Button>
         );
       })}
     </div>
