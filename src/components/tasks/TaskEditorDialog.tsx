@@ -86,7 +86,7 @@ export function TaskEditorDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
             {mode === "edit" ? t("tasks.editor.edit_title") : t("tasks.editor.create_title")}
@@ -142,7 +142,7 @@ export function TaskEditorDialog({
                     className={cn(
                       "h-8 flex-1 rounded-md px-3 text-sm transition-colors duration-150",
                       selected
-                        ? "bg-bg font-medium text-text-primary"
+                        ? "bg-bg font-medium text-text-primary shadow-sm"
                         : "text-text-muted hover:text-text-primary",
                     )}
                   >

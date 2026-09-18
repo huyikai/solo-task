@@ -87,13 +87,13 @@ export default function ListView() {
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex min-h-full flex-col gap-2">
       <div className="flex justify-end">
         <Button onClick={openCreate}>{t("tasks.new")}</Button>
       </div>
 
       {tasks !== null && tasks.length === 0 && (
-        <div className="flex flex-col items-center gap-2 py-16">
+        <div className="flex flex-1 flex-col items-center justify-center gap-2">
           <p className="text-base text-text-muted">{t("tasks.empty")}</p>
           <p className="text-sm text-text-subtle">{t("tasks.empty_hint")}</p>
         </div>
