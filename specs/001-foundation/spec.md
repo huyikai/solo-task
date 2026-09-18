@@ -6,26 +6,30 @@
 
 **Status**: Done
 
-> Archived 2026-09-18: the Foundation slice is functionally complete
-> (Tauri 2 + React 18 + SQLite scaffold, design tokens, three-view shell,
-> Settings + ConfirmDialog, CorruptedView + JSON export, structured IPC
-> errors, i18n with `zh-CN`, GitHub Actions CI workflow, TDD pre-push
-> hook, design-taste-frontend review notes embedded in commit bodies).
+> Archived 2026-09-18 (revised): the Foundation slice is functionally
+> complete. On-disk evidence collected during archive:
+>
+> - CI green on `macos-latest` + `windows-latest` (scratch PR #1, run
+>   35319806954 — 4 jobs passed). Validates T035 (Tauri build smoke
+>   via CI), T046a/b/c (`cargo test` discovers 8 unit tests across
+>   error/paths/db/commands including the preference round-trip), T054
+>   (CI workflow runs both runners), T060 (`cargo clippy -D warnings`
+>   passes locally), T024/T030/T038/T046/T046j (design-taste-frontend
+>   review summaries embedded in commit bodies — verified via
+>   `git log --grep`).
+> - Frontend test suite: 30 tests passing across 8 files (was 21/5 at
+>   archive time). Added in commit `26a27fd`: `CorruptedView.test.tsx`
+>   (S3), `Settings.test.tsx` (S2), `IpcErrorRender.test.tsx` (S4) —
+>   these three files were missing on disk despite being listed in
+>   `quickstart.md` step 2.
 >
 > `tasks.md` checkbox grid is retained **unmodified** as a historical
-> record. The following items remain without local mechanical evidence
-> and should be reviewed before opening 003:
+> record. Remaining gaps:
 >
-> - T021 — `pnpm tauri dev` smoke (manual, not reproducible in CI)
-> - T024, T030, T035, T038, T046, T046j — `design-taste-frontend` skill
->   review call and its commit-body summary
-> - T046a/b/c — preference get/set round-trip Rust tests written but
->   `cargo test` currently reports 0 tests (the `mod tests` are
->   registered; the harness needs investigation — recorded as a gap,
->   not silently marked done)
-> - T058, T059 — full quickstart validation + scratch PR CI confirmation
-> - T060 — `cargo clippy -- -D warnings` clean (passes locally but was
->   not captured in a dedicated commit)
+> - T021 — `pnpm tauri dev` smoke in the app shell: jsdom tests cover
+>   the rendering path (App.test.tsx), but the "DB file is created on
+>   disk after first launch" side effect cannot be exercised in CI.
+>   Manual verification remains the only signal.
 
 **Input**: User description: "项目骨架 (Foundation) — 第一次把项目骨架搭起来,把 constitution v1.4.0 中所有 '应用启动 / 项目启动时' 应具备的基础设施一次性落地"
 
