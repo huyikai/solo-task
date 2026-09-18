@@ -6,14 +6,20 @@ import * as ipc from "@/api/ipc";
 
 vi.mock("@/api/ipc", () => ({
   healthCheck: vi.fn(),
+  listTasks: vi.fn(),
 }));
 
 const mockedHealthCheck = vi.mocked(ipc.healthCheck);
+const mockedListTasks = vi.mocked(
+  ipc.listTasks as unknown as ReturnType<typeof vi.fn>,
+);
 
 describe("App view switching (S1, S7)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockedHealthCheck.mockResolvedValue({ ok: true, data: { ok: true } });
+    // ListView 挂载即拉取; 空数据 → 渲染空状态 (003 FR-008)
+    mockedListTasks.mockResolvedValue({ ok: true, data: [] });
   });
 
   test("renders three view tabs after healthy startup", async () => {
@@ -50,12 +56,14 @@ describe("App view switching (S1, S7)", () => {
     expect(ganttTab).toHaveAttribute("aria-selected", "true");
   });
 
-  test("active view shows placeholder content", async () => {
+  test("active view renders the real list (empty state) after switching", async () => {
     const user = userEvent.setup();
     render(<App />);
     await screen.findByRole("tablist");
-    expect(screen.getAllByText("Hello Solo Task").length).toBeGreaterThan(0);
+    expect(await screen.findByText("还没有任务")).toBeInTheDocument();
     await user.click(screen.getByRole("tab", { name: "看板" }));
-    expect(screen.getAllByText("Hello Solo Task").length).toBeGreaterThan(0);
+    // 切回列表视图后仍正常渲染真实列表的空状态
+    await user.click(screen.getByRole("tab", { name: "列表" }));
+    expect(await screen.findByText("还没有任务")).toBeInTheDocument();
   });
 });
