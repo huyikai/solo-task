@@ -77,15 +77,29 @@ export default function Settings({ onBack }: { onBack?: () => void } = {}) {
   })();
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-8 py-8">
+    <div className="mx-auto flex max-w-2xl flex-col gap-8 pb-8 pt-16">
       {onBack && (
         <Button
-          variant="ghost"
-          size="default"
-          className="-ml-3 w-fit font-medium"
+          variant="outline"
+          size="lg"
+          className="fixed left-6 top-14 z-40 px-5"
           onClick={onBack}
         >
-          ← {t("views.list")}
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="m12 19-7-7 7-7" />
+            <path d="M19 12H5" />
+          </svg>
+          {t("views.list")}
         </Button>
       )}
       <h1 className="text-2xl font-semibold">{t("settings.title")}</h1>

@@ -10,13 +10,14 @@
     "frontendDist": "../dist"
   },
   "app": {
+    "macOSPrivateApi": true,
     "windows": [
       {
         "title": "Solo Task",
         "width": 1024,
         "height": 720,
         "decorations": false,
-        "transparent": false,
+        "transparent": true,
         "resizable": true,
         "minWidth": 640,
         "minHeight": 480

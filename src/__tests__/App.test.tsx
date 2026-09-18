@@ -27,7 +27,7 @@ describe("App view switching (S1, S7)", () => {
   test("initial active view is list", async () => {
     render(<App />);
     const listTab = await screen.findByRole("tab", { name: "列表" });
-    expect(listTab).toHaveAttribute("data-state", "active");
+    expect(listTab).toHaveAttribute("aria-selected", "true");
   });
 
   test("clicking board tab switches active view", async () => {
@@ -35,10 +35,10 @@ describe("App view switching (S1, S7)", () => {
     render(<App />);
     const boardTab = await screen.findByRole("tab", { name: "看板" });
     await user.click(boardTab);
-    expect(boardTab).toHaveAttribute("data-state", "active");
+    expect(boardTab).toHaveAttribute("aria-selected", "true");
     expect(screen.getByRole("tab", { name: "列表" })).toHaveAttribute(
-      "data-state",
-      "inactive",
+      "aria-selected",
+      "false",
     );
   });
 
@@ -47,7 +47,7 @@ describe("App view switching (S1, S7)", () => {
     render(<App />);
     const ganttTab = await screen.findByRole("tab", { name: "甘特图" });
     await user.click(ganttTab);
-    expect(ganttTab).toHaveAttribute("data-state", "active");
+    expect(ganttTab).toHaveAttribute("aria-selected", "true");
   });
 
   test("active view shows placeholder content", async () => {

@@ -160,9 +160,22 @@ body,
 #root {
   height: 100%;
   margin: 0;
-  background: var(--bg);
   color: var(--text-primary);
   font-family: var(--font-sans);
   font-size: 16px;
   line-height: 1.6;
 }
+
+/* 无边框窗口圆角: 窗口本身透明, 由 #root 画出带圆角的背景矩形,
+   四角外的区域透出桌面 */
+html,
+body {
+  background: transparent;
+}
+
+#root {
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--bg);
+}
+

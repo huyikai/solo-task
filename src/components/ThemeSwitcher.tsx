@@ -1,5 +1,5 @@
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { t } from "@/i18n/t";
+import { cn } from "@/lib/utils";
 
 export type ThemeMode = "system" | "light" | "dark";
 
@@ -16,24 +16,32 @@ const options: Array<{ key: ThemeMode; labelKey: string }> = [
 
 export function ThemeSwitcher({ value, onChange }: ThemeSwitcherProps) {
   return (
-    <RadioGroup
-      value={value}
-      onValueChange={(next) => onChange(next as ThemeMode)}
+    <div
+      role="radiogroup"
       aria-label={t("settings.theme")}
-      className="inline-flex h-10 w-fit items-center gap-1 rounded-lg bg-muted p-1 text-muted-foreground"
+      className="inline-flex h-8 w-fit items-center overflow-hidden rounded-lg bg-muted p-[3px]"
     >
-      {options.map(({ key, labelKey }) => (
-        <label
-          key={key}
-          className="cursor-pointer"
-        >
-          <RadioGroupItem value={key} className="peer sr-only" />
-          <span className="inline-flex h-[calc(100%-2px)] items-center rounded-md px-4 py-1.5 text-sm font-medium text-muted-foreground transition-all hover:text-foreground peer-data-[state=checked]:bg-background peer-data-[state=checked]:text-foreground peer-data-[state=checked]:shadow-sm">
+      {options.map(({ key, labelKey }) => {
+        const selected = value === key;
+        return (
+          <button
+            key={key}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            onClick={() => onChange(key)}
+            className={cn(
+              "inline-flex h-[calc(100%-2px)] items-center rounded-md px-4 text-sm font-medium transition-all",
+              selected
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
             {t(labelKey)}
-          </span>
-        </label>
-      ))}
-    </RadioGroup>
+          </button>
+        );
+      })}
+    </div>
   );
 }
 

@@ -8,17 +8,19 @@ interface TitleBarProps {
 }
 
 /**
- * 透明 TitleBar: 不渲染背景条, 仅在左上角浮动三个窗口控制按钮.
- * Tab / 设置入口等 UI 由 Layout 渲染, 不再有 h-9 占位.
+ * 透明 TitleBar: 顶部 48px 整条为窗口拖拽区 (data-tauri-drag-region),
+ * 左上角浮动三个窗口控制按钮. Tab / 内容 UI 由 Layout 渲染, 但其顶部行
+ * 需要 z 序高于本条才能正常点击 (见 App.tsx 的 z-[60]).
  */
 export function TitleBar(_: TitleBarProps = {}) {
   return (
     <div
       data-tauri-drag-region
-      className="fixed left-0 top-0 z-50 flex h-9 items-center gap-1.5 pl-3 pr-3 pointer-events-none"
+      className="fixed left-0 top-0 z-50 flex h-12 w-full items-center gap-1.5 pl-3 pr-3"
       style={{ WebkitAppRegion: "drag" } as React.CSSProperties}
     >
       <div
+        data-tauri-drag-region
         className="pointer-events-auto flex items-center gap-1.5"
         style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
       >
