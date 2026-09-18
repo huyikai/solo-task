@@ -4,7 +4,27 @@
 
 **Created**: 2026-09-18
 
-**Status**: Draft
+**Status**: Done
+
+> Archived 2026-09-18: Tailwind v3.4.15 → v4.3.3 upgrade landed in a
+> single revertible commit (`181761b feat(build): Tailwind v3 -> v4 upgrade (spec 002)`).
+> Tabs now consumes shadcn-shipped v4 syntax verbatim; CSS-first config
+> preserves every project design token; the project's hex values remain
+> the source of truth (Constitution Principle X).
+>
+> 22 / 29 tasks are mechanically evidenced (config files, dependency
+> versions, syntax checks, tsc/test/i18n/cargo gates). 7 remain without
+> local mechanical evidence and stay unchecked in `tasks.md`:
+>
+> - T002 — optional dark-mode baseline (light is the primary gate)
+> - T016, T018, T019 — browser-level visual confirmation
+>   (Tabs height, Settings theme switcher, corrupted-DB screen)
+> - T020, T021 — re-capture computed-style diff against `baseline-v3.json`
+>   and pre/post stylesheet diff (the diff artifact itself was not
+>   captured in a dedicated commit)
+> - T028 — `design-taste-frontend` pre-flight summary in commit body
+>
+> These items are visible in `tasks.md` for whoever opens 003.
 
 **Input**: User description: "Tailwind v3 与 shadcn v4 语法不兼容，导致 Tabs 样式失效。升级到 Tailwind v4 使 shadcn 组件源码可以 1:1 使用。"
 

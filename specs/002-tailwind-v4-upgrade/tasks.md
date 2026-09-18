@@ -27,13 +27,13 @@ regression" is unprovable.
 
 ## Phase 2: Engine swap
 
-- [ ] **T003** Update `package.json`: `tailwindcss` `^3.4.15` → `^4`,
+- [x] **T003** Update `package.json`: `tailwindcss` `^3.4.15` → `^4`,
       add `@tailwindcss/postcss`, remove `autoprefixer` (built into v4)
-- [ ] **T004** Update `postcss.config.mjs`: `tailwindcss` →
+- [x] **T004** Update `postcss.config.mjs`: `tailwindcss` →
       `@tailwindcss/postcss`; drop the `autoprefixer` entry
-- [ ] **T005** Run `pnpm install`; confirm the lockfile updates and no
+- [x] **T005** Run `pnpm install`; confirm the lockfile updates and no
       v3 packages remain resolved
-- [ ] **T006** Verify PostCSS config is actually picked up (a wrong
+- [x] **T006** Verify PostCSS config is actually picked up (a wrong
       filename extension silently disables it)
 
 **Checkpoint**: `pnpm exec vite build` no longer errors on Tailwind
@@ -43,23 +43,23 @@ resolution.
 
 ## Phase 3: CSS-first configuration
 
-- [ ] **T007** Rewrite `src/styles/main.css` entry:
+- [x] **T007** Rewrite `src/styles/main.css` entry:
       `@tailwind base/components/utilities` → `@import "tailwindcss"`
-- [ ] **T008** Port the project's token values (from
+- [x] **T008** Port the project's token values (from
       `.specify/memory/design.md`) into a `@theme` block. **Do NOT adopt
       shadcn's default oklch palette** — the project's hex values are the
       source of truth (Constitution Principle X)
-- [ ] **T009** Preserve the existing semantic token names:
+- [x] **T009** Preserve the existing semantic token names:
       `--background`, `--foreground`, `--card`, `--popover`, `--primary`,
       `--secondary`, `--muted`, `--accent`, `--destructive`, `--border`,
       `--input`, `--ring` (+ their `-foreground` pairs), plus the legacy
       aliases (`--bg`, `--surface`, `--text-primary`, …)
-- [ ] **T010** Configure dark mode. v4 defaults to `prefers-color-scheme`;
+- [x] **T010** Configure dark mode. v4 defaults to `prefers-color-scheme`;
       the project also needs the `[data-theme="light"|"dark"]` override
       used by Settings. Define a matching `@custom-variant dark`
-- [ ] **T011** Delete `tailwind.config.ts` (or reduce it to a comment
+- [x] **T011** Delete `tailwind.config.ts` (or reduce it to a comment
       noting v4 is CSS-first) and confirm nothing imports it
-- [ ] **T012** Verify content scanning covers every `.tsx` under `src/` —
+- [x] **T012** Verify content scanning covers every `.tsx` under `src/` —
       v4 auto-detects sources; explicitly confirm component files are
       included by checking a class that appears only in a rarely-rendered
       component produces CSS
@@ -71,13 +71,13 @@ project's colors.
 
 ## Phase 4: Restore shadcn-native syntax
 
-- [ ] **T013** Revert `src/components/ui/tabs.tsx` from the v3-compat
+- [x] **T013** Revert `src/components/ui/tabs.tsx` from the v3-compat
       form back to the shadcn-shipped v4 form
       (`data-horizontal:`, `group-data-horizontal/tabs:`, `data-active:`)
-- [ ] **T014** Confirm `shadcn add tabs` output now compiles **verbatim**
+- [x] **T014** Confirm `shadcn add tabs` output now compiles **verbatim**
       — diff the project file against the CLI output; expect no syntax
       translation
-- [ ] **T015** Verify the built stylesheet contains rules for
+- [x] **T015** Verify the built stylesheet contains rules for
       `data-horizontal`, `group-data-horizontal/tabs:h-8`, and
       `data-active:bg-background` *(these were exactly 0 under v3)*
 
@@ -90,7 +90,7 @@ project's colors.
 - [ ] **T016** Re-check the Tabs rendering in the browser: list height
       32px, root `flex-direction: column`, active tab lifted with
       `bg-background` + shadow, inactive tabs transparent
-- [ ] **T017** Add/extend a test asserting the Tabs strip renders its
+- [x] **T017** Add/extend a test asserting the Tabs strip renders its
       three triggers and the active one carries the selected state
       (the one behavioral change in this migration)
 - [ ] **T018** Exercise the Settings theme switcher in the running app —
@@ -110,7 +110,7 @@ just in unit tests.
       `baseline-v3.json`. Every entry must match; any drift is a blocker
 - [ ] **T021** Compare the built stylesheet against the pre-upgrade one:
       no token value changed, no utility class silently dropped
-- [ ] **T022** Audit `@apply` usage and layer order — v4 is layer-aware
+- [x] **T022** Audit `@apply` usage and layer order — v4 is layer-aware
       and order-sensitive
 
 **Checkpoint**: Screens are pixel-equivalent to the baseline.
@@ -119,16 +119,16 @@ just in unit tests.
 
 ## Phase 7: Quality gate + land
 
-- [ ] **T023** `pnpm exec tsc --noEmit` clean
-- [ ] **T024** `pnpm test` — full suite green
-- [ ] **T025** `pnpm check:i18n` — zero hardcoded strings
-- [ ] **T026** `pnpm exec vite build` succeeds; inspect the bundle size
+- [x] **T023** `pnpm exec tsc --noEmit` clean
+- [x] **T024** `pnpm test` — full suite green
+- [x] **T025** `pnpm check:i18n` — zero hardcoded strings
+- [x] **T026** `pnpm exec vite build` succeeds; inspect the bundle size
       delta for sanity
-- [ ] **T027** `cargo check` (Rust side untouched, but the gate is
+- [x] **T027** `cargo check` (Rust side untouched, but the gate is
       whole-project)
 - [ ] **T028** `design-taste-frontend` review of the styled surfaces;
       record the pre-flight summary
-- [ ] **T029** Land as **one revertible commit** (the plan's stated
+- [x] **T029** Land as **one revertible commit** (the plan's stated
       rollback strategy)
 
 **Checkpoint**: Upgrade complete and revertible.
