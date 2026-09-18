@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 interface ConfirmDialogProps {
   open: boolean;
-  expectedText: string;
+  expectedText?: string;
   onConfirm: () => void;
   onCancel: () => void;
   title?: string;
@@ -45,7 +45,8 @@ export function ConfirmDialog({
   }, [open, onCancel]);
 
   if (!open) return null;
-  const canConfirm = value === expectedText;
+  // expectedText 缺省 (如单任务删除): 不需要输入确认, 直接可确认 (plan.md D7)
+  const canConfirm = expectedText === undefined || value === expectedText;
 
   return (
     <div
@@ -66,6 +67,7 @@ export function ConfirmDialog({
         {message && (
           <p className="text-base text-text-muted">{message}</p>
         )}
+        {expectedText !== undefined && (
         <input
           type="text"
           value={value}
@@ -79,6 +81,7 @@ export function ConfirmDialog({
             "focus:border-ring",
           )}
         />
+        )}
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={onCancel}>
             {cancelLabel ?? "Cancel"}

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import ListView from "@/views/ListView";
 import * as ipc from "@/api/ipc";
 import type { Task } from "@/api/ipc";
@@ -98,7 +99,7 @@ describe("ListView CRUD flows (S1/S4/S5)", () => {
     vi.clearAllMocks();
     mockedCreateTask.mockResolvedValue({ ok: true, data: task({ id: 2, title: "x" }) });
     mockedUpdateTask.mockResolvedValue({ ok: true, data: task({ id: 1, title: "y" }) });
-    mockedSetTaskStatus.mockResolvedValue({ ok: true, data: task({ id: 1, status: "doing" }) });
+    mockedSetTaskStatus.mockResolvedValue({ ok: true, data: task({ id: 1, title: "买牛奶", status: "doing" }) });
     mockedDeleteTask.mockResolvedValue({ ok: true, data: null });
   });
 

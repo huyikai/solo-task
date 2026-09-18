@@ -66,6 +66,10 @@ const zhCN = {
   "tasks.due": "截止",
   "tasks.edit": "编辑",
   "tasks.delete": "删除",
+  "tasks.new": "新建任务",
+  "tasks.delete_confirm_title": "确认删除“{title}”?",
+  "tasks.delete_confirm_message": "删除后不可恢复",
+  "tasks.delete_confirm_button": "确认删除",
   "error.retry": "重试",
 } as const;
 
