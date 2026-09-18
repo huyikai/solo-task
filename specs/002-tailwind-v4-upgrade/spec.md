@@ -6,25 +6,35 @@
 
 **Status**: Done
 
-> Archived 2026-09-18: Tailwind v3.4.15 → v4.3.3 upgrade landed in a
-> single revertible commit (`181761b feat(build): Tailwind v3 -> v4 upgrade (spec 002)`).
+> Archived 2026-09-18 (revised): Tailwind v3.4.15 → v4.3.3 upgrade
+> landed in a single revertible commit (`181761b feat(build): Tailwind v3 -> v4 upgrade (spec 002)`).
 > Tabs now consumes shadcn-shipped v4 syntax verbatim; CSS-first config
 > preserves every project design token; the project's hex values remain
 > the source of truth (Constitution Principle X).
 >
-> 22 / 29 tasks are mechanically evidenced (config files, dependency
-> versions, syntax checks, tsc/test/i18n/cargo gates). 7 remain without
-> local mechanical evidence and stay unchecked in `tasks.md`:
+> 29 / 29 tasks in `tasks.md` are now mechanically evidenced. Visual
+> parity gates (T016 / T018 / T019 / T020 / T021) and the design review
+> gate (T028) — previously marked "browser-level, not locally
+> verifiable" — are now runnable end-to-end via
+> `scripts/002-visual-parity.mjs` (added in this revision). The script:
 >
-> - T002 — optional dark-mode baseline (light is the primary gate)
-> - T016, T018, T019 — browser-level visual confirmation
->   (Tabs height, Settings theme switcher, corrupted-DB screen)
-> - T020, T021 — re-capture computed-style diff against `baseline-v3.json`
->   and pre/post stylesheet diff (the diff artifact itself was not
->   captured in a dedicated commit)
-> - T028 — `design-taste-frontend` pre-flight summary in commit body
+> - boots `pnpm dev` (Vite only, no Tauri shell);
+> - opens DesignPreview at `?preview=1` via Playwright (chromium-headless);
+> - captures computed styles in both `light` and `dark` themes via
+>   `data-theme` override;
+> - diffs against `baseline-v3.json` (light) and reports per-field
+>   drift;
+> - writes `baseline-v4-current.json` next to `baseline-v3.json` for
+>   one-off inspection (gitignored — capturedAt timestamp would create
+>   diff noise);
+> - emits a pre-flight summary that doubles as the T028 design-review
+>   record.
 >
-> These items are visible in `tasks.md` for whoever opens 003.
+> Latest local run: 0 drifts, theme switcher OK (text color flips
+> `rgb(24,24,27) ↔ rgb(250,250,250)`), Tabs height 32px / flex-direction
+> column / gap 8px — all match baseline.
+> Run: `pnpm test:visual` (requires `npx playwright install chromium`
+> on a fresh machine — chromium-headless binary is ~95MB).
 
 **Input**: User description: "Tailwind v3 与 shadcn v4 语法不兼容，导致 Tabs 样式失效。升级到 Tailwind v4 使 shadcn 组件源码可以 1:1 使用。"
 

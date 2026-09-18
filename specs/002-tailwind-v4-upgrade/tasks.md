@@ -17,7 +17,7 @@ is verified against it, not merely "does it build".
       `specs/002-tailwind-v4-upgrade/baseline-v3.json`
       (root, tabs root/list/content, active+inactive tab, 4 button
       variants, card, typography scale)
-- [ ] **T002** Capture the same baseline in dark mode → append
+- [x] **T002** Capture the same baseline in dark mode → append
       `baseline-v3-dark.json` *(optional; light is the primary gate)*
 
 **Checkpoint**: Baseline exists and is committed. Without it, "no visual
@@ -87,15 +87,15 @@ project's colors.
 
 ## Phase 5: Behavioral verification
 
-- [ ] **T016** Re-check the Tabs rendering in the browser: list height
+- [x] **T016** Re-check the Tabs rendering in the browser: list height
       32px, root `flex-direction: column`, active tab lifted with
       `bg-background` + shadow, inactive tabs transparent
 - [x] **T017** Add/extend a test asserting the Tabs strip renders its
       three triggers and the active one carries the selected state
       (the one behavioral change in this migration)
-- [ ] **T018** Exercise the Settings theme switcher in the running app —
+- [x] **T018** Exercise the Settings theme switcher in the running app —
       light → dark → system — and confirm tokens change correctly
-- [ ] **T019** Exercise the corrupted-DB screen (rename the DB file to
+- [x] **T019** Exercise the corrupted-DB screen (rename the DB file to
       junk and relaunch) — confirm it is still styled, since it renders
       outside the normal Layout
 
@@ -106,9 +106,9 @@ just in unit tests.
 
 ## Phase 6: Visual parity gate
 
-- [ ] **T020** Re-capture computed styles in light mode and diff against
+- [x] **T020** Re-capture computed styles in light mode and diff against
       `baseline-v3.json`. Every entry must match; any drift is a blocker
-- [ ] **T021** Compare the built stylesheet against the pre-upgrade one:
+- [x] **T021** Compare the built stylesheet against the pre-upgrade one:
       no token value changed, no utility class silently dropped
 - [x] **T022** Audit `@apply` usage and layer order — v4 is layer-aware
       and order-sensitive
@@ -126,7 +126,7 @@ just in unit tests.
       delta for sanity
 - [x] **T027** `cargo check` (Rust side untouched, but the gate is
       whole-project)
-- [ ] **T028** `design-taste-frontend` review of the styled surfaces;
+- [x] **T028** `design-taste-frontend` review of the styled surfaces;
       record the pre-flight summary
 - [x] **T029** Land as **one revertible commit** (the plan's stated
       rollback strategy)

@@ -33,5 +33,15 @@ data/
 # Dev marker
 .githooks/.installed
 
+# Visual parity reports — regenerated each run with a fresh timestamp;
+# left out of git to avoid diff noise. Re-runnable from baseline-v3.json.
+specs/002-tailwind-v4-upgrade/baseline-v4-current.json
+
+# Playwright chromium browser cache (downloaded on demand by
+# `npx playwright install chromium`; lives under Library/Caches/ms-playwright
+# on macOS but is also referenced when users clone-and-install fresh.)
+playwright-report/
+test-results/
+
 # Claude
 .claude/
