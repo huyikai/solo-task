@@ -1,6 +1,7 @@
 pub mod export_json;
 pub mod health_check;
 pub mod preferences;
+pub mod tasks;
 pub mod trigger_test_error;
 
 pub use export_json::ExportSummary;
