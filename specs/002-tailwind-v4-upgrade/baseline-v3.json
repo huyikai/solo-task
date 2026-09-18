@@ -1,0 +1,28 @@
+{
+  "capturedAt": "2026-09-18",
+  "capturedWith": "Tailwind v3.4.15",
+  "purpose": "Visual baseline for verifying the Tailwind v4 upgrade is a visual no-op",
+  "colorScheme": "light",
+  "root": { "backgroundColor": "rgb(250, 250, 250)", "color": "rgb(24, 24, 27)", "borderRadius": "10px", "fontSize": "16px", "lineHeight": "25.6px" },
+  "body": { "fontFamily": "-apple-system, \"system-ui\", \"Segoe UI\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Helvetica Neue\", sans-serif", "fontSize": "16px", "lineHeight": "25.6px" },
+  "tabsRoot": { "display": "flex", "flexDirection": "column", "gap": "8px", "height": "92px" },
+  "tabsList": { "width": "146px", "height": "32px", "padding": "3px", "backgroundColor": "rgb(244, 244, 245)", "borderRadius": "12px", "display": "flex", "flexDirection": "row" },
+  "tabsContent": { "fontSize": "14px", "lineHeight": "20px", "display": "block", "height": "52px" },
+  "activeTab": { "height": "25px", "padding": "2px 6px", "backgroundColor": "rgb(250, 250, 250)", "color": "rgb(24, 24, 27)", "fontSize": "14px", "fontWeight": "500", "lineHeight": "20px", "borderRadius": "8px", "boxShadow": "rgba(0, 0, 0, 0.05) 0px 1px 2px 0px" },
+  "inactiveTab": { "height": "25px", "padding": "2px 6px", "backgroundColor": "rgba(0, 0, 0, 0)", "color": "rgb(113, 113, 122)", "fontSize": "14px", "fontWeight": "500", "lineHeight": "20px", "borderRadius": "8px", "boxShadow": "none" },
+  "buttons": {
+    "primary": { "height": "40px", "padding": "8px 16px", "backgroundColor": "rgb(37, 99, 235)", "color": "rgb(255, 255, 255)", "fontSize": "14px", "fontWeight": "500", "lineHeight": "20px", "borderRadius": "8px" },
+    "secondary": { "height": "40px", "padding": "8px 16px", "backgroundColor": "rgb(250, 250, 250)", "color": "rgb(24, 24, 27)", "borderWidth": "1px", "borderColor": "rgb(228, 228, 231)", "borderRadius": "8px" },
+    "ghost": { "height": "40px", "padding": "8px 16px", "backgroundColor": "rgba(0, 0, 0, 0)", "color": "rgb(24, 24, 27)", "borderRadius": "8px" },
+    "destructive": { "height": "40px", "padding": "8px 16px", "backgroundColor": "rgb(220, 38, 38)", "color": "rgb(255, 255, 255)", "borderRadius": "8px" }
+  },
+  "card": { "backgroundColor": "rgb(255, 255, 255)", "borderWidth": "1px", "borderColor": "rgb(228, 228, 231)", "borderRadius": "8px", "boxShadow": "rgba(0, 0, 0, 0.05) 0px 1px 2px 0px" },
+  "typography": {
+    "h1": { "fontSize": "24px", "fontWeight": "600", "lineHeight": "32px" },
+    "h2": { "fontSize": "18px", "fontWeight": "500", "lineHeight": "28px" },
+    "text-xs": { "fontSize": "12px", "lineHeight": "16px" },
+    "text-sm": { "fontSize": "14px", "lineHeight": "20px" },
+    "text-base": { "fontSize": "16px", "lineHeight": "24px" }
+  },
+  "mutedForeground": "rgb(113, 113, 122)"
+}

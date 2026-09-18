@@ -1,9 +1,23 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/* Tokens — light theme (default). dark theme auto-injects under
-   prefers-color-scheme: dark via [data-theme] or media query. */
+/* Dark mode: v4 defaults to prefers-color-scheme, but Settings also
+   applies a [data-theme] override. One custom variant covers both. */
+@custom-variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
+
+/* Base UI 1.8.0 emits `data-orientation="horizontal|vertical"` on the
+   Tabs root, but shadcn's component source uses the shorthand
+   `data-horizontal:` / `data-vertical:` variants. Tailwind v4 supports
+   the short form natively — it just needs the DOM to actually carry
+   `data-horizontal`. These variants bridge the naming gap for the
+   non-grouped usages. */
+@custom-variant data-horizontal (&:where([data-orientation="horizontal"], [data-orientation="horizontal"] *));
+@custom-variant data-vertical (&:where([data-orientation="vertical"], [data-orientation="vertical"] *));
+
+/* ------------------------------------------------------------------
+   Design tokens — values come from .specify/memory/design.md.
+   NOT shadcn's default oklch palette (Constitution Principle X).
+   ------------------------------------------------------------------ */
+
 :root {
   /* shadcn semantic tokens: new components MUST use these names. */
   --background: #fafafa;
@@ -140,7 +154,6 @@
   --border: #27272a;
   --input: #27272a;
   --ring: #3b82f6;
-
   --bg: var(--background);
   --surface: var(--card);
   --surface-elevated: var(--popover);
@@ -153,6 +166,51 @@
   --success: #22c55e;
   --warning: #f59e0b;
   color-scheme: dark;
+}
+
+/* ------------------------------------------------------------------
+   Tailwind theme bridge — maps the CSS variables above onto utility
+   class names (`bg-background`, `text-foreground`, …).
+   `inline` keeps the var() reference in the output instead of
+   resolving it at build time, so runtime theme switching works.
+   ------------------------------------------------------------------ */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Project aliases (existing code). */
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-text-primary: var(--text-primary);
+  --color-text-muted: var(--text-muted);
+  --color-text-subtle: var(--text-subtle);
+  --color-border-strong: var(--border-strong);
+  --color-accent-hover: var(--accent-hover);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
 }
 
 html,
@@ -178,4 +236,3 @@ body {
   border-radius: 10px;
   background: var(--bg);
 }
-
