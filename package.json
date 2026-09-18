@@ -22,7 +22,7 @@
     "tailwind-merge": "^2.5.5",
     "class-variance-authority": "^0.7.1",
     "@radix-ui/react-slot": "^1.1.1",
-    "@base-ui/react": "^1.0.0"
+    "radix-ui": "^1.4.3"
   },
   "devDependencies": {
     "@types/react": "^18.3.12",

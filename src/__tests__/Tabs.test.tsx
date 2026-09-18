@@ -22,12 +22,12 @@ describe("shadcn-style Tabs", () => {
     );
     expect(screen.getByText("列表内容")).toBeVisible();
     expect(screen.getByRole("tab", { name: "列表" })).toHaveAttribute(
-      "aria-selected",
-      "true",
+      "data-state",
+      "active",
     );
     expect(screen.getByRole("tab", { name: "看板" })).toHaveAttribute(
-      "aria-selected",
-      "false",
+      "data-state",
+      "inactive",
     );
   });
 
@@ -46,9 +46,6 @@ describe("shadcn-style Tabs", () => {
     );
     await user.click(screen.getByRole("tab", { name: "看板" }));
     expect(screen.getByText("看板内容")).toBeVisible();
-    expect(onValueChange).toHaveBeenCalled();
-    const calls = onValueChange.mock.calls;
-    expect(calls.length).toBeGreaterThan(0);
-    expect(calls[calls.length - 1][0]).toBe("board");
+    expect(onValueChange).toHaveBeenCalledWith("board");
   });
 });
