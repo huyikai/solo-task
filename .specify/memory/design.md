@@ -467,6 +467,51 @@ selection pattern above.
 
 ---
 
+### 6.7 Task List (introduced by spec 003-task-crud)
+
+**Visual tone**: calm working list, no decorative chrome. Composed
+entirely of established primitives (Button, Input, Dialog, tokens);
+no new colors or radii were introduced.
+
+**TaskList container**: vertical stack `flex flex-col gap-2`. No card
+wrapping the list — rows are the surface.
+
+**TaskRow**: full-width, `h-12`, radius-md, `--surface` background,
+1px `--border`, `px-3`, `gap-3`; hover `--muted` transition 150ms.
+Content left-to-right:
+
+- Status badge: pill button, radius-full, `text-xs font-medium`,
+  colored by state (text + border only, no fill):
+  - todo → `--text-subtle` + `--border`
+  - doing → `--warning`
+  - done → `--success`
+  - Click cycles todo→doing→done→todo; `title` hint from i18n.
+- Title: `text-base text-text-primary`, single-line truncate.
+- Priority label (only when != none): `text-xs`, `--muted` background
+  chip, radius-sm, `--text-muted`. No per-priority colors.
+- Due date (only when set): `text-xs text-text-muted`, prefixed by
+  the localized 截止 label, `YYYY-MM-DD`.
+- Actions: two `Button variant="ghost" size="sm"` (编辑 / 删除),
+  no icons.
+
+**Empty state**: centered `py-16`; `text-base text-text-muted` title
+"还没有任务" + `text-sm text-text-subtle` hint. No illustration, no
+call-to-action button duplicated in the empty body (the toolbar's
+新建任务 button remains the single entry).
+
+**TaskEditorDialog**: shadcn Dialog (`radius-lg`, `p-6`), title
+`text-lg font-semibold`, fields as vertical `label` groups
+(`gap-1.5`, label `text-sm font-medium`): Input (title, maxLength
+200), textarea styled with the Input token set (description,
+maxLength 5000), priority segmented radiogroup reusing the §6.6
+pattern (`h-8` options, selected = `bg-bg` + `font-medium`), date
+Input (`type="date"`). Footer: outline 取消 + primary 保存,
+disabled while the trimmed title is empty.
+
+**Delete confirmation**: ConfirmDialog with title interpolating the
+truncated task name (20 chars) and NO typed confirmation input
+(weaker destruction than the DB wipe; plan.md D7).
+
 ## 7. Amending This Document
 
 Design system changes (token adjustment / new anti-pattern / dials
