@@ -16,6 +16,11 @@ pub fn run() {
         .manage(db_state)
         .invoke_handler(tauri::generate_handler![
             commands::health_check,
+            commands::create_task,
+            commands::list_tasks,
+            commands::update_task,
+            commands::set_task_status,
+            commands::delete_task,
             commands::export_json,
             commands::get_preference,
             commands::set_preference,
