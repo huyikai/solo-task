@@ -198,3 +198,39 @@ fn test_delete_missing_id_returns_task_not_found() {
     let result = delete_task(&conn, 777);
     assert!(matches!(result, Err(AppError::TaskNotFound(777))), "got {result:?}");
 }
+
+#[test]
+fn test_list_1000_rows_under_50ms() {
+    let (conn, _keep) = test_conn();
+
+    // 单事务批量插入 1,000 行 (SC-001: list_tasks < 50ms @ 1,000 rows)。
+    conn.execute_batch("BEGIN").unwrap();
+    for i in 0..1000 {
+        insert_task(
+            &conn,
+            &NewTaskRow {
+                title: Box::leak(format!("任务 {i}").into_boxed_str()),
+                description: "",
+                priority: TaskPriority::None,
+                due_at: None,
+                created_at: Box::leak(format!("2026-09-18T{:02}:{:02}:{:02}Z", i / 3600, (i / 60) % 60, i % 60).into_boxed_str()),
+                updated_at: "2026-09-18T00:00:00Z",
+            },
+        )
+        .unwrap();
+    }
+    conn.execute_batch("COMMIT").unwrap();
+
+    // 预热一次 (页缓存), 然后测量稳态耗时。
+    let _ = list_tasks(&conn).unwrap();
+    let start = std::time::Instant::now();
+    let all = list_tasks(&conn).unwrap();
+    let elapsed = start.elapsed();
+
+    assert_eq!(all.len(), 1000);
+    assert!(
+        elapsed.as_millis() < 50,
+        "list_tasks over 1,000 rows took {}ms, budget is 50ms",
+        elapsed.as_millis()
+    );
+}
