@@ -7,9 +7,17 @@ import type { Task } from "@/api/ipc";
 vi.mock("@/api/ipc", async (importOriginal) => ({
   ...(await importOriginal<object>()),
   listTasks: vi.fn(),
+  createTask: vi.fn(),
+  updateTask: vi.fn(),
+  setTaskStatus: vi.fn(),
+  deleteTask: vi.fn(),
 }));
 
 const mockedListTasks = vi.mocked(ipc.listTasks);
+const mockedCreateTask = vi.mocked(ipc.createTask);
+const mockedUpdateTask = vi.mocked(ipc.updateTask);
+const mockedSetTaskStatus = vi.mocked(ipc.setTaskStatus);
+const mockedDeleteTask = vi.mocked(ipc.deleteTask);
 
 function task(partial: Partial<Task> & { id: number; title: string }): Task {
   return {
@@ -77,5 +85,116 @@ describe("ListView rendering (S2)", () => {
     render(<ListView />);
 
     expect(await screen.findByRole("alert")).toHaveTextContent("数据库被锁定");
+  });
+});
+
+describe("ListView CRUD flows (S1/S4/S5)", () => {
+  const oneTask = () => ({
+    ok: true as const,
+    data: [task({ id: 1, title: "买牛奶" })],
+  });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockedCreateTask.mockResolvedValue({ ok: true, data: task({ id: 2, title: "x" }) });
+    mockedUpdateTask.mockResolvedValue({ ok: true, data: task({ id: 1, title: "y" }) });
+    mockedSetTaskStatus.mockResolvedValue({ ok: true, data: task({ id: 1, status: "doing" }) });
+    mockedDeleteTask.mockResolvedValue({ ok: true, data: null });
+  });
+
+  test("status cycle click calls setTaskStatus(id, next)", async () => {
+    const user = userEvent.setup();
+    mockedListTasks.mockResolvedValue(oneTask());
+    render(<ListView />);
+
+    await user.click(await screen.findByRole("button", { name: "待办" }));
+    expect(mockedSetTaskStatus).toHaveBeenCalledWith(1, "doing");
+  });
+
+  test("set_task_status not_found surfaces the generic toast (spec US5-4)", async () => {
+    const user = userEvent.setup();
+    mockedListTasks.mockResolvedValue(oneTask());
+    mockedSetTaskStatus.mockResolvedValue({
+      ok: false,
+      error: { variant: "task_not_found", message: "1" },
+    });
+    render(<ListView />);
+
+    await user.click(await screen.findByRole("button", { name: "待办" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("操作失败");
+  });
+
+  test("create flow: open dialog, submit, calls createTask and refreshes", async () => {
+    const user = userEvent.setup();
+    mockedListTasks.mockResolvedValueOnce(oneTask()); // 初次加载
+    mockedListTasks.mockResolvedValueOnce({
+      ok: true,
+      data: [task({ id: 2, title: "新任务" })],
+    }); // 创建后刷新
+
+    render(<ListView />);
+    await user.click(await screen.findByRole("button", { name: "新建任务" }));
+
+    const dialog = screen.getByRole("dialog");
+    await user.type(within(dialog).getByLabelText("标题"), "新任务");
+    await user.click(within(dialog).getByRole("button", { name: "保存" }));
+
+    expect(mockedCreateTask).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "新任务" }),
+    );
+    expect(await screen.findByText("新任务")).toBeInTheDocument();
+  });
+
+  test("edit flow: prefilled dialog calls updateTask and refreshes", async () => {
+    const user = userEvent.setup();
+    mockedListTasks.mockResolvedValueOnce(oneTask());
+    mockedListTasks.mockResolvedValueOnce({
+      ok: true,
+      data: [task({ id: 1, title: "改过的" })],
+    });
+
+    render(<ListView />);
+    await user.click(await screen.findByRole("button", { name: "编辑" }));
+
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByLabelText("标题")).toHaveValue("买牛奶");
+    await user.clear(within(dialog).getByLabelText("标题"));
+    await user.type(within(dialog).getByLabelText("标题"), "改过的");
+    await user.click(within(dialog).getByRole("button", { name: "保存" }));
+
+    expect(mockedUpdateTask).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 1, title: "改过的" }),
+    );
+    expect(await screen.findByText("改过的")).toBeInTheDocument();
+  });
+
+  test("delete flow: confirm calls deleteTask and row disappears", async () => {
+    const user = userEvent.setup();
+    mockedListTasks.mockResolvedValueOnce(oneTask());
+    mockedListTasks.mockResolvedValueOnce({ ok: true, data: [] });
+
+    render(<ListView />);
+    await user.click(await screen.findByRole("button", { name: "删除" }));
+
+    const dialog = screen.getByRole("dialog");
+    // 单任务删除不要求输入确认文字 (plan.md D7), 直接可确认
+    await user.click(within(dialog).getByRole("button", { name: "确认删除" }));
+
+    expect(mockedDeleteTask).toHaveBeenCalledWith(1);
+    expect(await screen.findByText("还没有任务")).toBeInTheDocument();
+  });
+
+  test("delete cancel keeps the row", async () => {
+    const user = userEvent.setup();
+    mockedListTasks.mockResolvedValue(oneTask());
+    render(<ListView />);
+
+    await user.click(await screen.findByRole("button", { name: "删除" }));
+    await user.click(
+      within(screen.getByRole("dialog")).getByRole("button", { name: "取消" }),
+    );
+
+    expect(mockedDeleteTask).not.toHaveBeenCalled();
+    expect(screen.getByTestId("task-row")).toBeInTheDocument();
   });
 });
