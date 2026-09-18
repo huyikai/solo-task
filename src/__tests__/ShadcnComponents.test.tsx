@@ -51,3 +51,17 @@ describe("shadcn-style Card (S6)", () => {
     expect(screen.getByText("内容")).toBeInTheDocument();
   });
 });
+
+describe("Button ref forwarding (React 18 compat)", () => {
+  test("forwards ref to the DOM button — radix asChild anchors depend on it", () => {
+    // new-york-v4 upstream assumes React 19 (ref-as-prop); on React 18 a
+    // function component without forwardRef silently drops the ref, which
+    // broke PopoverTrigger asChild → floating-ui never received its anchor
+    // and the date-picker popover positioned itself off-screen (WKWebView
+    // bug, root-caused 2026-09-18). This pins the compatibility shim.
+    const ref = { current: null as HTMLButtonElement | null };
+    render(<Button ref={ref}>锚点按钮</Button>);
+    expect(ref.current).toBeInstanceOf(HTMLButtonElement);
+    expect(ref.current?.textContent).toBe("锚点按钮");
+  });
+});
