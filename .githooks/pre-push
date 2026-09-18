@@ -34,15 +34,25 @@ while read -r local_ref local_sha remote_ref remote_sha; do
 
   # Determine commit range
   if [ "$remote_sha" = "$zero" ]; then
-    range="$local_sha"
-    commits="$(git rev-list "$local_sha" --not --all)"
+    # New branch being pushed. We want the commits reachable from
+    # local_sha but not from any existing remote ref. Walking `git log`
+    # from local_sha alone would scan the entire first-parent history,
+    # including prod-only commits already on origin/main, which the
+    # TDD rule would then falsely reject. Use all remote refs as the
+    # exclusion floor.
+    exclusions="$(git for-each-ref --format='%(objectname)' refs/remotes/ 2>/dev/null)"
+    if [ -n "$exclusions" ]; then
+      commits="$(git rev-list "$local_sha" --not $exclusions)"
+    else
+      # No remotes configured at all → treat the entire history as new.
+      commits="$(git log --format='%H' "$local_sha" --first-parent)"
+    fi
   else
     range="$remote_sha..$local_sha"
     commits="$(git rev-list "$range")"
   fi
 
   # commits newest-first; invert to oldest-first
-  ordered="$(echo "$commands" 2>/dev/null || true)"
   ordered="$(echo "$commits" | tac)"
 
   declare -a scope_has_test=()
