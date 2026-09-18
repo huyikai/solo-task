@@ -170,7 +170,15 @@ export function TaskEditorDialog({
                     {dueDate ? fmtDate(dueDate) : t("tasks.editor.pick_date")}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent
+                  className="w-auto p-0"
+                  align="start"
+                  // Radix 的 modal Dialog 会把 body 的 pointer-events 置 none,
+                  // portal 到 body 的 Popover 内容会继承到 (真实 WebView 里
+                  // 整个日历点不动; jsdom 无命中测试故测试仍绿)。在使用点
+                  // 强制恢复 — Radix 社区对 Popover-in-Dialog 的标准解法。
+                  style={{ pointerEvents: "auto" }}
+                >
                   <Calendar
                     mode="single"
                     selected={dueDate ?? undefined}

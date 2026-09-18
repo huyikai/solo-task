@@ -169,6 +169,11 @@ describe("TaskEditorDialog (calendar picker)", () => {
       within(dialog).getByRole("button", { name: "选择日期" }),
     );
     const grid = await screen.findByRole("grid");
+    // 回归守卫: modal Dialog 会把 body pointer-events 置 none, 日历内容
+    // portal 在 body 下, 必须显式恢复, 否则真机点不动 (jsdom 测不出)。
+    const popoverContent = document.querySelector('[data-slot="popover-content"]');
+    expect(popoverContent).not.toBeNull();
+    expect((popoverContent as HTMLElement).style.pointerEvents).toBe("auto");
     const dayButton = within(grid)
       .getAllByRole("button")
       .find((b) => b.textContent === "20");
