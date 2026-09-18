@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import TaskEditorDialog from "@/components/tasks/TaskEditorDialog";
 import type { Task } from "@/api/ipc";
@@ -148,7 +148,9 @@ describe("TaskEditorDialog (edit mode)", () => {
 });
 
 describe("TaskEditorDialog (calendar picker)", () => {
-  test("picking a day from the calendar sets the field and payload", async () => {
+  // jsdom 下 radix floating 链路本身极慢 (真实浏览器毫秒级, WKWebView
+  // probe 已证); 该用例需要完整 popover 交互, 放宽超时。
+  test("picking a day from the calendar sets the field and payload", { timeout: 90_000 }, async () => {
     const user = userEvent.setup();
     const onSubmit = vi.fn();
     render(
@@ -163,11 +165,10 @@ describe("TaskEditorDialog (calendar picker)", () => {
     const dialog = screen.getByRole("dialog");
     await user.type(within(dialog).getByLabelText("标题"), "有截止日");
 
-    // 打开日历 (Popover), 选当月 20 日 (rdp 的日按钮可访问名是完整日期
-    // 文案, 按可见文本过滤最稳定)
-    await user.click(
-      within(dialog).getByRole("button", { name: "选择日期" }),
-    );
+    // 打开日历 (Popover), 选当月 20 日。fireEvent 同步派发: ref 修复后
+    // floating-ui 走真实定位链, jsdom 无 layout, userEvent 的 pointer
+    // 序列会在此环境挂起。
+    fireEvent.click(within(dialog).getByRole("button", { name: "选择日期" }));
     const grid = await screen.findByRole("grid");
     // 回归守卫: modal Dialog 会把 body pointer-events 置 none, 日历内容
     // portal 在 body 下, 必须显式恢复, 否则真机点不动 (jsdom 测不出)。
@@ -178,10 +179,10 @@ describe("TaskEditorDialog (calendar picker)", () => {
       .getAllByRole("button")
       .find((b) => b.textContent === "20");
     expect(dayButton).toBeDefined();
-    await user.click(dayButton!);
+    fireEvent.click(dayButton!);
 
     // 触发按钮显示所选日, 提交载荷带 UTC 零点 RFC3339
-    expect(within(dialog).getByText("2026-09-20")).toBeInTheDocument();
+    expect(await within(dialog).findByText("2026-09-20")).toBeInTheDocument();
     await user.click(within(dialog).getByRole("button", { name: "保存" }));
     expect(onSubmit).toHaveBeenCalledWith(
       expect.objectContaining({ due_at: "2026-09-20T00:00:00Z" }),
