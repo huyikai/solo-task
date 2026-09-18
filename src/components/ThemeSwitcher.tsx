@@ -20,7 +20,7 @@ export function ThemeSwitcher({ value, onChange }: ThemeSwitcherProps) {
       value={value}
       onValueChange={(next) => onChange(next as ThemeMode)}
       aria-label={t("settings.theme")}
-      className="inline-flex h-10 w-fit items-center gap-0 overflow-hidden rounded-lg bg-muted p-[3px]"
+      className="inline-flex h-10 w-fit items-center gap-1 rounded-lg bg-muted p-1 text-muted-foreground"
     >
       {options.map(({ key, labelKey }) => (
         <label
@@ -28,7 +28,7 @@ export function ThemeSwitcher({ value, onChange }: ThemeSwitcherProps) {
           className="cursor-pointer"
         >
           <RadioGroupItem value={key} className="peer sr-only" />
-          <span className="inline-flex h-[calc(100%-1px)] items-center rounded-md px-3 py-1 text-sm font-medium text-muted-foreground transition-all hover:text-foreground peer-data-[state=checked]:bg-background peer-data-[state=checked]:text-foreground peer-data-[state=checked]:shadow-sm">
+          <span className="inline-flex h-[calc(100%-2px)] items-center rounded-md px-4 py-1.5 text-sm font-medium text-muted-foreground transition-all hover:text-foreground peer-data-[state=checked]:bg-background peer-data-[state=checked]:text-foreground peer-data-[state=checked]:shadow-sm">
             {t(labelKey)}
           </span>
         </label>
