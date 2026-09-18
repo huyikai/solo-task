@@ -64,6 +64,8 @@ fix it before continuing.
 
 ## 3. Launch the app and verify S1 (启动并看到主窗口骨架)
 
+Manual verification:
+
 ```bash
 pnpm tauri dev
 ```
@@ -75,6 +77,23 @@ Expected:
 - Switch tabs: state changes, only one is active at a time
 
 Verify acceptance scenarios 1-4 of S1.
+
+**Automated smoke** (CI-friendly; covers FR-001's "DB file is created
+on first launch" — jsdom tests cannot observe filesystem side effects):
+
+```bash
+pnpm dev:smoke
+# or: bash scripts/dev-smoke.sh
+# pass --keep to leave the dev server running after a green run
+```
+
+The script wipes any existing DB, boots `pnpm tauri dev`, waits for
+`http://localhost:1420` to come up, polls for
+`~/Library/Application Support/com.huyikai.solo-task/tasks.db` (or
+the platform equivalent), then verifies the schema contains the seven
+expected tables (`tasks`, `subtasks`, `tags`, `task_tags`,
+`reminders`, `migrations`, `user_preferences`). Exit 0 means FR-001
+fires on first launch.
 
 ---
 
