@@ -5,8 +5,18 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { Tabs as TabsPrimitive } from "radix-ui";
 
-// Exact port of shadcn/ui bases/radix/ui/tabs.tsx (commit 2026+).
-// Source: https://github.com/shadcn-ui/ui/blob/main/apps/v4/registry/bases/radix/ui/tabs.tsx
+// 1:1 port of shadcn/ui new-york-v4/ui/tabs.tsx
+// Source: https://github.com/shadcn-ui/ui/blob/main/apps/v4/registry/new-york-v4/ui/tabs.tsx
+// This is the default template produced by `pnpm dlx shadcn@latest add tabs`.
+//
+// Note: shadcn's "default" template uses Tailwind theme tokens like
+// `bg-muted`, `text-foreground`, `border-ring`, `bg-background`.
+// Our .specify/memory/design.md maps:
+//   bg-muted       -> bg-bg              (zinc-50 light / zinc-900 dark)
+//   bg-background  -> bg-surface         (white / zinc-900)
+//   text-foreground -> text-text-primary
+//   text-muted-foreground -> text-text-muted
+//   border-ring    -> border-accent
 
 function Tabs({
   className,
@@ -17,18 +27,22 @@ function Tabs({
     <TabsPrimitive.Root
       data-slot="tabs"
       data-orientation={orientation}
-      className={cn("flex flex-col", className)}
+      orientation={orientation}
+      className={cn(
+        "group/tabs flex gap-2 data-[orientation=horizontal]:flex-col",
+        className,
+      )}
       {...props}
     />
   );
 }
 
 const tabsListVariants = cva(
-  "inline-flex w-fit items-center justify-center rounded-md text-text-muted",
+  "group/tabs-list inline-flex w-fit items-center justify-center rounded-lg p-[3px] text-text-muted group-data-[orientation=horizontal]/tabs:h-9 group-data-[orientation=vertical]/tabs:h-fit group-data-[orientation=vertical]/tabs:flex-col data-[variant=line]:rounded-none",
   {
     variants: {
       variant: {
-        default: "bg-muted",
+        default: "bg-bg",
         line: "gap-1 bg-transparent",
       },
     },
@@ -62,17 +76,14 @@ function TabsTrigger({
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        "relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center whitespace-nowrap px-3 py-1.5 text-sm",
-        "text-text-muted transition-all",
-        "hover:text-text-primary",
-        "group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-active:bg-transparent",
-        "data-active:bg-bg data-active:text-text-primary data-active:font-medium",
-        "after:absolute after:bg-accent after:opacity-0 after:transition-opacity",
-        "group-data-horizontal/tabs-list:after:inset-x-0 group-data-horizontal/tabs-list:after:bottom-[-5px] group-data-horizontal/tabs-list:after:h-0.5",
-        "group-data-vertical/tabs-list:after:inset-y-0 group-data-vertical/tabs-list:after:-right-1 group-data-vertical/tabs-list:after:w-0.5",
-        "group-data-[variant=line]/tabs-list:data-active:after:opacity-100",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2",
-        "disabled:pointer-events-none disabled:opacity-50",
+        // Base
+        "relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap text-text-primary/60 transition-all group-data-[orientation=vertical]/tabs:w-full group-data-[orientation=vertical]/tabs:justify-start hover:text-text-primary focus-visible:border-accent focus-visible:ring-[3px] focus-visible:ring-accent/50 focus-visible:outline-1 focus-visible:outline-accent disabled:pointer-events-none disabled:opacity-50 group-data-[variant=default]/tabs-list:data-[state=active]:shadow-sm group-data-[variant=line]/tabs-list:data-[state=active]:shadow-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        // Line variant: no bg, just bottom indicator
+        "group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent",
+        // Active state
+        "data-[state=active]:bg-surface data-[state=active]:text-text-primary",
+        // Active indicator (line below trigger)
+        "after:absolute after:bg-text-primary after:opacity-0 after:transition-opacity group-data-[orientation=horizontal]/tabs:after:inset-x-0 group-data-[orientation=horizontal]/tabs:after:bottom-[-5px] group-data-[orientation=horizontal]/tabs:after:h-0.5 group-data-[orientation=vertical]/tabs:after:inset-y-0 group-data-[orientation=vertical]/tabs:after:-right-1 group-data-[orientation=vertical]/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-[state=active]:after:opacity-100",
         className,
       )}
       {...props}
