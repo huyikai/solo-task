@@ -81,8 +81,8 @@ export default function Settings({ onBack }: { onBack?: () => void } = {}) {
       {onBack && (
         <Button
           variant="ghost"
-          size="sm"
-          className="-ml-3 w-fit"
+          size="default"
+          className="-ml-3 w-fit font-medium"
           onClick={onBack}
         >
           ← {t("views.list")}
