@@ -50,4 +50,28 @@ describe("shadcn-style Tabs", () => {
     const lastCall = onValueChange.mock.calls[onValueChange.mock.calls.length - 1];
     expect(lastCall[0]).toBe("board");
   });
+
+  test("exposes radix state attributes (single primitive library)", () => {
+    // 宪章 IV / 技术债清理: UI 原语统一走 shadcn registry (radix-ui 统一包)。
+    // Base UI 的 Tab 用 data-active, radix 用 data-state — 这条断言钉住
+    // 迁移不被回退到 @base-ui/react。
+    render(
+      <Tabs defaultValue="list">
+        <TabsList>
+          <TabsTrigger value="list">列表</TabsTrigger>
+          <TabsTrigger value="board">看板</TabsTrigger>
+        </TabsList>
+        <TabsContent value="list">内容</TabsContent>
+        <TabsContent value="board">面板</TabsContent>
+      </Tabs>,
+    );
+    expect(screen.getByRole("tab", { name: "列表" })).toHaveAttribute(
+      "data-state",
+      "active",
+    );
+    expect(screen.getByRole("tab", { name: "看板" })).toHaveAttribute(
+      "data-state",
+      "inactive",
+    );
+  });
 });
