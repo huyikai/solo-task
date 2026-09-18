@@ -63,8 +63,10 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     [ -z "$scope" ] && continue # no scope, skip rule
 
     files="$(git diff-tree --no-commit-id --name-only -r "$c")"
-    touches_test="$(echo "$files" | grep -E '(^|/)(__tests__|tests?)/|\.(test|spec)\.[jt]sx?$|_test\.rs$' || true)"
-    touches_prod="$(echo "$files" | grep -vE '(^|/)(__tests__|tests?)/|\.(test|spec)\.[jt]sx?$|_test\.rs$|\.md$|^\.github/|^\.githooks/|^scripts/' || true)"
+    # tests\.rs$ covers the Rust convention of src/**/tests.rs and
+    # *_tests.rs modules (e.g. src-tauri/src/db/tests.rs, commands/tasks_tests.rs).
+    touches_test="$(echo "$files" | grep -E '(^|/)(__tests__|tests?)/|\.(test|spec)\.[jt]sx?$|_test\.rs$|tests\.rs$' || true)"
+    touches_prod="$(echo "$files" | grep -vE '(^|/)(__tests__|tests?)/|\.(test|spec)\.[jt]sx?$|_test\.rs$|tests\.rs$|\.md$|^\.github/|^\.githooks/|^scripts/' || true)"
 
     if [ -n "$touches_test" ]; then
       scope_has_test+=("$scope")
