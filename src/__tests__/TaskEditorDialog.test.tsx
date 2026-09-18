@@ -94,8 +94,8 @@ describe("TaskEditorDialog (edit mode)", () => {
       "aria-checked",
       "true",
     );
-    // due_at RFC3339 → 日期输入显示 YYYY-MM-DD
-    expect(within(dialog).getByLabelText("截止日期")).toHaveValue("2026-09-20");
+    // 日期触发按钮按存储的 Y-M-D 显示 (shadcn DatePicker 模式)
+    expect(within(dialog).getByText("2026-09-20")).toBeInTheDocument();
   });
 
   test("submits edited payload with explicit due date", async () => {
@@ -122,5 +122,64 @@ describe("TaskEditorDialog (edit mode)", () => {
       priority: "high",
       due_at: "2026-09-20T00:00:00Z",
     });
+  });
+
+  test("clearing the date submits due_at null", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    render(
+      <TaskEditorDialog
+        open
+        mode="edit"
+        task={fixtureTask}
+        onOpenChange={vi.fn()}
+        onSubmit={onSubmit}
+      />,
+    );
+
+    const dialog = screen.getByRole("dialog");
+    await user.click(within(dialog).getByRole("button", { name: "清除" }));
+    await user.click(within(dialog).getByRole("button", { name: "保存" }));
+
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({ due_at: null }),
+    );
+  });
+});
+
+describe("TaskEditorDialog (calendar picker)", () => {
+  test("picking a day from the calendar sets the field and payload", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    render(
+      <TaskEditorDialog
+        open
+        mode="create"
+        onOpenChange={vi.fn()}
+        onSubmit={onSubmit}
+      />,
+    );
+
+    const dialog = screen.getByRole("dialog");
+    await user.type(within(dialog).getByLabelText("标题"), "有截止日");
+
+    // 打开日历 (Popover), 选当月 20 日 (rdp 的日按钮可访问名是完整日期
+    // 文案, 按可见文本过滤最稳定)
+    await user.click(
+      within(dialog).getByRole("button", { name: "选择日期" }),
+    );
+    const grid = await screen.findByRole("grid");
+    const dayButton = within(grid)
+      .getAllByRole("button")
+      .find((b) => b.textContent === "20");
+    expect(dayButton).toBeDefined();
+    await user.click(dayButton!);
+
+    // 触发按钮显示所选日, 提交载荷带 UTC 零点 RFC3339
+    expect(within(dialog).getByText("2026-09-20")).toBeInTheDocument();
+    await user.click(within(dialog).getByRole("button", { name: "保存" }));
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({ due_at: "2026-09-20T00:00:00Z" }),
+    );
   });
 });

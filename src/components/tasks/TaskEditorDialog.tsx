@@ -9,6 +9,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Task, TaskPriority } from "@/api/ipc";
 import { t } from "@/i18n/t";
@@ -44,7 +47,7 @@ export function TaskEditorDialog({
   const [title, setTitle] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [priority, setPriority] = React.useState<TaskPriority>("none");
-  const [dueDate, setDueDate] = React.useState("");
+  const [dueDate, setDueDate] = React.useState<Date | null>(null);
 
   React.useEffect(() => {
     if (!open) return;
@@ -52,13 +55,18 @@ export function TaskEditorDialog({
       setTitle(task.title);
       setDescription(task.description);
       setPriority(task.priority);
-      // RFC3339 → 日期输入的 YYYY-MM-DD
-      setDueDate(task.due_at ? task.due_at.slice(0, 10) : "");
+      // RFC3339 → 按存储字符串的年月日构造本地零点 (跨时区稳定)
+      if (task.due_at) {
+        const [y, m, d] = task.due_at.slice(0, 10).split("-").map(Number);
+        setDueDate(new Date(y, m - 1, d));
+      } else {
+        setDueDate(null);
+      }
     } else {
       setTitle("");
       setDescription("");
       setPriority("none");
-      setDueDate("");
+      setDueDate(null);
     }
   }, [open, mode, task]);
 
@@ -72,7 +80,7 @@ export function TaskEditorDialog({
       title: trimmed,
       description,
       priority,
-      due_at: dueDate ? `${dueDate}T00:00:00Z` : null,
+      due_at: dueDate ? formatRfc3339Utc(dueDate) : null,
     });
   }
 
@@ -145,14 +153,38 @@ export function TaskEditorDialog({
             </div>
           </div>
 
-          <label className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1.5">
             <span className="text-sm font-medium">{t("tasks.editor.due_label")}</span>
-            <Input
-              type="date"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-            />
-          </label>
+            <div className="flex items-center gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className={cn(
+                      "w-full flex-1 justify-start font-normal",
+                      !dueDate && "text-muted-foreground",
+                    )}
+                  >
+                    <CalendarIcon />
+                    {dueDate ? fmtDate(dueDate) : t("tasks.editor.pick_date")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={dueDate ?? undefined}
+                    onSelect={(d) => setDueDate(d ?? null)}
+                  />
+                </PopoverContent>
+              </Popover>
+              {dueDate && (
+                <Button type="button" variant="ghost" size="sm" onClick={() => setDueDate(null)}>
+                  {t("tasks.editor.clear_date")}
+                </Button>
+              )}
+            </div>
+          </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
@@ -169,3 +201,15 @@ export function TaskEditorDialog({
 }
 
 export default TaskEditorDialog;
+
+/** 所选日历日 → UTC 零点 RFC3339 (跨时区稳定, 契约见 contracts/ipc.md)。 */
+function formatRfc3339Utc(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}T00:00:00Z`;
+}
+
+function fmtDate(date: Date): string {
+  return formatRfc3339Utc(date).slice(0, 10);
+}

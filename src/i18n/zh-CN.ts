@@ -55,6 +55,8 @@ const zhCN = {
   "tasks.editor.description_label": "描述",
   "tasks.editor.priority_label": "优先级",
   "tasks.editor.due_label": "截止日期",
+  "tasks.editor.pick_date": "选择日期",
+  "tasks.editor.clear_date": "清除",
   "tasks.editor.save": "保存",
   "tasks.editor.cancel": "取消",
   "tasks.status.todo": "待办",
