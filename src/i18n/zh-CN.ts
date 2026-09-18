@@ -57,6 +57,15 @@ const zhCN = {
   "tasks.editor.due_label": "截止日期",
   "tasks.editor.save": "保存",
   "tasks.editor.cancel": "取消",
+  "tasks.status.todo": "待办",
+  "tasks.status.doing": "进行中",
+  "tasks.status.done": "已完成",
+  "tasks.status.cycle_hint": "点击切换状态",
+  "tasks.empty": "还没有任务",
+  "tasks.empty_hint": "点击“新建任务”开始记录",
+  "tasks.due": "截止",
+  "tasks.edit": "编辑",
+  "tasks.delete": "删除",
   "error.retry": "重试",
 } as const;
 
