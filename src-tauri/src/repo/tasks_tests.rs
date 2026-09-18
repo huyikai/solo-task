@@ -1,6 +1,9 @@
 use crate::db::connect_and_init;
+use crate::error::AppError;
 use crate::models::{TaskPriority, TaskStatus};
-use crate::repo::tasks::{insert_task, list_tasks, NewTaskRow};
+use crate::repo::tasks::{
+    delete_task, insert_task, list_tasks, set_task_status, update_task, NewTaskRow, TaskPatchRow,
+};
 use rusqlite::Connection;
 use tempfile::TempDir;
 
@@ -78,4 +81,120 @@ fn test_insert_round_trips_optional_fields() {
     let all = list_tasks(&conn).unwrap();
     assert_eq!(all[0].id, later_id.id, "same-second tie must break by id DESC");
     assert_eq!(all[1].id, t.id);
+}
+
+#[test]
+fn test_update_partial_fields_leaves_others_untouched() {
+    let (conn, _keep) = test_conn();
+    let t = insert_task(
+        &conn,
+        &NewTaskRow {
+            title: "原标题",
+            description: "原描述",
+            priority: TaskPriority::Low,
+            due_at: Some("2026-09-20T18:00:00Z"),
+            created_at: "2026-09-18T08:00:00Z",
+            updated_at: "2026-09-18T08:00:00Z",
+        },
+    )
+    .unwrap();
+
+    let patch = TaskPatchRow {
+        title: Some("新标题".into()),
+        description: None,
+        priority: None,
+        due_at: None,
+    };
+    let updated = update_task(&conn, t.id, &patch, "2026-09-19T10:00:00Z").unwrap();
+
+    assert_eq!(updated.title, "新标题", "explicit field updates");
+    assert_eq!(updated.description, "原描述", "unspecified field untouched");
+    assert_eq!(updated.priority, TaskPriority::Low);
+    assert_eq!(updated.due_at, Some("2026-09-20T18:00:00Z".to_string()));
+    assert_eq!(updated.created_at, "2026-09-18T08:00:00Z", "created_at immutable");
+    assert_eq!(updated.updated_at, "2026-09-19T10:00:00Z", "updated_at refreshed");
+}
+
+#[test]
+fn test_update_can_clear_due_at_with_explicit_null() {
+    let (conn, _keep) = test_conn();
+    let t = insert_task(
+        &conn,
+        &NewTaskRow {
+            title: "有到期日",
+            description: "",
+            priority: TaskPriority::None,
+            due_at: Some("2026-09-20T18:00:00Z"),
+            created_at: "2026-09-18T08:00:00Z",
+            updated_at: "2026-09-18T08:00:00Z",
+        },
+    )
+    .unwrap();
+
+    // due_at: Some(None) = 显式清空; None = 不动 (contracts/ipc.md)
+    let patch = TaskPatchRow {
+        title: None,
+        description: None,
+        priority: None,
+        due_at: Some(None),
+    };
+    let updated = update_task(&conn, t.id, &patch, "2026-09-19T10:00:00Z").unwrap();
+    assert_eq!(updated.due_at, None, "Some(None) must clear due_at");
+}
+
+#[test]
+fn test_update_missing_id_returns_task_not_found() {
+    let (conn, _keep) = test_conn();
+    let patch = TaskPatchRow {
+        title: Some("幽灵".into()),
+        description: None,
+        priority: None,
+        due_at: None,
+    };
+    let result = update_task(&conn, 999, &patch, "2026-09-19T10:00:00Z");
+    assert!(matches!(result, Err(AppError::TaskNotFound(999))), "got {result:?}");
+}
+
+#[test]
+fn test_set_status_updates_status_and_timestamp() {
+    let (conn, _keep) = test_conn();
+    let t = insert_task(&conn, &row("流转", "2026-09-18T08:00:00Z")).unwrap();
+    assert_eq!(t.status, TaskStatus::Todo);
+
+    let doing = set_task_status(&conn, t.id, TaskStatus::Doing, "2026-09-18T09:00:00Z").unwrap();
+    assert_eq!(doing.status, TaskStatus::Doing);
+    assert_eq!(doing.updated_at, "2026-09-18T09:00:00Z");
+
+    let done = set_task_status(&conn, t.id, TaskStatus::Done, "2026-09-18T10:00:00Z").unwrap();
+    assert_eq!(done.status, TaskStatus::Done);
+
+    let back = set_task_status(&conn, t.id, TaskStatus::Todo, "2026-09-18T11:00:00Z").unwrap();
+    assert_eq!(back.status, TaskStatus::Todo, "any-direction transitions allowed (spec US3)");
+}
+
+#[test]
+fn test_set_status_missing_id_returns_task_not_found() {
+    let (conn, _keep) = test_conn();
+    let result = set_task_status(&conn, 12345, TaskStatus::Done, "2026-09-18T09:00:00Z");
+    assert!(matches!(result, Err(AppError::TaskNotFound(12345))), "got {result:?}");
+}
+
+#[test]
+fn test_delete_removes_row() {
+    let (conn, _keep) = test_conn();
+    let t = insert_task(&conn, &row("待删除", "2026-09-18T08:00:00Z")).unwrap();
+
+    delete_task(&conn, t.id).unwrap();
+    let all = list_tasks(&conn).unwrap();
+    assert!(all.is_empty(), "row must be gone");
+
+    let result = crate::repo::tasks::get_task(&conn, t.id);
+    assert!(matches!(result, Err(AppError::TaskNotFound(_))));
+}
+
+#[test]
+fn test_delete_missing_id_returns_task_not_found() {
+    let (conn, _keep) = test_conn();
+    let result = delete_task(&conn, 777);
+    assert!(matches!(result, Err(AppError::TaskNotFound(777))), "got {result:?}");
 }
