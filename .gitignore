@@ -45,3 +45,4 @@ test-results/
 
 # Claude
 .claude/
+tsconfig.node.tsbuildinfo
