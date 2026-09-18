@@ -46,3 +46,8 @@ test-results/
 # Claude
 .claude/
 tsconfig.node.tsbuildinfo
+
+# tsc -b 产物与误生成的 js
+tsconfig.tsbuildinfo
+vite.config.js
+vite.config.d.ts
