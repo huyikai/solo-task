@@ -32,21 +32,35 @@ pub fn run() {
 
 #[cfg(test)]
 mod window_capability_tests {
-    // 2026-09 用户报告: 自绘红绿灯点击无反应。根因之一是 capabilities
-    // 只授了 allow-start-dragging — core:window:default 仅含只读权限,
-    // minimize/close/toggle_maximize 被 ACL 拒绝且 JS 端 void 吞掉。
-    // 此测试机器守护窗口动作权限不再被裁掉。
+    // v1.1.1: 自绘红绿灯废弃 (顺序/hover/glyph 三处不像原生且要养权限),
+    // 改用 macOS 原生 Overlay。此测试机器守护窗口配置不回退到
+    // transparent 私有 API 路线, 且拖拽权限不被裁掉。
     #[test]
-    fn window_control_actions_are_granted() {
-        let caps = include_str!("../capabilities/default.json");
-        for perm in [
-            "core:window:allow-minimize",
-            "core:window:allow-close",
-            "core:window:allow-toggle-maximize",
-        ] {
+    fn window_uses_native_overlay_not_frameless_hack() {
+        let conf = include_str!("../tauri.conf.json");
+        assert!(
+            conf.contains(r#""titleBarStyle": "Overlay""#),
+            "tauri.conf.json 缺少 titleBarStyle Overlay — 红绿灯会退回自绘路线"
+        );
+        for legacy in ["macOSPrivateApi", "\"transparent\": true", "\"decorations\": false"] {
             assert!(
-                caps.contains(perm),
-                "capabilities/default.json 缺少 {perm} — 红绿灯按钮会是死的"
+                !conf.contains(legacy),
+                "tauri.conf.json 不应再含 {legacy} (v1.1.1 已废弃 transparent 私有 API 路线)"
+            );
+        }
+    }
+
+    #[test]
+    fn drag_region_permission_granted_without_window_actions() {
+        let caps = include_str!("../capabilities/default.json");
+        assert!(
+            caps.contains("core:window:allow-start-dragging"),
+            "capabilities/default.json 缺少 allow-start-dragging — 拖拽区会失效"
+        );
+        for action in ["allow-minimize", "allow-close", "allow-toggle-maximize"] {
+            assert!(
+                !caps.contains(action),
+                "原生红绿灯不需要 {action} (v1.1.1); 若加回说明又在自绘"
             );
         }
     }

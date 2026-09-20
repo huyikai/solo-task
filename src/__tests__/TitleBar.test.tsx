@@ -1,24 +1,19 @@
 import { describe, expect, test } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
+import TitleBar from "@/components/TitleBar";
 
-// 红绿灯是 12px 视觉圆点, 但命中区必须明显更大 (macOS 原生如此),
-// 否则真机上几乎点不中。jsdom 的 navigator.platform 不是 Mac, 模块顶层
-// 的 isMac 常量在静态导入时已定值 — 动态导入前先覆写。
-describe("TitleBar traffic-light hit targets (macOS variant)", () => {
-  test("each button exposes a 20px hit area around the 12px dot", async () => {
-    Object.defineProperty(window.navigator, "platform", {
-      value: "MacIntel",
-      configurable: true,
-    });
-    const { default: TitleBar } = await import("@/components/TitleBar");
-    render(<TitleBar />);
+// v1.1.1: 红绿灯交给 macOS 原生 Overlay (cc-switch 同款)。TitleBar 退化为
+// 纯拖拽条 — 顶部空白带仍可拖窗, 但不再画任何按钮 (样式/顺序/hover 全部
+// OS-owned, 自绘已被否决)。
+describe("TitleBar is a pure drag strip (v1.1.1)", () => {
+  test("renders one drag-region strip and zero buttons", () => {
+    const { container } = render(<TitleBar />);
+    const strip = container.firstElementChild as HTMLElement;
 
-    for (const label of ["minimize", "maximize", "close"]) {
-      const btn = screen.getByRole("button", { name: label });
-      expect(btn.classList.contains("h-5")).toBe(true);
-      expect(btn.classList.contains("w-5")).toBe(true);
-      // 视觉圆点是内层 span, 按钮本身只是命中区 (不能把颜色铺满按钮)
-      expect(btn.querySelector("span")).not.toBeNull();
-    }
+    expect(strip).not.toBeNull();
+    expect(strip.hasAttribute("data-tauri-drag-region")).toBe(true);
+    expect(strip.className).toContain("h-12");
+    expect(strip.className).toContain("z-40");
+    expect(strip.querySelectorAll("button")).toHaveLength(0);
   });
 });

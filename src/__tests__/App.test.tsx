@@ -67,16 +67,14 @@ describe("App view switching (S1, S7)", () => {
     expect(await screen.findByText("还没有任务")).toBeInTheDocument();
   });
 
-  test("header row passes pointer events through to the traffic lights", async () => {
+  test("header row is a drag region without pointer-events gating (v1.1.1)", async () => {
     render(<App />);
     const tablist = await screen.findByRole("tablist");
     const row = tablist.parentElement;
-    // 行容器 z-[60] 悬浮在 TitleBar (z-50) 之上: 若整条拦截事件, 左上角
-    // 窗口控制按钮既无 hover 图标也点不中 (点击落在 drag-region 上)。
-    // 容器必须 pointer-events-none, 交互子元素单独恢复。
-    expect(row?.classList.contains("pointer-events-none")).toBe(true);
-    expect(tablist.classList.contains("pointer-events-auto")).toBe(true);
-    const gear = screen.getByRole("button", { name: "设置" });
-    expect(gear.classList.contains("pointer-events-auto")).toBe(true);
+    // 原生 Overlay 红绿灯后, z-50 遮挡条已删: 行容器直接承担拖拽
+    // (data-tauri-drag-region, Tauri 只在事件 target 自身带属性时拖拽,
+    // Tabs/齿轮子元素不带属性故可点击), 不再需要 pointer-events 补丁。
+    expect(row?.hasAttribute("data-tauri-drag-region")).toBe(true);
+    expect(row?.classList.contains("pointer-events-none")).toBe(false);
   });
 });
