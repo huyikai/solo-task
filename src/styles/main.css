@@ -224,15 +224,8 @@ body,
   line-height: 1.6;
 }
 
-/* 无边框窗口圆角: 窗口本身透明, 由 #root 画出带圆角的背景矩形,
-   四角外的区域透出桌面 */
-html,
-body {
-  background: transparent;
-}
-
+/* v1.1.1: 原生 Overlay 标题栏 — 标准窗口自带圆角/阴影, 红绿灯由系统
+   绘制。不再需要 transparent 窗口 + #root 自画圆角的私有 API 方案。 */
 #root {
-  overflow: hidden;
-  border-radius: 10px;
   background: var(--bg);
 }

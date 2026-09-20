@@ -98,9 +98,9 @@ function App() {
           >
             <div
               data-tauri-drag-region
-              className="relative z-[60] mb-4 flex items-center justify-center pointer-events-none"
+              className="relative z-[60] mb-4 flex items-center justify-center"
             >
-              <TabsList className="pointer-events-auto">
+              <TabsList>
                 <TabsTrigger value="list">{t("views.list")}</TabsTrigger>
                 <TabsTrigger value="board">{t("views.board")}</TabsTrigger>
                 <TabsTrigger value="gantt">{t("views.gantt")}</TabsTrigger>
@@ -109,7 +109,7 @@ function App() {
                 type="button"
                 onClick={() => setRoute("settings")}
                 aria-label={t("settings.title")}
-                className="pointer-events-auto absolute right-0 top-1/2 -translate-y-1/2 inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground"
+                className="absolute right-0 top-1/2 -translate-y-1/2 inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground"
               >
                 <svg
                   width="18"
