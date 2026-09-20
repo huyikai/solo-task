@@ -70,36 +70,42 @@ function WindowButton({ variant, onClick, label, color }: WindowButtonProps) {
         onClick={onClick}
         aria-label={label}
         className={cn(
-          "group flex h-3 w-3 items-center justify-center rounded-full",
-          "transition-opacity",
+          "group flex h-5 w-5 items-center justify-center rounded-full",
+          "transition-opacity hover:opacity-80",
         )}
-        style={{ background: color }}
       >
-        <svg
-          width="6"
-          height="6"
-          viewBox="0 0 6 6"
-          fill="none"
-          stroke="rgba(0,0,0,0.55)"
-          strokeWidth="1"
-          strokeLinecap="round"
-          aria-hidden="true"
-          className="opacity-0 group-hover:opacity-100"
+        {/* 12px 视觉圆点是内层 span; 按钮本体是 20px 命中区 (原生 macOS
+            红绿灯同样视觉小、命中大, 否则真机几乎点不中)。 */}
+        <span
+          className="relative flex h-3 w-3 items-center justify-center rounded-full"
+          style={{ background: color }}
         >
-          {label === "minimize" && <line x1="0.5" y1="3" x2="5.5" y2="3" />}
-          {label === "maximize" && (
-            <>
-              <line x1="0.5" y1="3" x2="5.5" y2="3" />
-              <line x1="3" y1="0.5" x2="3" y2="5.5" />
-            </>
-          )}
-          {label === "close" && (
-            <>
-              <line x1="0.5" y1="0.5" x2="5.5" y2="5.5" />
-              <line x1="0.5" y1="5.5" x2="5.5" y2="0.5" />
-            </>
-          )}
-        </svg>
+          <svg
+            width="6"
+            height="6"
+            viewBox="0 0 6 6"
+            fill="none"
+            stroke="rgba(0,0,0,0.55)"
+            strokeWidth="1"
+            strokeLinecap="round"
+            aria-hidden="true"
+            className="absolute opacity-0 group-hover:opacity-100"
+          >
+            {label === "minimize" && <line x1="0.5" y1="3" x2="5.5" y2="3" />}
+            {label === "maximize" && (
+              <>
+                <line x1="0.5" y1="3" x2="5.5" y2="3" />
+                <line x1="3" y1="0.5" x2="3" y2="5.5" />
+              </>
+            )}
+            {label === "close" && (
+              <>
+                <line x1="0.5" y1="0.5" x2="5.5" y2="5.5" />
+                <line x1="0.5" y1="5.5" x2="5.5" y2="0.5" />
+              </>
+            )}
+          </svg>
+        </span>
       </button>
     );
   }
