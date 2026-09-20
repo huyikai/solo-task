@@ -3,8 +3,8 @@
 **Constitution Reference**: Principles IX-XI (Design Quality, Design System
 Continuity, Governance Layer Promotion, v1.7.0)
 **Skill invocation**: `/design-taste-frontend`
-**Version**: v1.1.0 (AA text-token sweep, segmented elevation, empty-state centering)
-**Last Amended**: 2026-09-18
+**Version**: v1.1.1 (native Overlay titlebar; v1.1.0 AA text-token sweep, segmented elevation, empty-state centering)
+**Last Amended**: 2026-09-20
 
 This document is the **single source of truth** for visual design in Solo
 Task. It is project-level (not feature-level): every UI spec MUST
@@ -374,15 +374,24 @@ Visual baseline: `--surface`, 1px `--border`, radius-md, shadow-sm,
 `p-4` content rhythm. `hoverable` is an explicitly supported extension
 that adds shadow-md on hover; do not add arbitrary card styling per page.
 
-### 6.3 Layout + Frameless TitleBar
+### 6.3 Layout + Native Overlay TitleBar (v1.1.1)
 
-**Structure**: a transparent frameless TitleBar overlay plus a main
-content area. The OS chrome is disabled (`decorations: false`) and
-window controls are source-owned under `src/components/TitleBar.tsx`.
+**Structure**: macOS native traffic lights overlaid on the content
+(`titleBarStyle: "Overlay"`, `title: ""`) plus a main content area,
+following the cc-switch reference (same Tauri 2 stack). NO custom
+window buttons, NO `decorations: false` / `transparent` /
+`macOSPrivateApi` — the 001 transparent-frameless route is retired.
+Window corners/shadow come from the standard macOS window (~10px
+radius, visually identical to the old hand-drawn one).
 
-- TitleBar: fixed overlay at the window top, `h-9`, transparent, no
-  visible background band; its traffic-light / Windows controls are
-  `no-drag`, while the surrounding region is `data-tauri-drag-region`.
+- Window-control order, glyphs, group hover, maximize/restore state
+  and highlight color are all OS-owned; do not re-implement.
+- `src/components/TitleBar.tsx` is reduced to a pure top drag strip
+  (`fixed h-12 z-40`, `data-tauri-drag-region`, no children) so the
+  empty band above the tabs row stays draggable.
+- The tabs header row itself carries `data-tauri-drag-region`
+  (interactive children without the attribute remain clickable) and
+  must NOT use `pointer-events` gating.
 - Main content starts at the top of the window. No separate visible
   app header or sub-header band.
 - Settings gear lives in the content area top-right when the views route
@@ -391,6 +400,9 @@ window controls are source-owned under `src/components/TitleBar.tsx`.
   arrow is rendered at the top-left of the Settings content, returning
   to the active view.
 - Main content: `p-6` or `p-8`, `--bg`, max width unlimited.
+- Capabilities keep only `core:window:allow-start-dragging` for the
+  drag regions (guard-tested in `lib.rs`); window action permissions
+  are not needed while controls are native.
 
 ### 6.4 Tabs (shadcn new-york-v4 source-owned)
 
