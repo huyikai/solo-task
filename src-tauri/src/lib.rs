@@ -5,6 +5,7 @@ pub mod models;
 pub mod paths;
 pub mod repo;
 pub mod state;
+pub mod tray;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -14,6 +15,10 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .manage(db_state)
+        .setup(|app| {
+            tray::install(app)?;
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             commands::health_check,
             commands::create_task,
@@ -64,4 +69,28 @@ mod window_capability_tests {
             );
         }
     }
+
+    // v1.1.2 (004-tray-and-window-controls): 关闭按钮退菜单栏 + 双箭头
+    // 覆盖层 setFullscreen 需要以下五条窗口权限。机器守护: 任何一条被
+    // 裁掉都会让"关闭窗口"或"全屏切换"不可用。
+    #[test]
+    fn window_supports_hide_show_focus_for_tray_and_fullscreen() {
+        let caps = include_str!("../capabilities/default.json");
+        for perm in [
+            "core:window:allow-hide",
+            "core:window:allow-show",
+            "core:window:allow-set-focus",
+            "core:window:allow-set-fullscreen",
+            "core:window:allow-unminimize",
+        ] {
+            assert!(
+                caps.contains(perm),
+                "capabilities/default.json 缺少 {perm} (004 FR-001/FR-005/FR-006); \
+                 关闭退托盘或全屏覆盖层会因 ACL 拒绝而失效"
+            );
+        }
+    }
 }
+
+#[cfg(test)]
+mod lifecycle_tests;
