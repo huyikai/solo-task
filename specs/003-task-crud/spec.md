@@ -4,7 +4,7 @@
 
 **Created**: 2026-09-18
 
-**Status**: Draft
+**Status**: Done (2026-09-20 — 32/32 tasks; T031 人工 e2e quickstart 7 步用户报告 1-7 全 OK, 归档)
 
 **Input**: User decision (2026-09-18): "先做 A" — 方向 A = 任务 CRUD +
 列表视图真实数据, MVP 六大块中其余五块 (subtasks / tags / reminders /
