@@ -156,11 +156,11 @@ Green commit 入同一 push**(pre-push hook 已修复, 245c122)。
       zh-CN.ts)。
 - [x] T030 `tsc --noEmit` / `pnpm test` / `cargo test` /
       `cargo clippy -D warnings` 四门全绿。
-- [ ] T031 quickstart 追加 003 e2e 步骤 (SC-004): 新建→流转→编辑→
+- [x] T031 quickstart 追加 003 e2e 步骤 (SC-004): 新建→流转→编辑→
       删除→重启保持 (SC-005), 手动跑一遍并记录结果到本文件 T031 行。
-      > 进度: specs/003-task-crud/quickstart.md 已写入; 人工 dev-run
-      > 待执行 (自动化门禁已全绿, 此步为 SC-004/005 的人工确认)。
-- [ ] T032 单 commit 归档准备: spec.md Status 推进 + tasks 勾选
+      > 进度: 2026-09-20 用户真机报告 1-7 全 OK (新建 / 状态循环 /
+      > 编辑 / 删除 / 重启持久化 / 错误重试 / 日期持久化)。SC-004 / SC-005 达成。
+- [x] T032 单 commit 归档准备: spec.md Status 推进 + tasks 勾选
       (沿用 001/002 的归档纪律)。
 
 ---
