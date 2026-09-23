@@ -34,10 +34,12 @@ if (!window.matchMedia) {
 describe("Settings (S2)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockedGetPreference.mockResolvedValue({
+    // 默认对所有 key 都返回合理响应; 子调用按 key 决定 (theme.mode +
+    // window.close_action 都覆盖; 测试可以按 key 重置)
+    mockedGetPreference.mockImplementation(async (key: string) => ({
       ok: true,
-      data: { key: "theme.mode", value: '"system"', updated_at: "2026-01-01T00:00:00Z" },
-    });
+      data: { key, value: '"system"', updated_at: "2026-01-01T00:00:00Z" },
+    }));
     mockedSetPreference.mockResolvedValue({ ok: true, data: null });
     mockedTriggerTestError.mockResolvedValue({
       ok: false,

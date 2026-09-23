@@ -9,6 +9,8 @@ import {
 import DesignPreview from "@/pages/DesignPreview";
 import TitleBar from "@/components/TitleBar";
 import Layout from "@/components/Layout";
+import WindowControls from "@/components/WindowControls";
+import { installCloseGuard } from "@/window/lifecycle";
 import ListView from "@/views/ListView";
 import BoardView from "@/views/BoardView";
 import GanttView from "@/views/GanttView";
@@ -49,6 +51,9 @@ function App() {
         new URLSearchParams(window.location.search).get("preview") === "1",
     );
     void check();
+    // 004 FR-006: 关闭按钮拦截安装一次。JS 端读 user_preferences
+    // `window.close_action` 决定 hide-to-tray 还是允许原生 quit。
+    void installCloseGuard();
   }, [check]);
 
   if (isPreview) {
@@ -87,6 +92,12 @@ function App() {
   return (
     <>
       <TitleBar />
+      {/* 004 FR-005: macOS Overlay native double-arrow button → setFullscreen
+          transparent overlay. z-50 sits above TitleBar; pointer-events-auto
+          on the button itself, transparent so the native traffic lights
+          (red/yellow/close) render through; surrounding area still
+          data-tauri-drag-region. */}
+      <WindowControls />
       <Layout className={route === "views" ? "pt-5" : undefined}>
         {route === "settings" ? (
           <Settings onBack={() => setRoute("views")} />

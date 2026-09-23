@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { ErrorToast } from "@/components/ui/error-toast";
 import { ThemeSwitcher, type ThemeMode } from "@/components/ThemeSwitcher";
+import { SettingsCloseAction } from "@/components/SettingsCloseAction";
 import {
   getPreference,
   setPreference,
@@ -115,6 +116,15 @@ export default function Settings({ onBack }: { onBack?: () => void } = {}) {
                 {t("settings.theme.currentHint", { mode: t(resolvedKey) })}
               </span>
             </div>
+          </CardContent>
+        </Card>
+        {/* 004 US3 / FR-007: appearance section adds the close-action
+            switch; same visual language as Theme (segmented radiogroup
+            per design.md §6.6). */}
+        <Card>
+          <CardContent className="flex items-center justify-between gap-4 pt-4">
+            <span className="text-base shrink-0">{t("settings.close_action.label")}</span>
+            <SettingsCloseAction />
           </CardContent>
         </Card>
       </section>

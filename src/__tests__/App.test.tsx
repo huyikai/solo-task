@@ -7,12 +7,30 @@ import * as ipc from "@/api/ipc";
 vi.mock("@/api/ipc", () => ({
   healthCheck: vi.fn(),
   listTasks: vi.fn(),
+  getPreference: vi.fn(),
+  setPreference: vi.fn(),
+}));
+
+// 004: WindowControls + installCloseGuard 引用 @tauri-apps/api/window,
+// jsdom 没有 Tauri runtime 故 stub。
+vi.mock("@tauri-apps/api/window", () => ({
+  getCurrentWindow: () => ({
+    onCloseRequested: vi.fn(),
+    hide: vi.fn(),
+    show: vi.fn(),
+    setFocus: vi.fn(),
+    unminimize: vi.fn(),
+    setFullscreen: vi.fn(),
+    isFullscreen: vi.fn().mockResolvedValue(false),
+  }),
 }));
 
 const mockedHealthCheck = vi.mocked(ipc.healthCheck);
 const mockedListTasks = vi.mocked(
   ipc.listTasks as unknown as ReturnType<typeof vi.fn>,
 );
+const mockedGetPreference = vi.mocked(ipc.getPreference);
+const mockedSetPreference = vi.mocked(ipc.setPreference);
 
 describe("App view switching (S1, S7)", () => {
   beforeEach(() => {
@@ -20,6 +38,10 @@ describe("App view switching (S1, S7)", () => {
     mockedHealthCheck.mockResolvedValue({ ok: true, data: { ok: true } });
     // ListView 挂载即拉取; 空数据 → 渲染空状态 (003 FR-008)
     mockedListTasks.mockResolvedValue({ ok: true, data: [] });
+    // 004 installCloseGuard 在 mount 时调 getPreference; 默认 fallback
+    // minimize_to_tray, 不需真实返回值, 但 mock 必须返回对象避免 .ok 访问抛错
+    mockedGetPreference.mockResolvedValue({ ok: false, error: { variant: "unknown" } });
+    mockedSetPreference.mockResolvedValue({ ok: true, data: null });
   });
 
   test("renders three view tabs after healthy startup", async () => {
