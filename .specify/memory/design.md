@@ -3,7 +3,7 @@
 **Constitution Reference**: Principles IX-XI (Design Quality, Design System
 Continuity, Governance Layer Promotion, v1.7.0)
 **Skill invocation**: `/design-taste-frontend`
-**Version**: v1.1.1 (native Overlay titlebar; v1.1.0 AA text-token sweep, segmented elevation, empty-state centering)
+**Version**: v1.1.2 (tray + window controls; v1.1.1 native Overlay titlebar; v1.1.0 AA text-token sweep, segmented elevation, empty-state centering)
 **Last Amended**: 2026-09-20
 
 This document is the **single source of truth** for visual design in Solo
@@ -403,6 +403,23 @@ radius, visually identical to the old hand-drawn one).
 - Capabilities keep only `core:window:allow-start-dragging` for the
   drag regions (guard-tested in `lib.rs`); window action permissions
   are not needed while controls are native.
+- **v1.1.2 exception (FR-005 double-arrow override)**: the native
+  macOS "double-arrow" button's zoom behavior toggles between
+  maximize and fullscreen as two separate OS gestures; we want a
+  clean two-state `setFullscreen(true/false)` toggle. The native
+  button is overlaid with a transparent 48x48 control
+  (`src/components/WindowControls.tsx`, z-50, `pointer-events-auto`,
+  transparent so the surrounding traffic lights (red/yellow/close)
+  render through). This **sacrifices the native hover ring and
+  maximize/restore icon** on the double-arrow specifically, in
+  exchange for a predictable toggle. Red/yellow/close remain fully
+  native.
+- **v1.1.2 window-action permissions**: now granted alongside
+  start-dragging: `allow-hide`, `allow-show`, `allow-set-focus`,
+  `allow-set-fullscreen`, `allow-unminimize` (close→hide lives in
+  JS, setFullscreen lives in JS overlay). The v1.1.1 negative
+  guard (`!allow-minimize` / `!allow-close` / `!allow-toggle-maximize`)
+  stays: those would re-enable self-drawn button paths.
 
 ### 6.4 Tabs (shadcn new-york-v4 source-owned)
 
@@ -546,6 +563,35 @@ disabled while the trimmed title is empty.
 **Delete confirmation**: ConfirmDialog with title interpolating the
 truncated task name (20 chars) and NO typed confirmation input
 (weaker destruction than the DB wipe; plan.md D7).
+
+### 6.8 Close-Action Switch (introduced by spec 004-tray-and-window-controls)
+
+**Visual tone**: quiet, in the appearance group, beside Theme.
+
+- Located inside the existing **外观** section (`<h2>外观</h2>`) of
+  Settings, in its own `Card` immediately after the theme card. No
+  new section, no new heading — keeps the four-group rhythm.
+- Segmented radiogroup with **two** options
+  (`minimize_to_tray` / `quit`), `h-8` buttons (`h-8 flex-1 rounded-md`),
+  identical to the editor priority group and the theme switcher
+  (radix-ui based, ARIA `role="radiogroup"` + `role="radio"` +
+  `aria-checked`).
+- Selected state: `bg-bg` + `font-medium` + `shadow-sm` per the §6.6
+  visual lock; unselected muted, hover → foreground.
+- Label: `t("settings.close_action.label")` "关闭按钮"; options:
+  `t("settings.close_action.minimize_to_tray")` "退回菜单栏"
+  (default) / `t("settings.close_action.quit")` "退出应用".
+- Persistence: `setPreference("window.close_action", JSON.stringify(value))`
+  into the existing `user_preferences` table. No JS-local mirror
+  required (single source of truth in SQLite).
+- Default value locked at `minimize_to_tray`. The close button's
+  intercept handler (JS side, see `src/window/lifecycle.ts`) reads
+  this preference once at mount and falls back to
+  `minimize_to_tray` on missing or JSON-invalid value (US3-4).
+- **No theme switch.** A switch would suggest the value is a runtime
+  toggle; the implementation reads once per mount, so changing the
+  switch takes effect on the next close click only after focus returns
+  to the window (acceptable for a low-frequency toggle).
 
 ## 7. Amending This Document
 
