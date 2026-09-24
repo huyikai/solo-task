@@ -5,20 +5,18 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
 /**
- * 透明覆盖层: 叠在 macOS 原生"双箭头"按钮位置 (titleBarStyle: Overlay
- * 下原生按钮约 left-2 top-2, 大小 14x16 — 我们覆盖 48x48 命中区,
- * 透明的视觉圆形与原生一致)。
- *
- * 应置于 z-50(标题栏之上)之下,放 Layout 内容层;Tab 行 (z-[60]) 会在
- * 内容区被覆盖,符合期望。App.tsx 集成时需放在 Layout 之外、Tabs 之前。
+ * 透明覆盖层: 叠在 macOS 原生"双箭头"(绿色最大化)按钮位置。
+ * macOS 红绿灯从左到右: 关闭(红) / 最小化(黄) / 最大化(绿),
+ * 三键约在 left 20/40/60px, 直径 12px。覆盖层只盖绿色键,
+ * 不得压住红/黄键 (会导致关闭/最小化失灵)。
  */
 export function WindowControls() {
   return (
-    <div className="absolute left-2 top-2 z-50 pointer-events-none">
+    <div className="absolute left-[52px] top-2 z-50 pointer-events-none">
       <button
         type="button"
         aria-label="toggle fullscreen"
-        className="pointer-events-auto flex h-12 w-12 items-center justify-center bg-transparent"
+        className="pointer-events-auto flex h-8 w-8 items-center justify-center bg-transparent"
         onClick={async () => {
           const win = getCurrentWindow();
           const current = await win.isFullscreen();
