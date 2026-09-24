@@ -7,6 +7,8 @@ pub mod repo;
 pub mod state;
 pub mod tray;
 
+use tauri::Manager;
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let db_state = commands::health_check::init_state()
@@ -31,8 +33,19 @@ pub fn run() {
             commands::set_preference,
             commands::trigger_test_error_command,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|app_handle, event| {
+            // macOS: 点击 Dock 图标触发 Reopen 事件。窗口被 hide() 后
+            // Tauri 不会自动恢复 — 需要显式 show + focus (004 US1)。
+            if let tauri::RunEvent::Reopen { .. } = event {
+                if let Some(win) = app_handle.get_webview_window("main") {
+                    let _ = win.unminimize();
+                    let _ = win.show();
+                    let _ = win.set_focus();
+                }
+            }
+        });
 }
 
 #[cfg(test)]
