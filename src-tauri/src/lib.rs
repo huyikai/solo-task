@@ -7,6 +7,7 @@ pub mod repo;
 pub mod state;
 pub mod tray;
 
+#[cfg(target_os = "macos")]
 use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
