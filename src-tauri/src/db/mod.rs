@@ -60,6 +60,10 @@ pub(crate) fn map_sqlite(e: rusqlite::Error, context: &str) -> AppError {
         {
             AppError::DbCorrupted
         }
+        // 非法 status/priority 等字段值 → 校验错误 (US6 / Principle VII)
+        rusqlite::Error::FromSqlConversionFailure(_, _, msg) => {
+            AppError::Validation(format!("{context}: {msg}"))
+        }
         _ => AppError::Unknown(format!("{context}: {e}")),
     }
 }
