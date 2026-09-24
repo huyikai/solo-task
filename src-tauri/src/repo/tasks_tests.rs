@@ -234,3 +234,43 @@ fn test_list_1000_rows_under_50ms() {
         elapsed.as_millis()
     );
 }
+
+// US6 / Principle VII: 非法 status/priority 是数据校验问题, 必须映射到
+// AppError::Validation (i18n "输入不符合要求"), 而非 AppError::Unknown
+// ("操作失败") — 后者掩盖了真正原因, 违反 spec US6 "显示对应 i18n 文案"。
+#[test]
+fn test_invalid_status_maps_to_validation_not_unknown() {
+    let (conn, _keep) = test_conn();
+    // 用原始 SQL 插入非法 status, 绕过 insert_task 的 Rust 端校验
+    conn.execute(
+        "INSERT INTO tasks (title, description, status, priority, due_at, created_at, updated_at)
+         VALUES ('dirty', '', 'bogus', 'none', NULL, '2026-01-01T00:00:00Z', '2026-01-01T00:00:00Z')",
+        [],
+    )
+    .unwrap();
+
+    let result = list_tasks(&conn);
+    assert!(
+        matches!(result, Err(AppError::Validation(_))),
+        "invalid status should map to Validation, got: {:?}",
+        result
+    );
+}
+
+#[test]
+fn test_invalid_priority_maps_to_validation_not_unknown() {
+    let (conn, _keep) = test_conn();
+    conn.execute(
+        "INSERT INTO tasks (title, description, status, priority, due_at, created_at, updated_at)
+         VALUES ('dirty', '', 'todo', 'bogus', NULL, '2026-01-01T00:00:00Z', '2026-01-01T00:00:00Z')",
+        [],
+    )
+    .unwrap();
+
+    let result = list_tasks(&conn);
+    assert!(
+        matches!(result, Err(AppError::Validation(_))),
+        "invalid priority should map to Validation, got: {:?}",
+        result
+    );
+}
