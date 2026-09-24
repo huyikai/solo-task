@@ -38,6 +38,8 @@ pub fn run() {
         .run(|app_handle, event| {
             // macOS: 点击 Dock 图标触发 Reopen 事件。窗口被 hide() 后
             // Tauri 不会自动恢复 — 需要显式 show + focus (004 US1)。
+            // RunEvent::Reopen 是 macOS 专属 variant, 其他平台不编译此分支。
+            #[cfg(target_os = "macos")]
             if let tauri::RunEvent::Reopen { .. } = event {
                 if let Some(win) = app_handle.get_webview_window("main") {
                     let _ = win.unminimize();
@@ -45,6 +47,9 @@ pub fn run() {
                     let _ = win.set_focus();
                 }
             }
+            // 非 macOS 平台: 事件参数未使用, 消除警告
+            #[cfg(not(target_os = "macos"))]
+            let _ = (app_handle, event);
         });
 }
 
