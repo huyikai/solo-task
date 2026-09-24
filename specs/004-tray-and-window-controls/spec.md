@@ -4,7 +4,7 @@
 
 **Created**: 2026-09-20
 
-**Status**: Draft
+**Status**: Done (2026-09-24 — 27/27 tasks; 人工 e2e 用户逐项验证通过, 含 Dock 图标恢复)
 
 **Input**: 2026-09-20 用户拍板的四条需求:
 1. macOS 原生红绿灯的"双箭头(zoom/fullscreen)"按钮改为 `setFullscreen(true/false)` 二态语义 — 一次点最大化,再点一次全屏是错的,要求二选一清晰切换。
