@@ -29,7 +29,11 @@ export function parseCloseAction(raw: string | null | undefined): CloseAction {
 /** 安装关闭按钮拦截。在 App.tsx 挂载时 useEffect 调用一次。 */
 export async function installCloseGuard(): Promise<void> {
   await getCurrentWindow().onCloseRequested(async (event) => {
-    // 关闭时动态读偏好 (不在启动时缓存 — Settings 切换后下次关闭即生效)
+    // 必须在任何 await 之前同步调用 preventDefault — Tauri 的
+    // onCloseRequested 在 handler 的第一个 await 返回后就检查
+    // isPreventDefault(), 如果在 await 之后才调用会来不及生效。
+    event.preventDefault();
+
     let action: CloseAction = "minimize_to_tray";
     try {
       const result = await getPreference(KEY);
@@ -39,11 +43,12 @@ export async function installCloseGuard(): Promise<void> {
     } catch {
       // 调用链异常 → fallback minimize_to_tray
     }
+
     if (action === "quit") {
-      // 不 preventDefault → Tauri 走原生 quit
-      return;
+      // 显式销毁窗口 (preventDefault 已拦住原生关闭, 需要手动退出)
+      await getCurrentWindow().destroy();
+    } else {
+      await getCurrentWindow().hide();
     }
-    event.preventDefault();
-    await getCurrentWindow().hide();
   });
 }

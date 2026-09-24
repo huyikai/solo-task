@@ -12,6 +12,7 @@ const mockHide = vi.fn();
 const mockShow = vi.fn();
 const mockSetFocus = vi.fn();
 const mockUnminimize = vi.fn();
+const mockDestroy = vi.fn();
 
 vi.mock("@tauri-apps/api/window", () => ({
   getCurrentWindow: () => ({
@@ -20,6 +21,7 @@ vi.mock("@tauri-apps/api/window", () => ({
     show: mockShow,
     setFocus: mockSetFocus,
     unminimize: mockUnminimize,
+    destroy: mockDestroy,
   }),
 }));
 
@@ -39,6 +41,7 @@ beforeEach(() => {
   mockShow.mockReset();
   mockSetFocus.mockReset();
   mockUnminimize.mockReset();
+  mockDestroy.mockReset();
   mockGetPreference.mockReset();
   mockSetPreference.mockReset();
 });
@@ -78,7 +81,7 @@ describe("installCloseGuard (004 FR-006)", () => {
     expect(mockShow).not.toHaveBeenCalled();
   });
 
-  test("quit mode: handler 不 preventDefault,允许原生 quit", async () => {
+  test("quit mode: preventDefault + destroy (显式退出)", async () => {
     mockGetPreference.mockResolvedValue({
       ok: true,
       data: { key: "window.close_action", value: '"quit"', updated_at: "2026-09-20T00:00:00Z" },
@@ -91,7 +94,10 @@ describe("installCloseGuard (004 FR-006)", () => {
     const ev = { preventDefault: vi.fn(), isPreventDefault: () => false };
     await handler(ev);
 
-    expect(ev.preventDefault).not.toHaveBeenCalled();
+    // preventDefault 必须同步调用 (在任何 await 之前), 否则 Tauri
+    // 来不及检查 isPreventDefault 就销毁窗口
+    expect(ev.preventDefault).toHaveBeenCalledTimes(1);
+    expect(mockDestroy).toHaveBeenCalledTimes(1);
     expect(mockHide).not.toHaveBeenCalled();
   });
 
