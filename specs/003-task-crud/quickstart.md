@@ -53,9 +53,17 @@ pnpm tauri dev
 
 ```bash
 sqlite3 ~/Library/Application\ Support/com.huyikai.solo-task/tasks.db \
-  "UPDATE tasks SET status='bogus' WHERE id=(SELECT MAX(id) FROM tasks);"
+  "UPDATE tasks SET status='bogus' WHERE id=(SELECT MAX(id) FROM tasks));"
 pnpm tauri dev
 ```
 
 预期: 应用启动不崩溃; 打开列表后该行渲染或报错路径符合
 Principle VII (不静默修复)。(可选, 破坏性只影响本地库)
+
+**恢复 (必做)**: 测试完成后立即执行以下命令将脏数据还原为合法值,
+否则每次打开列表都会触发错误提示:
+
+```bash
+sqlite3 ~/Library/Application\ Support/com.huyikai.solo-task/tasks.db \
+  "UPDATE tasks SET status='todo' WHERE status NOT IN ('todo','doing','done');"
+```
