@@ -194,6 +194,7 @@ export default function Settings({ onBack }: { onBack?: () => void } = {}) {
                     variant="outline"
                     size="sm"
                     onClick={async () => {
+                      setTestError(null);
                       const result = await triggerTestError(variant);
                       if (!result.ok) setTestError(result.error);
                     }}
