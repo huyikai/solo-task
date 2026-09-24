@@ -8,6 +8,12 @@ vi.mock("@/api/ipc", () => ({
   exportJson: vi.fn(),
 }));
 
+// vi.mock (hoisted) — vi.doMock 在并行环境下时序不稳导致 flaky
+const mockSave = vi.fn();
+vi.mock("@tauri-apps/plugin-dialog", () => ({
+  save: mockSave,
+}));
+
 const mockedExportJson = vi.mocked(ipc.exportJson);
 
 describe("CorruptedView (S3)", () => {
@@ -23,11 +29,7 @@ describe("CorruptedView (S3)", () => {
 
   test("clicking export invokes exportJson with the saved path", async () => {
     const user = userEvent.setup();
-    // CorruptedView dynamically imports @tauri-apps/plugin-dialog's save()
-    vi.doMock("@tauri-apps/plugin-dialog", () => ({
-      save: vi.fn().mockResolvedValue("/tmp/export.json"),
-    }));
-
+    mockSave.mockResolvedValue("/tmp/export.json");
     mockedExportJson.mockResolvedValue({
       ok: true,
       data: { written_to: "/tmp/export.json", bytes: 0, warnings: ["database_corrupted"] },
@@ -38,7 +40,5 @@ describe("CorruptedView (S3)", () => {
 
     expect(mockedExportJson).toHaveBeenCalledWith("/tmp/export.json");
     expect(await screen.findByText("导出成功")).toBeInTheDocument();
-
-    vi.doUnmock("@tauri-apps/plugin-dialog");
   });
 });
